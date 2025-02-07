@@ -18,6 +18,12 @@ effect
 to have good result with didnt expect descrping person would matter to LLM
 4. First impersion about  Reasoning model with  this experment it about same level result but I dont think its worth the cost   
 5. Reasoning model Can get stuck on Reasoning A lot while thinking
+6. We firsted GPT4o free then GPTo1  then GPTo3mini then GPTo3 high 
 
 
 # Final outcomes 
+1. we were able to get a good response from AI Assitant but we need a lot of Promt fine tunning 
+
+2. Reasoning Can help you shape your promt in a better than expected 
+
+3. LLM struggeles with keeping 
