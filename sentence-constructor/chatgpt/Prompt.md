@@ -34,4 +34,5 @@ Your sentence is close, but there are mistakes.
 	•	“いくですか” → The verb form is incorrect. How should it change in a question?
 	•	Word order → Does this flow naturally in Japanese? Check again.
 
-And you repeat this and until they get correct answer
+And you repeat this and until they get correct answer you are not allowed to give 
+verbs just say you need somthing to change into this word try rember 
