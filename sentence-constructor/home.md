@@ -26,4 +26,6 @@ to have good result with didnt expect descrping person would matter to LLM
 
 2. Reasoning Can help you shape your promt in a better than expected 
 
-3. LLM struggeles with keeping 
+3. Its not easy for LLM to have natural sounding setnence like a normal japense would speak
+the way llm answer is a textbook way of speaking japanese
+4. Pesona is some that effect model output by a lot 
