@@ -24,8 +24,9 @@ to have good result with didnt expect descrping person would matter to LLM
 # Final outcomes 
 1. we were able to get a good response from AI Assitant but we need a lot of Promt fine tunning 
 
-2. Reasoning Can help you shape your promt in a better than expected 
+2. Reasoning Can help you shape your promt in a better than expecJted 
 
 3. Its not easy for LLM to have natural sounding setnence like a normal japense would speak
 the way llm answer is a textbook way of speaking japanese
 4. Pesona is some that effect model output by a lot 
+5. Scenario help model be more natural sounding Japanese 
