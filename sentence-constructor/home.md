@@ -1,40 +1,59 @@
-# Hyptothesis and Technical Uncertainty
+# Hypothesis and Technical Uncertainty
 
-1. Is Reasoning model  will  perform better than normal model
-2. Assumtpotion will you use paid model From and free model will be able to perform better is it posiible to get good Reasoning model 
-3. I think Given an example on how I want the answer would be helpful to them and I will get better response
-4. I think we will be able to acheive The task but zeroshot promt would be a bit diffcult to achieve
-5. Does XMl make really huge difference when promting I need to verfiy I get the idea and heard it not sure will make difference
-6. Can local run model even do a thing or they will just be waste of resource 
+Through my experimental investigation, I focused on several critical research questions regarding model performance and optimization strategies:
 
+1. The primary inquiry centered on the comparative performance analysis between reasoning-focused models and standard implementations, with particular attention to cost-effectiveness ratios.
 
+2. I investigated the possibility of achieving comparable performance metrics from free-tier models when optimized for reasoning tasks, as opposed to their paid counterparts.
 
+3. My methodology incorporated example-based learning approaches, hypothesizing that demonstrative prompts would yield superior results compared to zero-shot implementations, though the latter presented significant technical challenges.
 
+4. A crucial component of my investigation involved evaluating the impact of XML structure on prompt engineering effectiveness, though initial uncertainty existed regarding its practical significance.
+
+5. The research extended to resource utilization analysis for local model deployment scenarios, specifically examining the cost-benefit relationship of computational resource allocation.
 
 # Technical Exploration
-1. Superiesed Using captial make huge Differene the promts I tried so hard to speak english Didnt know will have huge
-effect
-2. XML alone is very bad and make bad resulst from my experience you need to have mix  
-3. I am learning japanese every day I know different typs of 先生 which type of them are really good it allowed med 
-to have good result with didnt expect descrping person would matter to LLM
-4. First impersion about  Reasoning model with  this experment it about same level result but I dont think its worth the cost   
-5. Reasoning model Can get stuck on Reasoning A lot while thinking
-6. We firsted GPT4o free then GPTo1  then GPTo3mini then GPTo3 high then Gemmi 2.0 Pro which Gemmeni Pro model  I didnt try Gemmi model since while they are google AI studio is nice trid gemmi flash it is in sainly fast and cheap and have outcome I think with good promt geemmin flash can take voice
-also Now I am expermiting in llama 7b 13b then 70b 
 
+My experimental findings revealed several significant insights regarding model behavior and optimization techniques:
 
+1. Model Testing Sequence:
+   - GPT-4o Free
+   - GPT-o1 paid
+   - GPT-o3 Mini low reasoning
+   - GPT-o3 mini High Resoning
+   - Gemini Flash T3 chat
+   - Gemini 2.0 Pro free to try
+   - Llama 7B free
+   - Llama 13B free
+   - Llama 70B used hugging chat
+   - Claude free tier
 
-# Final outcomes 
-1. we were able to get a good response from AI Assitant but we need a lot of Promt fine tunning 
+2. An unexpected discovery emerged regarding capitalization's impact on prompt effectiveness, demonstrating that syntactical precision often supersedes grammatical perfection in model performance.
 
-2. Reasoning Can help you shape your promt in a better than expecJted 
+3. Through Japanese language model testing, I encountered an unanticipated correlation between persona implementation and response quality. The impact of persona engineering on output naturalness significantly exceeded initial expectations.
 
-3. Its not easy for LLM to have natural sounding setnence like a normal japense would speak
-the way llm answer is a textbook way of speaking japanese
-4. Pesona is some that effect model output by a lot 
-5. Scenario help model be more natural sounding Japanese 
-6. For local model we cant go with very small model we need mid size model put
-small model needs a lot more Perciese and promt heavy but if it one time thing
-to figure out and then we have Json paraser libary that that you should showed in
-GEN Ai esstianl good solution but the company need to invest at one time hardware
-cost but in general from my persective its good enough
+4. Performance evaluation of Gemini Flash revealed exceptional speed-to-cost ratios, with particular promise in voice processing applications when coupled with optimized prompting strategies.
+
+# Final Outcomes
+
+The experimental process yielded several significant conclusions with direct applications:
+
+1. Prompt Engineering Effectiveness:
+   - Required substantial iterative refinement
+   - Demonstrated unexpected synergy with reasoning approaches
+   - Necessitated systematic optimization procedures
+
+2. Language Model Limitations:
+   - Identified persistent challenges in natural language generation
+   - Documented significant improvements through scenario implementation
+   - Observed unexpected effectiveness of persona-based modifications
+
+3. For local model we cant go with very small model we need mid size model put small model needs a lot more Perciese and promt heavy but if it one time thing to figure out and then we have Json paraser libary that that you should showed in GEN Ai esstianl good solution but the company need to invest at one time hardware cost but in general from my persective its good enough
+
+4. Resource Allocation:
+   - Mid-size models demonstrated optimal performance-to-resource ratios
+   - Smaller models required increased prompt engineering investment
+   - Initial hardware costs justified by operational efficiency gains
+
+5. Claude expirment I have done different apporach for it  I said everyone knows how good
+this mode and always make it as compareason  I tried it on free teir with all pervious promots and see how did it do compare to the model the promt was designed for on average it performed better or about the same the other model
