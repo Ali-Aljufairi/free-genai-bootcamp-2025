@@ -1,9 +1,14 @@
 
-
 ---
-こんにちは！(Konnichiwa!)  your Japanese language instructor. Today, we're practicing ordering food at a restaurant, focusing on politeness levels. I will be the waiter/waitress, and you will be the customer.
 
-Your task is to order food in three different restaurant scenarios. For each scenario:
+こんにちは！(Konnichiwa!) your Japanese language instructor. Today, we're practicing ordering food at a restaurant, focusing on politeness levels. I will be the waiter/waitress, and you will be the customer.
+
+Your task is to order food in three different restaurant scenarios. For each scenario, you will follow the ReAct framework:
+
+*   **Reason:** Think step-by-step about the situation, the required politeness level, the available vocabulary, and the sentence structure.
+*   **Act:** Based on your reasoning, construct your Japanese response.
+
+For each scenario:
 
 1.  **Vocabulary:** I'll give you a list of helpful Japanese words (with English translations).
 2.  **Sentence Structure Reminder:** I'll remind you of the basic Japanese sentence structure.
@@ -58,11 +63,16 @@ Imagine a small, bustling ramen shop. It's noisy, everyone speaks casually.
     (Object) (Quantity)
     (Question Word) (Subject) (Predicate)
 
-3.  **Your Turn:** Start a conversation, order, and ask a question using *casual* Japanese. Remember to:
+3.  **Your Turn:** Start a conversation, order, and ask a question using *casual* Japanese.
 
-    *   Greet the waiter casually.
-    *   Order your food using casual language.
-    *   Ask a question about the food or shop casually.
+    **Reason:**
+
+    *   This is a casual ramen shop, so I need to use *tameguchi*.
+    *   I can start with a casual greeting like "Yo!" or just jump right in.
+    *   I want to order ramen and gyoza.
+    *   I'll ask if the ramen is spicy.
+
+    **Act:** (Now, write your Japanese response based on the above reasoning)
 
 ---
 
@@ -86,11 +96,16 @@ A typical family restaurant, like Denny's. Relaxed but polite atmosphere.
     (Object) を お願いします (Order)
     (Question word) が (Subject) ですか (Question)
 
-3.  **Your Turn:** Start, order, and ask a question using *polite* Japanese (-masu, -desu). Remember to:
+3.  **Your Turn:** Start, order, and ask a question using *polite* Japanese (-masu, -desu).
 
-    *   Greet the waiter politely.
-    *   Order your food using polite language.
-    *   Ask a question about the food or restaurant politely.
+    **Reason:**
+
+    *   This is a family restaurant, so I need to use *teineigo* (-masu, -desu).
+    *   I should start with a polite greeting like "Konnichiwa."
+    *   I want to order a hamburger steak.
+    *   I'll ask for a recommendation for a drink.
+
+    **Act:** (Now, write your Japanese response based on the above reasoning)
 
 ---
 
@@ -114,11 +129,16 @@ A very formal, traditional Japanese restaurant. Impeccable service; use honorifi
     (Object) を 頂けますでしょうか (Order - Humble)
     (Subject) は いかがでしょうか (Question - Polite, about food)
 
-3.  **Your Turn:** Start, order, and ask a question using *honorific/humble* Japanese. Remember to:
+3.  **Your Turn:** Start, order, and ask a question using *honorific/humble* Japanese.
 
-    *   Greet the waiter with appropriate formality.
-    *   Order your food using humble language.
-    *   Ask a question about the food or restaurant using polite/honorific language.
+    **Reason:**
+
+    *   This is a very formal restaurant, so I need to use *sonkeigo/kenjougo*.
+    *   I should start with a very polite greeting.
+    *   I want to order tempura.
+    *   I'll ask how the tea is.
+
+    **Act:** (Now, write your Japanese response based on the above reasoning)
 
 ---
 
