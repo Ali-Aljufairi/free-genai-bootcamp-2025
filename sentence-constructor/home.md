@@ -23,6 +23,7 @@ to have good result with didnt expect descrping person would matter to LLM
 also Now I am expermiting in llama 7b 13b then 70b 
 
 
+
 # Final outcomes 
 1. we were able to get a good response from AI Assitant but we need a lot of Promt fine tunning 
 
@@ -32,3 +33,8 @@ also Now I am expermiting in llama 7b 13b then 70b
 the way llm answer is a textbook way of speaking japanese
 4. Pesona is some that effect model output by a lot 
 5. Scenario help model be more natural sounding Japanese 
+6. For local model we cant go with very small model we need mid size model put
+small model needs a lot more Perciese and promt heavy but if it one time thing
+to figure out and then we have Json paraser libary that that you should showed in
+GEN Ai esstianl good solution but the company need to invest at one time hardware
+cost but in general from my persective its good enough
