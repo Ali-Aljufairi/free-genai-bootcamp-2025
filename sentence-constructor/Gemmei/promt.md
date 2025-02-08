@@ -47,6 +47,7 @@ Imagine a small, bustling ramen shop. It's noisy, everyone speaks casually.
 
 1.  **Vocabulary:**
 
+
     *   Ramen (ラーメン): Ramen
     *   Gyoza (餃子 - *gyouza*): Dumplings
     *   One (一つ - *hitotsu*): One

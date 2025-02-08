@@ -19,7 +19,8 @@ effect
 to have good result with didnt expect descrping person would matter to LLM
 4. First impersion about  Reasoning model with  this experment it about same level result but I dont think its worth the cost   
 5. Reasoning model Can get stuck on Reasoning A lot while thinking
-6. We firsted GPT4o free then GPTo1  then GPTo3mini then GPTo3 high then Gemmi 2.0 Pro which Gemmeni Pro model  I didnt try Gemmi model since while they are google AI studio is nice trid gemmi flash it is in sainly fast and cheap and have outcome I think with good promt geemmin flash can take voic
+6. We firsted GPT4o free then GPTo1  then GPTo3mini then GPTo3 high then Gemmi 2.0 Pro which Gemmeni Pro model  I didnt try Gemmi model since while they are google AI studio is nice trid gemmi flash it is in sainly fast and cheap and have outcome I think with good promt geemmin flash can take voice
+also Now I am expermiting in llama 7b 13b then 70b 
 
 
 # Final outcomes 
