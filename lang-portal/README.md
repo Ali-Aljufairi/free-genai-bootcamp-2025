@@ -1,10 +1,18 @@
-# Project lang-portal
+# Language Learning Portal
 
-One Paragraph of project description goes here
+A free bootcamp project focused on language learning using Generative AI technologies.arning using Generative AI technologies.
+
+## Project Overview
+
+This project aims to create an interactive platform for language learning, leveraging modern AI technologies to provide personalized learning experiences.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+More details coming soon...
+
+## Contributing
+
+Guidelines for contributing will be added soon.
 
 ## MakeFile
 
@@ -45,9 +53,3 @@ make watch
 Run the test suite:
 ```bash
 make test
-```
-
-Clean up binary from the last build:
-```bash
-make clean
-```
