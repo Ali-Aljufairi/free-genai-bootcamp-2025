@@ -34,10 +34,10 @@ type StudySession struct {
 
 // StudyActivity represents a specific learning activity
 type StudyActivity struct {
-	ID              int64     `json:"id"`
-	StudySessionID  int64     `json:"study_session_id"`
-	GroupID         int64     `json:"group_id"`
-	CreatedAt       time.Time `json:"created_at"`
+	ID             int64     `json:"id"`
+	StudySessionID int64     `json:"study_session_id"`
+	GroupID        int64     `json:"group_id"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 // WordReviewItem represents a practice record for a word

@@ -9,17 +9,21 @@ import (
 type FiberServer struct {
 	*fiber.App
 
-	db database.Service
+	db *database.DB
 }
 
 func New() *FiberServer {
+	db, err := database.New("./data.db")
+	if err != nil {
+		panic(err)
+	}
+
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
 			ServerHeader: "lang-portal",
 			AppName:      "lang-portal",
 		}),
-
-		db: database.New(),
+		db: db,
 	}
 
 	return server

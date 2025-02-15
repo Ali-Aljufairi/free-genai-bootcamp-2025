@@ -19,6 +19,11 @@ func (s *FiberServer) RegisterFiberRoutes() {
 
 	s.App.Get("/health", s.healthHandler)
 
+	// Dashboard routes
+	s.App.Get("/api/v1/dashboard/study_progress", s.studyProgressHandler)
+
+	// Study session routes
+	s.App.Get("/api/v1/study_sessions/:id/words", s.getStudySessionWordsHandler)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {

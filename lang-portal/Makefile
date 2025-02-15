@@ -5,15 +5,21 @@ all: build test
 
 build:
 	@echo "Building..."
-	
-	
 	@CGO_ENABLED=1 GOOS=linux go build -o main cmd/api/main.go
 
 # Run the application
-run:
+run: db-setup
 	@go run cmd/api/main.go &
 	@npm install --prefer-offline --no-fund --prefix ./frontend
 	@npm run dev --prefix ./frontend
+
+# Database setup and management
+db-setup: migrate seed
+
+# Initialize SQLite database
+db-init:
+	@echo "Initializing SQLite database..."
+	@touch words.db
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -41,6 +47,16 @@ test:
 clean:
 	@echo "Cleaning..."
 	@rm -f main
+
+# Run database migrations
+migrate:
+	@echo "Running migrations..."
+	@go run cmd/api/main.go migrate
+
+# Seed database with initial data
+seed:
+	@echo "Seeding database..."
+	@go run cmd/api/main.go seed
 
 # Live Reload
 watch:
