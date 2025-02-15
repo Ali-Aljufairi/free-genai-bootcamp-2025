@@ -373,17 +373,6 @@ Returns quick overview statistics.
 ### Initialize Database
 This task will initialize the sqlite database called `words.db
 
-### Migrate Database
-This task will run a series of migrations sql files on the database
-
-Migrations live in the `migrations` folder.
-The migration files will be run in order of their file name.
-The file names should looks like this:
-
-```sql
-0001_init.sql
-0002_create_words_table.sql
-```
 
 ### Seed Data
 This task will import json files and transform them into target data for our database.

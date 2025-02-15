@@ -8,7 +8,7 @@ build:
 	@CGO_ENABLED=1 GOOS=linux go build -o main cmd/api/main.go
 
 # Run the application
-run: db-setup
+run:
 	@go run cmd/api/main.go &
 	@npm install --prefer-offline --no-fund --prefix ./frontend
 	@npm run dev --prefix ./frontend

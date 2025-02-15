@@ -5,7 +5,7 @@ function App() {
   const [message, setMessage] = useState<string>('')
 
   const fetchData = () => {
-    fetch(`http://localhost:${import.meta.env.VITE_PORT}/`)
+    fetch(`http://localhost:${import.meta.env.VITE_PORT}/api/v1/words`)
       .then(response => response.text())
       .then(data => setMessage(data))
       .catch(error => console.error('Error fetching data:', error))
@@ -48,9 +48,6 @@ function App() {
           </div>
         </div>
 
-        <div className="text-center text-gray-500 text-sm">
-          Built with Vite, React, and Tailwind CSS
-        </div>
       </div>
     </div>
   )

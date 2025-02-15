@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strconv"
+	"time"
 
 	"lang-portal/internal/database"
 
@@ -25,7 +26,6 @@ func NewStudySessionHandler(db *database.DB) *StudySessionHandler {
 
 // GetStudySessionWords handles retrieving words for a specific study session
 func (h *StudySessionHandler) GetStudySessionWords(c *fiber.Ctx) error {
-	// Parse session ID from URL parameter
 	sessionID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -33,28 +33,144 @@ func (h *StudySessionHandler) GetStudySessionWords(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get words for the study session from database
-	words, err := h.db.GetStudySessionWords(sessionID)
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	itemsPerPage := 100
+
+	words, total, err := h.db.GetStudySessionWords(sessionID, page, itemsPerPage)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get study session words",
 		})
 	}
 
-	return c.JSON(words)
+	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+
+	return c.JSON(fiber.Map{
+		"items": words,
+		"pagination": fiber.Map{
+			"current_page":   page,
+			"total_pages":    totalPages,
+			"total_items":    total,
+			"items_per_page": itemsPerPage,
+		},
+	})
 }
 
 // GetStudySessions handles retrieving all study sessions
 func (h *StudySessionHandler) GetStudySessions(c *fiber.Ctx) error {
-	// Get all study sessions from database
-	sessions, err := h.db.GetStudySessions()
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	itemsPerPage := 100
+
+	sessions, total, err := h.db.GetStudySessions(page, itemsPerPage)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get study sessions",
 		})
 	}
 
-	return c.JSON(sessions)
+	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+
+	return c.JSON(fiber.Map{
+		"items": sessions,
+		"pagination": fiber.Map{
+			"current_page":   page,
+			"total_pages":    totalPages,
+			"total_items":    total,
+			"items_per_page": itemsPerPage,
+		},
+	})
+}
+
+// GetStudySession handles retrieving a specific study session
+func (h *StudySessionHandler) GetStudySession(c *fiber.Ctx) error {
+	sessionID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid session ID",
+		})
+	}
+
+	session, err := h.db.GetStudySession(sessionID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get study session",
+		})
+	}
+
+	return c.JSON(session)
+}
+
+// ReviewWord handles recording a word review in a study session
+func (h *StudySessionHandler) ReviewWord(c *fiber.Ctx) error {
+	sessionID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid session ID",
+		})
+	}
+
+	wordID, err := strconv.Atoi(c.Params("word_id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid word ID",
+		})
+	}
+
+	type ReviewRequest struct {
+		Correct bool `json:"correct"`
+	}
+
+	var req ReviewRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	err = h.db.CreateWordReview(sessionID, wordID, req.Correct)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create word review",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success":          true,
+		"word_id":          wordID,
+		"study_session_id": sessionID,
+		"correct":          req.Correct,
+		"created_at":       time.Now(),
+	})
+}
+
+// ResetHistory handles resetting study history
+func (h *StudySessionHandler) ResetHistory(c *fiber.Ctx) error {
+	err := h.db.ResetStudyHistory()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to reset study history",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Study history has been reset",
+	})
+}
+
+// FullReset handles resetting the entire system
+func (h *StudySessionHandler) FullReset(c *fiber.Ctx) error {
+	err := h.db.FullReset()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to perform full reset",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "System has been fully reset",
+	})
 }
 
 // StudyProgress handles retrieving study progress statistics
