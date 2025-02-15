@@ -33,6 +33,19 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/v1/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
 	s.App.Get("/api/v1/study_progress", studySessionHandler.StudyProgress)
 
+	// Group routes
+	groupHandler := handlers.NewGroupHandler(s.db)
+	s.App.Get("/api/v1/groups", groupHandler.GetGroups)
+	s.App.Get("/api/v1/groups/:id", groupHandler.GetGroup)
+	s.App.Get("/api/v1/groups/:id/words", groupHandler.GetGroupWords)
+	s.App.Get("/api/v1/groups/:id/study_sessions", groupHandler.GetGroupStudySessions)
+
+	// Study activity routes
+	studyActivityHandler := handlers.NewStudyActivityHandler(s.db)
+	s.App.Get("/api/v1/study_activities/:id", studyActivityHandler.GetStudyActivity)
+	s.App.Get("/api/v1/study_activities/:id/sessions", studyActivityHandler.GetStudyActivitySessions)
+	s.App.Post("/api/v1/study_activities", studyActivityHandler.CreateStudyActivity)
+
 	// Word routes
 	wordHandler := handlers.NewWordHandler(s.db)
 	s.App.Get("/api/v1/words", wordHandler.GetWords)
