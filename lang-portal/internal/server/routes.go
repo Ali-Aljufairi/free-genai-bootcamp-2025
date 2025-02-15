@@ -1,6 +1,8 @@
 package server
 
 import (
+	"lang-portal/internal/handlers"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -23,7 +25,14 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/v1/dashboard/study_progress", s.studyProgressHandler)
 
 	// Study session routes
-	s.App.Get("/api/v1/study_sessions/:id/words", s.getStudySessionWordsHandler)
+	studySessionHandler := handlers.NewStudySessionHandler(s.db)
+	s.App.Get("/api/v1/study_sessions", studySessionHandler.GetStudySessions)
+	s.App.Get("/api/v1/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
+	s.App.Get("/api/v1/study_progress", studySessionHandler.StudyProgress)
+
+	// Word routes
+	wordHandler := handlers.NewWordHandler(s.db)
+	s.App.Get("/api/v1/words", wordHandler.GetWords)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {

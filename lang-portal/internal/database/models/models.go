@@ -4,11 +4,17 @@ import "time"
 
 // Word represents a vocabulary word in the system
 type Word struct {
-	ID       int64  `json:"id"`
-	Japanese string `json:"japanese"`
-	Romaji   string `json:"romaji"`
-	English  string `json:"english"`
-	Parts    string `json:"parts"` // JSON string
+	ID       int64         `json:"id"`
+	Japanese string        `json:"japanese"`
+	Romaji   string        `json:"romaji"`
+	English  string        `json:"english"`
+	Parts    WordPartsJSON `json:"parts"`
+}
+
+type WordPartsJSON struct {
+	Type      string `json:"type"`
+	Formality string `json:"formality,omitempty"`
+	Category  string `json:"category,omitempty"`
 }
 
 // Group represents a thematic group of words

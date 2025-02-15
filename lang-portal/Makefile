@@ -14,12 +14,19 @@ run: db-setup
 	@npm run dev --prefix ./frontend
 
 # Database setup and management
-db-setup: migrate seed
+db-setup: db-init migrate seed
+
+# Reset database (clean and reinitialize)
+db-reset:
+	@echo "Resetting database..."
+	@rm -f data.db
+	@make db-setup
 
 # Initialize SQLite database
 db-init:
 	@echo "Initializing SQLite database..."
 	@touch words.db
+
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -51,28 +58,29 @@ clean:
 # Run database migrations
 migrate:
 	@echo "Running migrations..."
-	@go run cmd/api/main.go migrate
+	@go build -o dbtools cmd/api/main.go
+	@./dbtools migrate
+	@rm -f dbtools
 
 # Seed database with initial data
 seed:
 	@echo "Seeding database..."
-	@go run cmd/api/main.go seed
+	@go build -o dbtools cmd/api/main.go
+	@./dbtools seed
+	@./dbtools seed-activities
+	@rm -f dbtools
 
 # Live Reload
 watch:
 	@if command -v air > /dev/null; then \
-            air; \
-            echo "Watching...";\
-        else \
-            read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
-            if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
-                go install github.com/air-verse/air@latest; \
-                air; \
-                echo "Watching...";\
-            else \
-                echo "You chose not to install air. Exiting..."; \
-                exit 1; \
-            fi; \
-        fi
+		air; \
+		echo "Watching...";\
+	else \
+		read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
+		if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
+			go install github.com/air-verse/air@latest; \
+			air; \
+		fi \
+	fi
 
 .PHONY: all build run test clean watch

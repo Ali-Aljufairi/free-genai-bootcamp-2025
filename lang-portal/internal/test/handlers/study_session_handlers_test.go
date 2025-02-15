@@ -3,8 +3,8 @@ package handlers_test
 import (
 	"testing"
 
-	"github.com/free-genai-bootcamp-2025/lang-portal/internal/database"
-	"github.com/free-genai-bootcamp-2025/lang-portal/internal/handlers"
+	"lang-portal/internal/database"
+	"lang-portal/internal/handlers"
 )
 
 func TestNewStudySessionHandler(t *testing.T) {

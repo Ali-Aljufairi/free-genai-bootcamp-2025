@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"lang-portal/internal/database"
 	"lang-portal/internal/server"
 	"log"
 	"os"
@@ -39,9 +40,50 @@ func gracefulShutdown(fiberServer *server.FiberServer, done chan bool) {
 }
 
 func main() {
+	// Check for database commands
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "migrate":
+			db, err := database.New("words.db")
+			if err != nil {
+				log.Fatalf("Failed to connect to database: %v", err)
+			}
+			defer db.Close()
+			if err := db.Migrate("internal/database/migrations"); err != nil {
+				log.Fatalf("Failed to run migrations: %v", err)
+			}
+			log.Println("Migrations completed successfully")
+			return
+		case "seed":
+			db, err := database.New("words.db")
+			if err != nil {
+				log.Fatalf("Failed to connect to database: %v", err)
+			}
+			defer db.Close()
+			if err := db.SeedWords("internal/database/seeds/words.json", "default"); err != nil {
+				log.Fatalf("Failed to seed database: %v", err)
+			}
+			log.Println("Database seeding completed successfully")
+			return
+		case "seed-activities":
+			db, err := database.New("words.db")
+			if err != nil {
+				log.Fatalf("Failed to connect to database: %v", err)
+			}
+			defer db.Close()
+			if err := db.SeedStudyActivities("internal/database/seeds/study_activities.json"); err != nil {
+				log.Fatalf("Failed to seed study activities: %v", err)
+			}
+			if err := db.SeedStudySessions("internal/database/seeds/study_sessions.json"); err != nil {
+				log.Fatalf("Failed to seed study sessions: %v", err)
+			}
+			log.Println("Study activities and sessions seeding completed successfully")
+			return
+		}
+	}
 
+	// Start server if no database commands
 	server := server.New()
-
 	server.RegisterFiberRoutes()
 
 	// Create a done channel to signal when the shutdown is complete

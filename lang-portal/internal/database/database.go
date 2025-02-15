@@ -113,6 +113,43 @@ func (db *DB) Migrate(migrationsDir string) error {
 	return nil
 }
 
+// SeedStudyActivities imports study activities from a JSON file into the database
+func (db *DB) SeedStudyActivities(seedFile string) error {
+	content, err := ioutil.ReadFile(seedFile)
+	if err != nil {
+		return fmt.Errorf("error reading seed file: %v", err)
+	}
+
+	var activities []struct {
+		ID          int    `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	if err := json.Unmarshal(content, &activities); err != nil {
+		return fmt.Errorf("error parsing seed file: %v", err)
+	}
+
+	// Start transaction
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %v", err)
+	}
+
+	// Insert activities
+	for _, activity := range activities {
+		_, err = tx.Exec(
+			"INSERT INTO study_activities (id, name, description) VALUES (?, ?, ?)",
+			activity.ID, activity.Name, activity.Description,
+		)
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("error inserting study activity: %v", err)
+		}
+	}
+
+	return tx.Commit()
+}
+
 // SeedWords imports words from a JSON file into the database
 func (db *DB) SeedWords(seedFile string, groupName string) error {
 	content, err := ioutil.ReadFile(seedFile)
@@ -141,10 +178,17 @@ func (db *DB) SeedWords(seedFile string, groupName string) error {
 
 	// Insert words and create word-group relationships
 	for _, word := range words {
+		// Convert WordPartsJSON to JSON string
+		partsJSON, err := json.Marshal(word.Parts)
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("error marshaling parts: %v", err)
+		}
+
 		// Insert word
 		result, err := tx.Exec(
 			"INSERT INTO words (japanese, romaji, english, parts) VALUES (?, ?, ?, ?)",
-			word.Japanese, word.Romaji, word.English, word.Parts,
+			word.Japanese, word.Romaji, word.English, string(partsJSON),
 		)
 		if err != nil {
 			tx.Rollback()
@@ -189,4 +233,82 @@ func (d *DB) GetTotalAvailableWords() (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+// SeedStudySessions imports study sessions from a JSON file into the database
+func (db *DB) SeedStudySessions(seedFile string) error {
+	content, err := ioutil.ReadFile(seedFile)
+	if err != nil {
+		return fmt.Errorf("error reading seed file: %v", err)
+	}
+
+	var sessions []struct {
+		ID              int       `json:"id"`
+		GroupID         int       `json:"group_id"`
+		StudyActivityID int       `json:"study_activity_id"`
+		CreatedAt       time.Time `json:"created_at"`
+	}
+	if err := json.Unmarshal(content, &sessions); err != nil {
+		return fmt.Errorf("error parsing seed file: %v", err)
+	}
+
+	// Start transaction
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("error starting transaction: %v", err)
+	}
+
+	// Insert sessions
+	for _, session := range sessions {
+		_, err = tx.Exec(
+			"INSERT INTO study_sessions (id, group_id, study_activity_id, created_at) VALUES (?, ?, ?, ?)",
+			session.ID, session.GroupID, session.StudyActivityID, session.CreatedAt,
+		)
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("error inserting study session: %v", err)
+		}
+	}
+
+	return tx.Commit()
+}
+
+// GetWords retrieves all words from the database
+func (db *DB) GetWords() ([]models.Word, error) {
+	query := `
+		SELECT id, japanese, romaji, english, parts
+		FROM words
+		ORDER BY id ASC
+	`
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error querying words: %v", err)
+	}
+	defer rows.Close()
+
+	var words []models.Word
+	for rows.Next() {
+		var word models.Word
+		var partsJSON []byte
+
+		err := rows.Scan(&word.ID, &word.Japanese, &word.Romaji, &word.English, &partsJSON)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning word row: %v", err)
+		}
+
+		if partsJSON != nil {
+			if err := json.Unmarshal(partsJSON, &word.Parts); err != nil {
+				return nil, fmt.Errorf("error unmarshaling parts JSON: %v", err)
+			}
+		}
+
+		words = append(words, word)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating word rows: %v", err)
+	}
+
+	return words, nil
 }

@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "name": "Vocabulary Review",
+        "description": "Review and memorize vocabulary words"
+    },
+    {
+        "id": 2,
+        "name": "Writing Practice",
+        "description": "Practice writing Japanese characters"
+    },
+    {
+        "id": 3,
+        "name": "Reading Practice",
+        "description": "Practice reading Japanese text"
+    }
+]
