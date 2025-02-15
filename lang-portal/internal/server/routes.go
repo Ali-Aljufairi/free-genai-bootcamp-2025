@@ -32,6 +32,8 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/v1/study_sessions", studySessionHandler.GetStudySessions)
 	s.App.Get("/api/v1/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
 	s.App.Get("/api/v1/study_progress", studySessionHandler.StudyProgress)
+	s.App.Post("/api/v1/study_sessions", studySessionHandler.CreateStudySession)
+	s.App.Post("/api/v1/study_sessions/:id/review", studySessionHandler.ReviewWord)
 
 	// Group routes
 	groupHandler := handlers.NewGroupHandler(s.db)
@@ -49,6 +51,10 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	// Word routes
 	wordHandler := handlers.NewWordHandler(s.db)
 	s.App.Get("/api/v1/words", wordHandler.GetWords)
+
+	// Review routes
+	reviewHandler := handlers.NewReviewHandler(s.db)
+	s.App.Post("/api/v1/study_sessions/:id/review", reviewHandler.SubmitReview)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
