@@ -21,6 +21,11 @@ type DB struct {
 	conn *sql.DB
 }
 
+// QueryRow executes a query that is expected to return at most one row
+func (db *DB) QueryRow(query string, args ...interface{}) *sql.Row {
+	return db.conn.QueryRow(query, args...)
+}
+
 // New creates a new database connection
 func New(dbPath string) (*DB, error) {
 	conn, err := sql.Open("sqlite3", dbPath)
@@ -299,15 +304,11 @@ func (db *DB) GetWords() ([]models.Word, error) {
 
 		if partsJSON != nil {
 			if err := json.Unmarshal(partsJSON, &word.Parts); err != nil {
-				return nil, fmt.Errorf("error unmarshaling parts JSON: %v", err)
+				return nil, fmt.Errorf("error parsing word parts: %v", err)
 			}
 		}
 
 		words = append(words, word)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating word rows: %v", err)
 	}
 
 	return words, nil

@@ -22,7 +22,10 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/health", s.healthHandler)
 
 	// Dashboard routes
-	s.App.Get("/api/v1/dashboard/study_progress", s.studyProgressHandler)
+	dashboardHandler := handlers.NewDashboardHandler(s.db)
+	s.App.Get("/api/v1/dashboard/last_study_session", dashboardHandler.GetLastStudySession)
+	s.App.Get("/api/v1/dashboard/study_progress", dashboardHandler.GetStudyProgress)
+	s.App.Get("/api/v1/dashboard/quick-stats", dashboardHandler.GetQuickStats)
 
 	// Study session routes
 	studySessionHandler := handlers.NewStudySessionHandler(s.db)

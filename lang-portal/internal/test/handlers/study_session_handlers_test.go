@@ -5,17 +5,18 @@ import (
 
 	"lang-portal/internal/database"
 	"lang-portal/internal/handlers"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewStudySessionHandler(t *testing.T) {
+	// Arrange
 	db := &database.DB{}
+
+	// Act
 	handler := handlers.NewStudySessionHandler(db)
 
-	if handler == nil {
-		t.Error("Expected non-nil handler")
-	}
-
-	if handler.DB() != db {
-		t.Error("Handler not initialized with correct database instance")
-	}
+	// Assert
+	assert.NotNil(t, handler, "Handler should not be nil")
+	assert.Equal(t, db, handler.DB(), "Handler should be initialized with correct database instance")
 }
