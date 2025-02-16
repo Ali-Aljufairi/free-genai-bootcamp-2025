@@ -15,28 +15,17 @@ func NewWordHandler(db *database.DB) *WordHandler {
 	return &WordHandler{db: db}
 }
 
-// GetWords returns all words with pagination
+// GetWords returns all words
 func (h *WordHandler) GetWords(c *fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
-
-	words, total, err := h.db.GetWords(page, itemsPerPage)
+	words, err := h.db.GetWords()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get words",
 		})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
-
 	return c.JSON(fiber.Map{
 		"items": words,
-		"pagination": fiber.Map{
-			"current_page":   page,
-			"total_pages":    totalPages,
-			"total_items":    total,
-			"items_per_page": itemsPerPage,
-		},
 	})
 }
 

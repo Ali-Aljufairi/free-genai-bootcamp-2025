@@ -24,6 +24,35 @@ func NewStudySessionHandler(db *database.DB) *StudySessionHandler {
 	return &StudySessionHandler{db: db}
 }
 
+// CreateStudySession creates a new study session
+func (h *StudySessionHandler) CreateStudySession(c *fiber.Ctx) error {
+	type CreateSessionRequest struct {
+		GroupID         int `json:"group_id"`
+		StudyActivityID int `json:"study_activity_id"`
+	}
+
+	var req CreateSessionRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	sessionID, err := h.db.CreateStudySession(req.GroupID, req.StudyActivityID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create study session",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"id":                sessionID,
+		"group_id":          req.GroupID,
+		"study_activity_id": req.StudyActivityID,
+		"created_at":        time.Now(),
+	})
+}
+
 // GetStudySessionWords handles retrieving words for a specific study session
 func (h *StudySessionHandler) GetStudySessionWords(c *fiber.Ctx) error {
 	sessionID, err := strconv.Atoi(c.Params("id"))
@@ -33,51 +62,29 @@ func (h *StudySessionHandler) GetStudySessionWords(c *fiber.Ctx) error {
 		})
 	}
 
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
-
-	words, total, err := h.db.GetStudySessionWords(sessionID, page, itemsPerPage)
+	words, err := h.db.GetStudySessionWords(sessionID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get study session words",
 		})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
-
 	return c.JSON(fiber.Map{
 		"items": words,
-		"pagination": fiber.Map{
-			"current_page":   page,
-			"total_pages":    totalPages,
-			"total_items":    total,
-			"items_per_page": itemsPerPage,
-		},
 	})
 }
 
 // GetStudySessions handles retrieving all study sessions
 func (h *StudySessionHandler) GetStudySessions(c *fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
-
-	sessions, total, err := h.db.GetStudySessions(page, itemsPerPage)
+	sessions, err := h.db.GetStudySessions()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get study sessions",
 		})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
-
 	return c.JSON(fiber.Map{
 		"items": sessions,
-		"pagination": fiber.Map{
-			"current_page":   page,
-			"total_pages":    totalPages,
-			"total_items":    total,
-			"items_per_page": itemsPerPage,
-		},
 	})
 }
 

@@ -41,6 +41,15 @@ func (db *DB) Close() error {
 	return db.conn.Close()
 }
 
+// SaveReviewAttempt saves a review attempt to the database
+func (db *DB) SaveReviewAttempt(sessionID, wordID int, isCorrect bool, nextReview time.Time) error {
+	_, err := db.conn.Exec(
+		"INSERT INTO word_review_items (word_id, study_session_id, correct, created_at, next_review_at) VALUES (?, ?, ?, ?, ?)",
+		wordID, sessionID, isCorrect, time.Now(), nextReview,
+	)
+	return err
+}
+
 // Health returns the current health status of the database
 func (db *DB) Health() map[string]string {
 	stats := make(map[string]string)
@@ -98,18 +107,24 @@ func (db *DB) Migrate(migrationsDir string) error {
 			return fmt.Errorf("error reading migration %s: %v", migration, err)
 		}
 
-		// Split content into individual statements
+		// Split the migration file into individual statements
 		statements := strings.Split(string(content), ";")
+
 		for _, stmt := range statements {
-			if strings.TrimSpace(stmt) != "" {
-				_, err = tx.Exec(stmt)
-				if err != nil {
-					tx.Rollback()
-					return fmt.Errorf("error executing migration %s: %v", migration, err)
-				}
+			// Skip empty statements
+			if strings.TrimSpace(stmt) == "" {
+				continue
+			}
+
+			// Execute the statement
+			_, err = tx.Exec(stmt)
+			if err != nil {
+				tx.Rollback()
+				return fmt.Errorf("error executing migration %s: %v", migration, err)
 			}
 		}
 
+		// Commit the transaction
 		if err = tx.Commit(); err != nil {
 			return fmt.Errorf("error committing migration %s: %v", migration, err)
 		}
@@ -276,40 +291,4 @@ func (db *DB) SeedStudySessions(seedFile string) error {
 	}
 
 	return tx.Commit()
-}
-
-// GetWords retrieves all words from the database
-func (db *DB) GetWords() ([]models.Word, error) {
-	query := `
-		SELECT id, japanese, romaji, english, parts
-		FROM words
-		ORDER BY id ASC
-	`
-
-	rows, err := db.conn.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error querying words: %v", err)
-	}
-	defer rows.Close()
-
-	var words []models.Word
-	for rows.Next() {
-		var word models.Word
-		var partsJSON []byte
-
-		err := rows.Scan(&word.ID, &word.Japanese, &word.Romaji, &word.English, &partsJSON)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning word row: %v", err)
-		}
-
-		if partsJSON != nil {
-			if err := json.Unmarshal(partsJSON, &word.Parts); err != nil {
-				return nil, fmt.Errorf("error parsing word parts: %v", err)
-			}
-		}
-
-		words = append(words, word)
-	}
-
-	return words, nil
 }

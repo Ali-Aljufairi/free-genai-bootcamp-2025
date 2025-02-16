@@ -1,48 +1,33 @@
 package database
 
 import (
-	"encoding/json"
-	"fmt"
+	"database/sql"
 	"lang-portal/internal/database/models"
 	"time"
 )
 
-// GetStudySessionWords retrieves all words associated with a study session
+// GetStudySessionWords retrieves words for a specific study session
 func (db *DB) GetStudySessionWords(sessionID int) ([]models.Word, error) {
-	query := `
-		SELECT DISTINCT w.id, w.japanese, w.romaji, w.english, w.parts
+	rows, err := db.conn.Query(`
+		SELECT w.id, w.japanese, w.romaji, w.english
 		FROM words w
-		JOIN word_review_items wri ON w.id = wri.word_id
-		WHERE wri.study_session_id = ?
-	`
-
-	rows, err := db.conn.Query(query, sessionID)
+		JOIN study_session_words ssw ON w.id = ssw.word_id
+		WHERE ssw.study_session_id = ?
+		ORDER BY w.id`,
+		sessionID,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("error querying study session words: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
 	var words []models.Word
 	for rows.Next() {
-		var word models.Word
-		var partsJSON []byte
-
-		err := rows.Scan(&word.ID, &word.Japanese, &word.Romaji, &word.English, &partsJSON)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning word row: %v", err)
+		var w models.Word
+		if err := rows.Scan(&w.ID, &w.Japanese, &w.Romaji, &w.English); err != nil {
+			return nil, err
 		}
-
-		if partsJSON != nil {
-			if err := json.Unmarshal(partsJSON, &word.Parts); err != nil {
-				return nil, fmt.Errorf("error unmarshaling word parts: %v", err)
-			}
-		}
-
-		words = append(words, word)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating word rows: %v", err)
+		words = append(words, w)
 	}
 
 	return words, nil
@@ -50,35 +35,79 @@ func (db *DB) GetStudySessionWords(sessionID int) ([]models.Word, error) {
 
 // GetStudySessions retrieves all study sessions
 func (db *DB) GetStudySessions() ([]models.StudySession, error) {
-	query := `
-		SELECT id, group_id, created_at, study_activity_id
-		FROM study_sessions
-		ORDER BY created_at DESC
-	`
-
-	rows, err := db.conn.Query(query)
+	rows, err := db.conn.Query(
+		"SELECT id, group_id, created_at, study_activity_id FROM study_sessions ORDER BY created_at DESC",
+	)
 	if err != nil {
-		return nil, fmt.Errorf("error querying study sessions: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
 	var sessions []models.StudySession
 	for rows.Next() {
-		var session models.StudySession
-		var createdAt time.Time
-
-		err := rows.Scan(&session.ID, &session.GroupID, &createdAt, &session.StudyActivityID)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning study session row: %v", err)
+		var s models.StudySession
+		if err := rows.Scan(&s.ID, &s.GroupID, &s.CreatedAt, &s.StudyActivityID); err != nil {
+			return nil, err
 		}
-
-		session.CreatedAt = createdAt
-		sessions = append(sessions, session)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating study session rows: %v", err)
+		sessions = append(sessions, s)
 	}
 
 	return sessions, nil
+}
+
+// GetStudySession retrieves a specific study session by ID
+func (db *DB) GetStudySession(id int) (*models.StudySession, error) {
+	row := db.conn.QueryRow(
+		"SELECT id, group_id, created_at, study_activity_id FROM study_sessions WHERE id = ?",
+		id,
+	)
+
+	var session models.StudySession
+	err := row.Scan(&session.ID, &session.GroupID, &session.CreatedAt, &session.StudyActivityID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &session, nil
+}
+
+// CreateWordReview creates a new word review record
+func (db *DB) CreateWordReview(sessionID, wordID int, correct bool) error {
+	_, err := db.conn.Exec(
+		"INSERT INTO word_review_items (word_id, study_session_id, correct, created_at) VALUES (?, ?, ?, ?)",
+		wordID, sessionID, correct, time.Now(),
+	)
+	return err
+}
+
+// ResetStudyHistory resets all study history
+func (db *DB) ResetStudyHistory() error {
+	_, err := db.conn.Exec("DELETE FROM word_review_items")
+	return err
+}
+
+// FullReset performs a complete reset of the system
+func (db *DB) FullReset() error {
+	_, err := db.conn.Exec(`
+		DELETE FROM word_review_items;
+		DELETE FROM study_sessions;
+		DELETE FROM study_activities;
+	`)
+	return err
+}
+
+// CreateStudySession creates a new study session
+func (db *DB) CreateStudySession(groupID, studyActivityID int) (int64, error) {
+	result, err := db.conn.Exec(
+		"INSERT INTO study_sessions (group_id, study_activity_id, created_at) VALUES (?, ?, ?)",
+		groupID, studyActivityID, time.Now(),
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.LastInsertId()
 }
