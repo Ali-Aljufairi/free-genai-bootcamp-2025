@@ -6,16 +6,17 @@ all: build test
 build:
 	@echo "Building..."
 	@CGO_ENABLED=1 GOOS=linux go build -o main cmd/api/main.go 2>build-errors.tmp || { \
-		echo "Build failed. Organizing error messages..." && \
+		echo "\033[1;31mBuild failed. Error details:\033[0m" && \
+		echo "----------------------------------------" && \
+		cat build-errors.tmp && \
+		echo "\n\033[1;33mOrganizing detailed error report...\033[0m" && \
 		echo "Build Errors Log (Generated from make build)\n" > build-errors.log && \
 		echo "Compilation Errors by Package:\n" >> build-errors.log && \
 		for pkg in $$(grep -o "[^/]*/[^/]*/[^:]*" build-errors.tmp | sort -u); do \
 			echo "\nPackage: $$pkg" >> build-errors.log && \
 			grep -A 1 "$$pkg" build-errors.tmp | sed 's/^/   - /' >> build-errors.log; \
 		done && \
-		echo "\nError Summary:" >> build-errors.log && \
-		echo "The build process encountered errors in the above packages." >> build-errors.log && \
-		echo "Please review the error messages for each package and fix the issues." >> build-errors.log && \
+		echo "\nDetailed error log has been written to: build-errors.log" && \
 		rm build-errors.tmp && \
 		exit 1; \
 	}
