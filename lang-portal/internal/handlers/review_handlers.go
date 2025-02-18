@@ -16,8 +16,39 @@ func NewReviewHandler(db *database.DB) *ReviewHandler {
 	return &ReviewHandler{db: db}
 }
 
+func (h *ReviewHandler) SaveReviewAttempt(c *fiber.Ctx) error {
+	type ReviewAttempt struct {
+		SessionID int64 `json:"session_id"`
+		WordID    int64 `json:"word_id"`
+		Correct   bool  `json:"correct"`
+	}
+
+	var attempt ReviewAttempt
+	if err := c.BodyParser(&attempt); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Calculate next review time (for example, 24 hours from now)
+	nextReview := time.Now().Add(24 * time.Hour)
+
+	// Save the review attempt
+	err := h.db.SaveReviewAttempt(attempt.SessionID, attempt.WordID, attempt.Correct, nextReview)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to save review attempt",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Review attempt saved successfully",
+	})
+}
+
 type ReviewAttempt struct {
-	WordID    int       `json:"word_id"`
+	WordID    int64     `json:"word_id"`
 	IsCorrect bool      `json:"is_correct"`
 	Timestamp time.Time `json:"timestamp"`
 }
@@ -30,7 +61,7 @@ type ReviewResponse struct {
 
 // SubmitReview handles the submission of a word review attempt
 func (h *ReviewHandler) SubmitReview(c *fiber.Ctx) error {
-	sessionID, err := strconv.Atoi(c.Params("id"))
+	sessionID, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid session ID",

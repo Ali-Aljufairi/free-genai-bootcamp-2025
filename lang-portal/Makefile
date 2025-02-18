@@ -33,7 +33,7 @@ db-setup: db-init migrate seed
 # Reset database (clean and reinitialize)
 db-reset:
 	@echo "Resetting database..."
-	@rm -f data.db
+	@rm -f words.db
 	@make db-setup
 
 # Initialize SQLite database

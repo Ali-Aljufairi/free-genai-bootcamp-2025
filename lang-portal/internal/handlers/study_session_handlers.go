@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"lang-portal/internal/database"
+	"lang-portal/internal/database/models"
 	"strconv"
 	"time"
-
-	"lang-portal/internal/database"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,36 +26,32 @@ func NewStudySessionHandler(db *database.DB) *StudySessionHandler {
 
 // CreateStudySession creates a new study session
 func (h *StudySessionHandler) CreateStudySession(c *fiber.Ctx) error {
-	type CreateSessionRequest struct {
-		GroupID         int `json:"group_id"`
-		StudyActivityID int `json:"study_activity_id"`
+	var input struct {
+		GroupID         int64 `json:"group_id"`
+		StudyActivityID int64 `json:"study_activity_id"`
 	}
 
-	var req CreateSessionRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	sessionID, err := h.db.CreateStudySession(req.GroupID, req.StudyActivityID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create study session",
-		})
+	session := models.StudySession{
+		GroupID:         input.GroupID,
+		StudyActivityID: input.StudyActivityID,
+		CreatedAt:       time.Now(),
 	}
 
-	return c.JSON(fiber.Map{
-		"id":                sessionID,
-		"group_id":          req.GroupID,
-		"study_activity_id": req.StudyActivityID,
-		"created_at":        time.Now(),
-	})
+	result := h.db.GetDB().Create(&session)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to create study session"})
+	}
+
+	return c.JSON(session)
 }
 
 // GetStudySessionWords handles retrieving words for a specific study session
 func (h *StudySessionHandler) GetStudySessionWords(c *fiber.Ctx) error {
-	sessionID, err := strconv.Atoi(c.Params("id"))
+	sessionID, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid session ID",
@@ -90,7 +86,7 @@ func (h *StudySessionHandler) GetStudySessions(c *fiber.Ctx) error {
 
 // GetStudySession handles retrieving a specific study session
 func (h *StudySessionHandler) GetStudySession(c *fiber.Ctx) error {
-	sessionID, err := strconv.Atoi(c.Params("id"))
+	sessionID, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid session ID",
@@ -109,14 +105,14 @@ func (h *StudySessionHandler) GetStudySession(c *fiber.Ctx) error {
 
 // ReviewWord handles recording a word review in a study session
 func (h *StudySessionHandler) ReviewWord(c *fiber.Ctx) error {
-	sessionID, err := strconv.Atoi(c.Params("id"))
+	sessionID, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid session ID",
 		})
 	}
 
-	wordID, err := strconv.Atoi(c.Params("word_id"))
+	wordID, err := strconv.ParseInt(c.Params("word_id"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid word ID",
@@ -198,25 +194,8 @@ func (h *StudySessionHandler) StudyProgress(c *fiber.Ctx) error {
 		})
 	}
 
-	resp := StudyProgressResponse{
-		TotalWordsStudied:   totalWordsStudied,
-		TotalAvailableWords: totalAvailableWords,
-	}
-
-	return c.JSON(resp)
-}
-
-// WordResponse represents the response structure for word data
-type WordResponse struct {
-	ID       int    `json:"id"`
-	Word     string `json:"word"`
-	Meaning  string `json:"meaning"`
-	Example  string `json:"example"`
-	Category string `json:"category"`
-}
-
-// StudyProgressResponse represents the response structure for study progress
-type StudyProgressResponse struct {
-	TotalWordsStudied   int `json:"total_words_studied"`
-	TotalAvailableWords int `json:"total_available_words"`
+	return c.JSON(fiber.Map{
+		"total_words_studied":   totalWordsStudied,
+		"total_available_words": totalAvailableWords,
+	})
 }

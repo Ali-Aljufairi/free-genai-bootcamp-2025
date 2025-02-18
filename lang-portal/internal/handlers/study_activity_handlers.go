@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"lang-portal/internal/database"
+	"lang-portal/internal/database/models"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type StudyActivityHandler struct {
@@ -17,18 +20,19 @@ func NewStudyActivityHandler(db *database.DB) *StudyActivityHandler {
 
 // GetStudyActivity returns a specific study activity by ID
 func (h *StudyActivityHandler) GetStudyActivity(c *fiber.Ctx) error {
+	// Parse the activity ID from URL parameters
 	activityID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid activity ID",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid activity ID"})
 	}
 
-	activity, err := h.db.GetStudyActivity(activityID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get study activity",
-		})
+	var activity models.StudyActivity
+	result := h.db.GetDB().First(&activity, activityID)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Study activity not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get study activity"})
 	}
 
 	return c.JSON(activity)
@@ -36,59 +40,76 @@ func (h *StudyActivityHandler) GetStudyActivity(c *fiber.Ctx) error {
 
 // GetStudyActivitySessions returns all study sessions for a specific activity
 func (h *StudyActivityHandler) GetStudyActivitySessions(c *fiber.Ctx) error {
+	// Parse the activity ID from URL parameters
 	activityID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid activity ID",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid activity ID"})
 	}
 
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
+	// Parse pagination parameters with defaults and basic validation
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	itemsPerPage, err := strconv.Atoi(c.Query("per_page", "10"))
+	if err != nil || itemsPerPage < 1 {
+		itemsPerPage = 10
+	}
+	offset := (page - 1) * itemsPerPage
 
-	sessions, total, err := h.db.GetStudyActivitySessions(activityID, page, itemsPerPage)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get study activity sessions",
-		})
+	var sessions []models.StudySession
+	var total int64
+
+	// Count the total sessions for this activity
+	countResult := h.db.GetDB().
+		Model(&models.StudySession{}).
+		Where("study_activity_id = ?", activityID).
+		Count(&total)
+	if countResult.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get sessions count"})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+	// Retrieve the paginated sessions
+	result := h.db.GetDB().
+		Model(&models.StudySession{}).
+		Where("study_activity_id = ?", activityID).
+		Offset(offset).
+		Limit(itemsPerPage).
+		Find(&sessions)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get sessions"})
+	}
 
 	return c.JSON(fiber.Map{
 		"items": sessions,
-		"pagination": fiber.Map{
-			"current_page":   page,
-			"total_pages":    totalPages,
-			"total_items":    total,
-			"items_per_page": itemsPerPage,
-		},
+		"total": total,
+		"page":  page,
 	})
 }
 
 // CreateStudyActivity creates a new study activity
 func (h *StudyActivityHandler) CreateStudyActivity(c *fiber.Ctx) error {
-	type CreateActivityRequest struct {
-		GroupID         int `json:"group_id"`
-		StudyActivityID int `json:"study_activity_id"`
+	var input struct {
+		GroupID int64 `json:"group_id"`
 	}
 
-	var req CreateActivityRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	activityID, err := h.db.CreateStudyActivity(req.GroupID, req.StudyActivityID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create study activity",
-		})
+	// Validate the input
+	if input.GroupID <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid group_id"})
 	}
 
-	return c.JSON(fiber.Map{
-		"id":       activityID,
-		"group_id": req.GroupID,
-	})
+	activity := models.StudyActivity{
+		GroupID: input.GroupID,
+	}
+
+	result := h.db.GetDB().Create(&activity)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create study activity"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(activity)
 }

@@ -3,7 +3,9 @@ package handlers
 import (
 	"strconv"
 	"lang-portal/internal/database"
+	"lang-portal/internal/database/models"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type GroupHandler struct {
@@ -17,16 +19,24 @@ func NewGroupHandler(db *database.DB) *GroupHandler {
 // GetGroups returns all groups with pagination
 func (h *GroupHandler) GetGroups(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
+	itemsPerPage, _ := strconv.Atoi(c.Query("per_page", "10"))
 
-	groups, total, err := h.db.GetGroups(page, itemsPerPage)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get groups",
-		})
+	var groups []models.Group
+	var total int64
+
+	offset := (page - 1) * itemsPerPage
+
+	result := h.db.GetDB().Model(&models.Group{}).Count(&total)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to get groups count"})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+	result = h.db.GetDB().Model(&models.Group{}).Offset(offset).Limit(itemsPerPage).Find(&groups)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to get groups"})
+	}
+
+	totalPages := (total + int64(itemsPerPage) - 1) / int64(itemsPerPage)
 
 	return c.JSON(fiber.Map{
 		"items": groups,
@@ -43,16 +53,17 @@ func (h *GroupHandler) GetGroups(c *fiber.Ctx) error {
 func (h *GroupHandler) GetGroup(c *fiber.Ctx) error {
 	groupID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid group ID",
-		})
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid group ID"})
 	}
 
-	group, err := h.db.GetGroup(groupID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get group",
-		})
+	var group models.Group
+	result := h.db.GetDB().First(&group, groupID)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		return c.Status(404).JSON(fiber.Map{"error": "Group not found"})
+	}
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to get group"})
 	}
 
 	return c.JSON(group)
@@ -62,22 +73,28 @@ func (h *GroupHandler) GetGroup(c *fiber.Ctx) error {
 func (h *GroupHandler) GetGroupWords(c *fiber.Ctx) error {
 	groupID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid group ID",
-		})
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid group ID"})
 	}
 
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	itemsPerPage := 100
+	itemsPerPage, _ := strconv.Atoi(c.Query("per_page", "10"))
 
-	words, total, err := h.db.GetGroupWords(groupID, page, itemsPerPage)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get group words",
-		})
+	var words []models.Word
+	var total int64
+
+	offset := (page - 1) * itemsPerPage
+
+	result := h.db.GetDB().Model(&models.Word{}).Where("group_id = ?", groupID).Count(&total)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to get words count"})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+	result = h.db.GetDB().Model(&models.Word{}).Where("group_id = ?", groupID).Offset(offset).Limit(itemsPerPage).Find(&words)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to get words"})
+	}
+
+	totalPages := (total + int64(itemsPerPage) - 1) / int64(itemsPerPage)
 
 	return c.JSON(fiber.Map{
 		"items": words,
@@ -102,14 +119,26 @@ func (h *GroupHandler) GetGroupStudySessions(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	itemsPerPage := 100
 
-	sessions, total, err := h.db.GetGroupStudySessions(groupID, page, itemsPerPage)
-	if err != nil {
+	var sessions []models.StudySession
+	var total int64
+
+	offset := (page - 1) * itemsPerPage
+
+	result := h.db.GetDB().Model(&models.StudySession{}).Where("group_id = ?", groupID).Count(&total)
+	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get group study sessions",
+			"error": "Failed to get study sessions count",
 		})
 	}
 
-	totalPages := (total + itemsPerPage - 1) / itemsPerPage
+	result = h.db.GetDB().Model(&models.StudySession{}).Where("group_id = ?", groupID).Offset(offset).Limit(itemsPerPage).Find(&sessions)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get study sessions",
+		})
+	}
+
+	totalPages := (total + int64(itemsPerPage) - 1) / int64(itemsPerPage)
 
 	return c.JSON(fiber.Map{
 		"items": sessions,

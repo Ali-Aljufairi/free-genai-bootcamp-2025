@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"time"
+)
 
 // Word represents a vocabulary word in the system
 type Word struct {
@@ -15,6 +20,20 @@ type WordPartsJSON struct {
 	Type      string `json:"type"`
 	Formality string `json:"formality,omitempty"`
 	Category  string `json:"category,omitempty"`
+}
+
+// Value implements the driver.Valuer interface
+func (w WordPartsJSON) Value() (driver.Value, error) {
+	return json.Marshal(w)
+}
+
+// Scan implements the sql.Scanner interface
+func (w *WordPartsJSON) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &w)
 }
 
 // Group represents a thematic group of words
