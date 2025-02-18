@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"lang-portal/internal/database/models"
+	"os"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -106,8 +107,14 @@ func (db *DB) Migrate(migrationsPath string) error {
 
 // SeedWords seeds the database with words from a JSON file
 func (db *DB) SeedWords(seedFile string, groupName string) error {
-	// Implementation can be added later
-	return nil
+	// Read and execute the SQL seed file
+	seedSQL, err := os.ReadFile(seedFile)
+	if err != nil {
+		return fmt.Errorf("error reading seed file: %v", err)
+	}
+
+	// Execute the SQL statements
+	return db.db.Exec(string(seedSQL)).Error
 }
 
 // SeedStudyActivities seeds the database with study activities from a JSON file
@@ -147,11 +154,26 @@ func (db *DB) SaveReviewAttempt(sessionID, wordID int64, isCorrect bool, nextRev
 	return db.db.Create(&review).Error
 }
 
-// GetWords retrieves all words
-func (db *DB) GetWords() ([]models.Word, error) {
+// GetWords retrieves words with pagination
+func (db *DB) GetWords(page, pageSize int) ([]models.Word, int64, error) {
 	var words []models.Word
-	err := db.db.Find(&words).Error
-	return words, err
+	var total int64
+
+	// Get total count
+	if err := db.db.Model(&models.Word{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Calculate offset
+	offset := (page - 1) * pageSize
+
+	// Get paginated results
+	err := db.db.Select("id, japanese, romaji, english, parts").Offset(offset).Limit(pageSize).Find(&words).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return words, total, nil
 }
 
 // Health checks if the database connection is healthy

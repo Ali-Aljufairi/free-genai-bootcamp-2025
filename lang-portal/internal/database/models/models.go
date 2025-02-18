@@ -9,11 +9,11 @@ import (
 
 // Word represents a vocabulary word in the system
 type Word struct {
-	ID       int64         `json:"id"`
-	Japanese string        `json:"japanese"`
-	Romaji   string        `json:"romaji"`
-	English  string        `json:"english"`
-	Parts    WordPartsJSON `json:"parts"`
+	ID       int64         `json:"id" gorm:"primaryKey"`
+	Japanese string        `json:"japanese" gorm:"not null"`
+	Romaji   string        `json:"romaji" gorm:"not null"`
+	English  string        `json:"english" gorm:"not null"`
+	Parts    WordPartsJSON `json:"parts" gorm:"type:text"`
 }
 
 type WordPartsJSON struct {
@@ -29,11 +29,25 @@ func (w WordPartsJSON) Value() (driver.Value, error) {
 
 // Scan implements the sql.Scanner interface
 func (w *WordPartsJSON) Scan(value interface{}) error {
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
-	}
-	return json.Unmarshal(b, &w)
+    if value == nil {
+        return nil
+    }
+
+    var data []byte
+    switch v := value.(type) {
+    case []byte:
+        data = v
+    case string:
+        data = []byte(v)
+    default:
+        return errors.New("type assertion to []byte or string failed")
+    }
+
+    if len(data) == 0 {
+        return nil
+    }
+
+    return json.Unmarshal(data, &w)
 }
 
 // Group represents a thematic group of words

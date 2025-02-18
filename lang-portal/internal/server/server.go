@@ -13,7 +13,7 @@ type FiberServer struct {
 }
 
 func New() *FiberServer {
-	db, err := database.New("./data.db")
+	db, err := database.New("./words.db")
 	if err != nil {
 		panic(err)
 	}

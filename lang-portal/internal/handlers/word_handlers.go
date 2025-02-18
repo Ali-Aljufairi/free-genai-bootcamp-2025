@@ -16,9 +16,21 @@ func NewWordHandler(db *database.DB) *WordHandler {
 	return &WordHandler{db: db}
 }
 
-// GetWords returns all words
+// GetWords returns paginated words
 func (h *WordHandler) GetWords(c *fiber.Ctx) error {
-	words, err := h.db.GetWords()
+	// Get page and pageSize from query parameters
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	pageSize, _ := strconv.Atoi(c.Query("pageSize", "10"))
+
+	// Ensure valid pagination parameters
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	words, total, err := h.db.GetWords(page, pageSize)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get words",
@@ -27,6 +39,10 @@ func (h *WordHandler) GetWords(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"items": words,
+		"total": total,
+		"page": page,
+		"pageSize": pageSize,
+		"totalPages": (total + int64(pageSize) - 1) / int64(pageSize),
 	})
 }
 
