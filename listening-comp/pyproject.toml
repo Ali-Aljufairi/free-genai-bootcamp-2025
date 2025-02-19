@@ -1,0 +1,12 @@
+[project]
+name = "listening-comp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.36.23",
+    "chromadb>=0.6.3",
+    "streamlit>=1.42.1",
+    "youtube-transcript-api>=0.6.3",
+]
