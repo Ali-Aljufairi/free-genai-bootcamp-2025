@@ -4,8 +4,8 @@
 all: build test
 
 build:
-	@echo "Building..."
-	@CGO_ENABLED=1 GOOS=linux go build -o main cmd/api/main.go 2>build-errors.tmp || { \
+	@echo "Building for Mac..."
+	@CGO_ENABLED=1 GOOS=darwin go build -o main cmd/api/main.go 2>build-errors.tmp || { \
 		echo "\033[1;31mBuild failed. Error details:\033[0m" && \
 		echo "----------------------------------------" && \
 		cat build-errors.tmp && \
