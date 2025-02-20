@@ -1,5 +1,9 @@
 import os
 import streamlit as st
+import sys
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class AudioManager:
     def __init__(self):

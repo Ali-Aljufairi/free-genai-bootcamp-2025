@@ -8,5 +8,6 @@ dependencies = [
     "boto3>=1.36.23",
     "chromadb>=0.6.3",
     "streamlit>=1.42.1",
+    "watchdog>=6.0.0",
     "youtube-transcript-api>=0.6.3",
 ]
