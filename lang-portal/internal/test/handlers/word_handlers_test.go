@@ -34,7 +34,8 @@ func TestGetWords(t *testing.T) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			japanese TEXT NOT NULL,
 			romaji TEXT NOT NULL,
-			english TEXT NOT NULL
+			english TEXT NOT NULL,
+			parts TEXT
 		)
 	`)
 	db.GetDB().Exec(`
@@ -100,7 +101,8 @@ func TestGetWord(t *testing.T) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			japanese TEXT NOT NULL,
 			romaji TEXT NOT NULL,
-			english TEXT NOT NULL
+			english TEXT NOT NULL,
+			parts TEXT
 		)
 	`)
 	db.GetDB().Exec(`

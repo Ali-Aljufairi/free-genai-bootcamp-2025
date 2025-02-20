@@ -60,9 +60,10 @@ docker-down:
 	fi
 
 # Test the application
+# Run tests with verbose output and logging
 test:
-	@echo "\033[1;34mRunning tests...\033[0m"
-	@go test -v ./...
+	@echo "Running tests..."
+	@go test -v ./... 2>&1 | tee test.log
 
 # Clean the binary
 clean:

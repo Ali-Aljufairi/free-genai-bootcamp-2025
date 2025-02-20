@@ -51,7 +51,7 @@ func (db *DB) Close() error {
 // GetStudySessionWords retrieves words for a specific study session
 func (db *DB) GetStudySessionWords(sessionID int64) ([]models.Word, error) {
 	var words []models.Word
-	err := db.db.Where("study_session_id = ?", sessionID).Find(&words).Error
+	err := db.db.Joins("JOIN word_review_items ON words.id = word_review_items.word_id").Where("word_review_items.study_session_id = ?", sessionID).Find(&words).Error
 	return words, err
 }
 
