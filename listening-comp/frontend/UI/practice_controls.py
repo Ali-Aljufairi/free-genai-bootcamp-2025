@@ -11,27 +11,37 @@ class PracticeControls:
 
     def render(self):
         """Render practice type and topic selection controls"""
-        practice_type = st.selectbox(
-            "Select Practice Type", ["Dialogue Practice", "Phrase Matching"]
+        practice_types = {
+            "💬 Dialogue Practice": "Dialogue Practice",
+            "🎯 Phrase Matching": "Phrase Matching"
+        }
+        practice_type_display = st.selectbox(
+            "Select Practice Type",
+            list(practice_types.keys())
         )
+        practice_type = practice_types[practice_type_display]
 
         topics = {
-            "Dialogue Practice": [
-                "Daily Conversation",
-                "Shopping",
-                "Restaurant",
-                "Travel",
-                "School/Work",
-            ],
-            "Phrase Matching": [
-                "Announcements",
-                "Instructions",
-                "Weather Reports",
-                "News Updates",
-            ],
+            "Dialogue Practice": {
+                "💭 Daily Conversation": "Daily Conversation",
+                "🛍️ Shopping": "Shopping",
+                "🍽️ Restaurant": "Restaurant",
+                "✈️ Travel": "Travel",
+                "💼 School/Work": "School/Work"
+            },
+            "Phrase Matching": {
+                "📢 Announcements": "Announcements",
+                "📝 Instructions": "Instructions",
+                "🌤️ Weather Reports": "Weather Reports",
+                "📰 News Updates": "News Updates"
+            }
         }
 
-        topic = st.selectbox("Select Topic", topics[practice_type])
+        topic_display = st.selectbox(
+            "Select Topic",
+            list(topics[practice_type].keys())
+        )
+        topic = topics[practice_type][topic_display]
 
         if st.button("Generate New Question"):
             section_num = 2 if practice_type == "Dialogue Practice" else 3
