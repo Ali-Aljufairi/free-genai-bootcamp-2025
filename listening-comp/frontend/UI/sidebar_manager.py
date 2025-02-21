@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import sys
+from .youtube_transcript_manager import YouTubeTranscriptManager
+from backend.get_transcript import get_transcript
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -8,6 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 class SidebarManager:
     def __init__(self, question_manager):
         self.question_manager = question_manager
+        self.youtube_transcript_manager = YouTubeTranscriptManager(st.session_state.youtube_service)
 
     def render(self):
         """Render the sidebar with saved questions grouped by practice type and topic"""
@@ -89,3 +92,40 @@ class SidebarManager:
                 st.info(
                     "No saved questions yet. Generate some questions to see them here!"
                 )
+
+            # YouTube Transcript Section
+            st.header("YouTube Transcript")
+            youtube_url = st.text_input("Enter YouTube URL", key="youtube_url")
+            
+            if st.button("Get and Save Transcript"):
+                if youtube_url:
+                    with st.spinner("Fetching transcript..."):
+                        video_id = st.session_state.youtube_service.extract_video_id(youtube_url)
+                        if video_id:
+                            transcript = get_transcript(youtube_url)
+                            if transcript:
+                                if self.youtube_transcript_manager.save_transcript(youtube_url, transcript):
+                                    st.success("Transcript saved successfully!")
+                                else:
+                                    st.error("Failed to save transcript")
+                            else:
+                                st.error("Could not fetch transcript")
+                        else:
+                            st.error("Invalid YouTube URL")
+
+            # Display saved transcripts
+            st.subheader("Saved Transcripts")
+            saved_transcripts = self.youtube_transcript_manager.get_saved_transcripts()
+            if saved_transcripts:
+                selected_transcript = st.selectbox(
+                    "Select a saved transcript",
+                    saved_transcripts
+                )
+                if selected_transcript:
+                    transcript_data = self.youtube_transcript_manager.load_transcript(selected_transcript)
+                    if transcript_data:
+                        if st.button("Load Transcript"):
+                            st.session_state.current_transcript = transcript_data
+                            st.success("Transcript loaded!")
+            else:
+                st.info("No saved transcripts found")

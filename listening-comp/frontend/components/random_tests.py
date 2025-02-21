@@ -18,6 +18,7 @@ class RandomTestsTab:
 
     def get_transcript_path(self, video_id: str) -> str:
         """Get the path for transcript file"""
+
         return os.path.join("backend", "data", "transcripts", f"{video_id}.txt")
 
     def render(self):

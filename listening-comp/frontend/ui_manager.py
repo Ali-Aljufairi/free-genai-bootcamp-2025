@@ -10,10 +10,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from backend.question_generator import QuestionGenerator
 from backend.audio_generator import AudioGenerator
+from backend.services.youtube_service import YouTubeService
 
 
 class UIManager:
     def __init__(self):
+        self.initialize_session_state()
         self.question_manager = QuestionManager()
         self.audio_manager = AudioManager()
         self.sidebar_manager = SidebarManager(self.question_manager)
@@ -26,6 +28,8 @@ class UIManager:
             st.session_state.question_generator = QuestionGenerator()
         if "audio_generator" not in st.session_state:
             st.session_state.audio_generator = AudioGenerator()
+        if "youtube_service" not in st.session_state:
+            st.session_state.youtube_service = YouTubeService()
         if "current_question" not in st.session_state:
             st.session_state.current_question = None
         if "feedback" not in st.session_state:
@@ -39,7 +43,6 @@ class UIManager:
 
     def render_interactive_stage(self):
         """Main method to render the entire interactive learning stage"""
-        self.initialize_session_state()
         self.sidebar_manager.render()
         self.practice_controls.render()
         self.question_content.render()
