@@ -2,30 +2,24 @@ import streamlit as st
 import sys
 import os
 
-# Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
 # Now we can import our modules
-from frontend.components.random_tests import RandomTestsTab
-from backend.utils.logger import Logger
+from frontend.components.youtube_tests import YouTubeTestsTab
+from frontend.ui_manager import UIManager
 from backend.services.youtube_service import YouTubeService
 from backend.utils.directory_manager import DirectoryManager
-from ui_manager import UIManager
+from backend.utils.logger import Logger
 
-# Enable debug logging at startup
-Logger.enable_debug()
 logger = Logger().get_logger()
-
-logger.info("Starting JLPT Listening Practice Application")
-
 
 class JLPTListeningApp:
     def __init__(self):
         DirectoryManager.initialize_app_directories()
         self.ui_manager = UIManager()
         self.youtube_service = YouTubeService()
-        self.random_tests = RandomTestsTab()
+        self.random_tests = YouTubeTestsTab()
 
     def render(self):
         """Render the main application interface"""

@@ -1,9 +1,9 @@
 import streamlit as st
-from question_manager import QuestionManager
 from UI.audio_manager import AudioManager
 from UI.practice_controls import PracticeControls
 from UI.sidebar_manager import SidebarManager
 from UI.question_content import QuestionContent
+from frontend.question_manager import QuestionManager
 import os
 import sys
 

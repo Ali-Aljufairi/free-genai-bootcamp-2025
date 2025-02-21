@@ -10,7 +10,7 @@ from backend.utils.transcript_downloader import (
 from backend.utils.logger import Logger
 
 
-class RandomTestsTab:
+class YouTubeTestsTab:
     def __init__(self):
         self.youtube_service = YouTubeService()
         self.transcript_downloader = TranscriptDownloader()
@@ -22,7 +22,7 @@ class RandomTestsTab:
         return os.path.join("backend", "data", "transcripts", f"{video_id}.txt")
 
     def render(self):
-        """Render the random tests tab"""
+        """Render the YouTube tests tab"""
         st.header("YouTube Transcript Extractor")
 
         # YouTube URL input
