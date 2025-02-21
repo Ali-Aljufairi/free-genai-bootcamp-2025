@@ -66,3 +66,4 @@ Key components:
 - <mcfile name="pyproject.toml" path="/Users/ali/github/free-genai-bootcamp-2025/listening-comp/pyproject.toml"></mcfile>: Project dependencies and metadata
 - <mcfile name="requirements.txt" path="/Users/ali/github/free-genai-bootcamp-2025/listening-comp/backend/requirements.txt"></mcfile>: Backend Python dependencies
 - <mcfile name=".python-version" path="/Users/ali/github/free-genai-bootcamp-2025/listening-comp/.python-version"></mcfile>: Python version specification (3.13)
+
