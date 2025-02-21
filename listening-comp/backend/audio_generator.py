@@ -71,7 +71,6 @@ class AudioGenerator:
                 print(f"Error: Invalid speaker in part {i+1}")
                 return False
                 
-            # Check text
             if not text or not isinstance(text, str):
                 print(f"Error: Invalid text in part {i+1}")
                 return False
