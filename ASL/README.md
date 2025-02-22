@@ -9,14 +9,15 @@ Fingerspelling Detector with Python, OpenCV and Mediapipe
 - Handle duplicate characters with **Unknown** hand gesture
 
 
-## Demo
+## Demo Click in image to watch video
 
 
+[![Watch the video]()](https://www.youtube.com/watch?v=1zApPw6uHEI "ASL")
 
-<!-- ![alphabet](./assets/ASL_alphabet_chart.jpg) -->
-<p align="left">
-  <img src="/assets/ASL.png" width="100%">
-</p>
+# You can find video in 
+
+```assets/ali.mov```
+
 
 ```bash
 $ uv run main.py
