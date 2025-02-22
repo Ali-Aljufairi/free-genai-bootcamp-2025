@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 import tempfile
 import subprocess
 from datetime import datetime
+import uuid
 
 class AudioGenerator:
     def __init__(self):
@@ -336,3 +337,53 @@ class AudioGenerator:
             if os.path.exists(output_file):
                 os.unlink(output_file)
             raise Exception(f"Audio generation failed: {str(e)}")
+
+    def generate_audio_from_transcript(self, question: Dict) -> str:
+        """Generate audio for a question that includes transcript source data
+        
+        Args:
+            question (Dict): Question data with source_segments metadata
+            
+        Returns:
+            str: Path to the generated audio file
+        """
+        # Generate the main question audio
+        main_audio = self.generate_audio(question)
+        
+        # If there are source segments, append them after a pause
+        if "source_segments" in question:
+            # Create a list to store all audio files
+            audio_files = [main_audio]
+            
+            # Add 2 second silence
+            silence = self.generate_silence(2000)
+            audio_files.append(silence)
+            
+            # Add original audio clips if available
+            for segment in question["source_segments"]:
+                # Here you would fetch the original audio from YouTube
+                # For now, we'll generate TTS as a placeholder
+                segment_audio = self.generate_audio_part(
+                    "This is where the original audio segment would play",
+                    self.get_voice_for_gender("announcer")
+                )
+                audio_files.append(segment_audio)
+                
+                # Add 1 second silence between segments
+                audio_files.append(self.generate_silence(1000))
+            
+            # Combine all audio files
+            output_file = os.path.join(
+                self.audio_dir,
+                f"question_with_source_{uuid.uuid4()}.mp3"
+            )
+            self.combine_audio_files(audio_files, output_file)
+            
+            # Clean up temporary files
+            for file in audio_files:
+                if file != output_file and os.path.exists(file):
+                    os.unlink(file)
+                    
+            return output_file
+            
+        return main_audio

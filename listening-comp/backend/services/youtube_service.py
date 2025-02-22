@@ -3,6 +3,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtubesearchpython import VideosSearch
 from backend.utils.logger import Logger
 import os
+import asyncio
 
 
 class YouTubeService:
@@ -49,22 +50,25 @@ class YouTubeService:
         try:
             video_id = self.extract_video_id(video_url)
             if not video_id:
-                self.logger.warning(f"Could not extract video ID from URL: {video_url}")
+                self.logger.error(f"Could not extract video ID from URL: {video_url}")
                 return None
-
-            self.logger.info(f"Fetching transcript for video: {video_url}")
-            transcript_list = YouTubeTranscriptApi.get_transcript(
-                video_id, languages=["ja"]
+                
+            self.logger.info(f"Getting transcript for video: {video_id}")
+            
+            # Get transcript using YouTubeTranscriptApi
+            transcript = await asyncio.to_thread(
+                YouTubeTranscriptApi.get_transcript,
+                video_id,
+                languages=['ja']
             )
-            if not transcript_list:
-                self.logger.warning(f"No transcript found for video: {video_url}")
+            
+            if not transcript:
+                self.logger.warning(f"No transcript found for video: {video_id}")
                 return None
-
-            # Combine all transcript segments into one text
-            full_transcript = " ".join([entry["text"] for entry in transcript_list])
-            self.logger.debug(f"Transcript length: {len(full_transcript)} characters")
-            return full_transcript
-
+                
+            self.logger.debug(f"Successfully retrieved transcript with {len(transcript)} segments")
+            return transcript
+            
         except Exception as e:
             self.logger.error(f"Error getting transcript: {str(e)}", exc_info=True)
             return None
@@ -94,10 +98,10 @@ class YouTubeService:
             
             # Get transcripts for all videos
             results = {}
-            for video_url in videos:
-                transcript = await self.get_transcript(video_url)
+            for video in videos:
+                transcript = await self.get_transcript(video["url"])
                 if transcript:
-                    results[video_url] = transcript
+                    results[video["url"]] = transcript
             
             if not results:
                 self.logger.warning(f"No transcripts found for JLPT {level}")
