@@ -12,7 +12,7 @@ Fingerspelling Detector with Python, OpenCV and Mediapipe
 ## Demo Click in image to watch video
 
 
-[![Watch the video]()](https://www.youtube.com/watch?v=1zApPw6uHEI "ASL")
+[![Watch the video](assets/alipic.png)](https://www.youtube.com/watch?v=1zApPw6uHEI "ASL")
 
 # You can find video in 
 
