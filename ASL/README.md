@@ -8,6 +8,7 @@ Fingerspelling Detector with Python, OpenCV and Mediapipe
 - Handle changing gesture by adding **Timing Threshold**
 - Handle duplicate characters with **Unknown** hand gesture
 
+<br>
 
 ## Demo Click in image to watch video
 
@@ -19,10 +20,13 @@ Fingerspelling Detector with Python, OpenCV and Mediapipe
 ```assets/ali.mov```
 
 
+<br>
+
 ```bash
 $ uv run main.py
 
 ```
+<br>
 
 ## Training Pipeline
 
