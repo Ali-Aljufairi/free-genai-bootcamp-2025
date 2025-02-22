@@ -68,6 +68,10 @@ class QuestionVectorStore:
             "section3": {
                 "name": "section3_questions",
                 "metadata": {"description": "JLPT phrase matching questions - Section 3"}
+            },
+            "transcripts": {
+                "name": "transcripts",
+                "metadata": {"description": "JLPT listening transcripts"}
             }
         }
         
@@ -257,7 +261,8 @@ class QuestionVectorStore:
             
             for segment in transcript_data:
                 # Get word count of current segment
-                word_count = len(segment['text'].split())
+                text = segment['text'].strip()  # Normalize text by stripping whitespace
+                word_count = len(text.split())
                 
                 if current_word_count + word_count > 100:  # Chunk size of ~100 words
                     if current_chunk:
@@ -265,7 +270,7 @@ class QuestionVectorStore:
                         current_chunk = []
                         current_word_count = 0
                 
-                current_chunk.append(segment)
+                current_chunk.append({'text': text, 'start': segment['start'], 'duration': segment['duration']})
                 current_word_count += word_count
             
             # Add remaining chunk if any
@@ -294,15 +299,15 @@ class QuestionVectorStore:
                 if metadata:
                     chunk_metadata.update(metadata)
                 
-                # Add to collection
-                self.collections['section2'].add(
+                # Add to transcripts collection instead of section2
+                self.collections['transcripts'].add(
                     documents=[text],
                     metadatas=[chunk_metadata],
                     ids=[f"{video_id}_chunk_{i}"]
                 )
                 
                 self.logger.info(f"Added chunk {i+1}/{len(chunks)} to vector store")
-                
+            
             self.logger.info(f"Successfully processed all transcript chunks")
             
         except Exception as e:
@@ -319,27 +324,32 @@ class QuestionVectorStore:
         Returns:
             List[Dict]: List of relevant transcript segments with metadata
         """
-        collection = self.client.get_collection(
-            name="transcripts",
-            embedding_function=self.embedding_fn
-        )
-        
-        results = collection.query(
-            query_texts=[query],
-            n_results=n_results
-        )
-        
-        formatted_results = []
-        for i in range(len(results['ids'][0])):
-            result = {
-                'id': results['ids'][0][i],
-                'text': results['documents'][0][i],
-                'metadata': results['metadatas'][0][i],
-                'distance': results['distances'][0][i] if 'distances' in results else None
-            }
-            formatted_results.append(result)
+        try:
+            # Get the transcripts collection
+            collection = self.collections['transcripts']
             
-        return formatted_results
+            # Normalize query by stripping whitespace
+            query = query.strip()
+            
+            results = collection.query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            
+            formatted_results = []
+            for i in range(len(results['ids'][0])):
+                result = {
+                    'id': results['ids'][0][i],
+                    'text': results['documents'][0][i],
+                    'metadata': results['metadatas'][0][i],
+                    'distance': results['distances'][0][i] if 'distances' in results else None
+                }
+                formatted_results.append(result)
+                
+            return formatted_results
+        except Exception as e:
+            self.logger.error(f"Error searching transcripts: {str(e)}", exc_info=True)
+            return []
 
     def generate_question_from_transcript(self, query: str, n_results: int = 3) -> Dict:
         """Generate a listening question from relevant transcript segments
@@ -363,16 +373,19 @@ class QuestionVectorStore:
         self.logger.debug(f"Combined context: {context}")
         
         # Use Bedrock to generate a structured question
-        try:
-            self.logger.info("Generating question using Titan model")
-            response = self.bedrock_client.invoke_model(
-                modelId="amazon.titan-text-express-v1",
-                body=json.dumps({
-                    "inputText": f"""Based on this transcript segment from a Japanese listening practice:
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                self.logger.info(f"Generating question using Titan model (attempt {attempt + 1}/{max_retries})")
+                response = self.bedrock_client.invoke_model(
+                    modelId="amazon.titan-text-express-v1",
+                    body=json.dumps({
+                        "inputText": f"""You are a JLPT question generator. Your task is to create a listening practice question based on this Japanese transcript segment:
 
 {context}
 
-Create a JLPT listening practice question in this exact JSON format:
+Output ONLY a valid JSON object in this EXACT format, with NO additional text or explanation:
+
 {{
     "Introduction": "Brief context setting",
     "Conversation": "Natural dialogue based on the transcript",
@@ -380,47 +393,66 @@ Create a JLPT listening practice question in this exact JSON format:
     "Options": ["A", "B", "C", "D"],
     "CorrectAnswer": "The correct option letter",
     "Explanation": "Why this is the correct answer"
-}}
-
-Make sure the dialogue is natural and the question tests listening comprehension.
-Output only valid JSON, no other text.""",
-                    "textGenerationConfig": {
-                        "maxTokenCount": 1000,
-                        "temperature": 0.7,
-                        "topP": 0.9
-                    }
+}}""",
+                        "textGenerationConfig": {
+                            "maxTokenCount": 1000,
+                            "temperature": 0.7 - (attempt * 0.2),  # Reduce temperature with each retry
+                            "topP": 0.9 - (attempt * 0.1)  # Reduce topP with each retry
+                        }
+                    })
+                )
+                response_body = json.loads(response['body'].read())
+                self.logger.debug(f"Model response: {response_body}")
+                
+                # Extract and clean the JSON from the response
+                output_text = response_body['results'][0]['outputText'].strip()
+                self.logger.debug(f"Generated text: {output_text}")
+                
+                # Try to find JSON object if there's extra text
+                if not output_text.startswith('{'):
+                    import re
+                    json_match = re.search(r'\{.*\}', output_text, re.DOTALL)
+                    if json_match:
+                        output_text = json_match.group(0)
+                
+                # Parse the JSON response
+                question_data = json.loads(output_text)
+                
+                # Validate required fields
+                required_fields = ['Introduction', 'Conversation', 'Question', 'Options', 'CorrectAnswer', 'Explanation']
+                missing_fields = [field for field in required_fields if field not in question_data]
+                if missing_fields:
+                    raise ValueError(f"Missing required fields: {missing_fields}")
+                
+                if not isinstance(question_data['Options'], list) or len(question_data['Options']) != 4:
+                    raise ValueError("Options must be a list of exactly 4 items")
+                
+                self.logger.info("Successfully parsed question data")
+                
+                # Add metadata for audio generation
+                question_data.update({
+                    "practice_type": "Dialogue Practice",
+                    "topic": query,
+                    "source_segments": [
+                        {
+                            "video_id": seg['metadata']['video_id'],
+                            "start_time": seg['metadata']['start_time'],
+                            "end_time": seg['metadata']['end_time']
+                        }
+                        for seg in segments
+                    ]
                 })
-            )
-            response_body = json.loads(response['body'].read())
-            self.logger.debug(f"Model response: {response_body}")
-            
-            # Extract the JSON from the response
-            output_text = response_body['results'][0]['outputText']
-            self.logger.debug(f"Generated text: {output_text}")
-            
-            # Parse the JSON response
-            question_data = json.loads(output_text)
-            self.logger.info("Successfully parsed question data")
-            
-            # Add metadata for audio generation
-            question_data.update({
-                "practice_type": "Dialogue Practice",
-                "topic": query,
-                "source_segments": [
-                    {
-                        "video_id": seg['metadata']['video_id'],
-                        "start_time": seg['metadata']['start_time'],
-                        "end_time": seg['metadata']['end_time']
-                    }
-                    for seg in segments
-                ]
-            })
-            
-            return question_data
-            
-        except Exception as e:
-            self.logger.error(f"Error generating question: {str(e)}", exc_info=True)
-            raise
+                
+                return question_data
+                
+            except json.JSONDecodeError as e:
+                self.logger.warning(f"Failed to parse JSON (attempt {attempt + 1}): {str(e)}")
+                if attempt == max_retries - 1:
+                    raise ValueError("Failed to generate valid JSON after all retries")
+            except Exception as e:
+                self.logger.error(f"Error generating question: {str(e)}", exc_info=True)
+                if attempt == max_retries - 1:
+                    raise
 
 if __name__ == "__main__":
     # Example usage
