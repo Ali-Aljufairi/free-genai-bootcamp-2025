@@ -2,8 +2,7 @@ import gradio as gr
 
 def create_word_practice_tab():
     """Create the Word Practice tab components"""
-    with gr.Tab("Word Practice"):
-        with gr.Row():
+    with gr.Row():
             with gr.Column():
                 generate_word_btn = gr.Button("Get New Word", variant="primary")
                 word_output = gr.Textbox(
@@ -50,8 +49,7 @@ def create_word_practice_tab():
 
 def create_sentence_practice_tab():
     """Create the Sentence Practice tab components"""
-    with gr.Tab("Sentence Practice"):
-        with gr.Row():
+    with gr.Row():
             with gr.Column():
                 generate_sentence_btn = gr.Button("Generate New Sentence", variant="primary")
                 sentence_output = gr.Textbox(
