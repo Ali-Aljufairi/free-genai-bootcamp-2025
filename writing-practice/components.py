@@ -16,9 +16,6 @@ def draw_japanese_canvas(key: str):
     col1, col2 = st.columns([4, 1])
 
     with col1:
-        drawing_mode = st.selectbox(
-            "Drawing tool:", ("freedraw", "line", "rect", "circle"), key=f"{key}_mode"
-        )
         stroke_width = st.slider("Stroke width:", 1, 25, 3, key=f"{key}_stroke")
 
     with col2:
@@ -31,10 +28,10 @@ def draw_japanese_canvas(key: str):
         fill_color="rgba(255, 0, 0, 0.3)",  # Red fill color
         stroke_width=stroke_width,
         stroke_color="#FF0000",  # Red stroke color
-        background_color="#FFFFFF",
+        background_color="#0F1116",
         height=400,  # Larger height
-        width=600,  # Larger width
-        drawing_mode=drawing_mode,
+        width=550,  # Larger width
+        drawing_mode="freedraw",
         key=key
         if f"{key}_cleared" not in st.session_state
         else f"{key}_{np.random.randint(1000000)}",
