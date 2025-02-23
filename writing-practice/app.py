@@ -143,12 +143,13 @@ with tab1:
                     st.error(f"Error during grading: {e}")
                     os.remove(image_path)
                     raise
-                # Display results
-                st.markdown("### Feedback")
-                st.text_input("Your Writing", value=transcription, disabled=True)
-                st.text_input("Target Word", value=target, disabled=True)
-                st.text_input("Grade", value=grade, disabled=True)
-                st.text_area("Feedback", value=feedback, disabled=True)
+                # Move feedback to col1
+                with col1:
+                    st.markdown("### Feedback")
+                    st.text_input("Your Writing", value=transcription, disabled=True)
+                    st.text_input("Target Word", value=target, disabled=True)
+                    st.text_input("Grade", value=grade, disabled=True)
+                    st.text_area("Feedback", value=feedback, disabled=True)
                 os.remove(image_path)
             else:
                 # Canvas returns a numpy array if not blank
@@ -159,13 +160,14 @@ with tab1:
                                 canvas_result
                             )
                         )
-                        st.markdown("### Feedback")
-                        st.text_input(
-                            "Your Writing", value=transcription, disabled=True
-                        )
-                        st.text_input("Target Word", value=target, disabled=True)
-                        st.text_input("Grade", value=grade, disabled=True)
-                        st.text_area("Feedback", value=feedback, disabled=True)
+                        with col1:
+                            st.markdown("### Feedback")
+                            st.text_input(
+                                "Your Writing", value=transcription, disabled=True
+                            )
+                            st.text_input("Target Word", value=target, disabled=True)
+                            st.text_input("Grade", value=grade, disabled=True)
+                            st.text_area("Feedback", value=feedback, disabled=True)
                     except Exception as e:
                         st.error(f"Error during grading: {e}")
                 else:
