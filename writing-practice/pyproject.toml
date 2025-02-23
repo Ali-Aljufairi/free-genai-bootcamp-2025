@@ -10,6 +10,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
+    "streamlit-drawable-canvas>=0.9.3",
     "streamlit>=1.42.2",
     "torch>=2.6.0",
     "torchvision==0.21.0",
