@@ -263,10 +263,8 @@ class JapaneseApp:
 
     def process_word_image(self, image: Image.Image):
         """Process the provided image (PIL Image) and perform OCR and grading for word submission"""
-        # Convert to grayscale and enhance contrast for better OCR
-        image = image.convert("L")
-
-        # Threshold to make red strokes black (better for OCR)
+        # Enhance contrast for better OCR while preserving color
+        # Convert red strokes to black for OCR while keeping original color for display
         threshold = 200  # Adjust this value if needed
         image = image.point(lambda p: p < threshold and 255)
 
@@ -274,10 +272,8 @@ class JapaneseApp:
 
     def process_sentence_image(self, image: Image.Image):
         """Process the provided image (PIL Image) and perform OCR and grading for sentence submission"""
-        # Convert to grayscale and enhance contrast for better OCR
-        image = image.convert("L")
-
-        # Threshold to make red strokes black (better for OCR)
+        # Enhance contrast for better OCR while preserving color
+        # Convert red strokes to black for OCR while keeping original color for display
         threshold = 200  # Adjust this value if needed
         image = image.point(lambda p: p < threshold and 255)
 

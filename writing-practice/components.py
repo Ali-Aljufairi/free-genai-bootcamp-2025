@@ -39,10 +39,8 @@ def draw_japanese_canvas(key: str):
 
     # Check if canvas has any drawing
     if canvas_result.image_data is not None:
-        # Convert to grayscale by taking mean across color channels
-        grayscale = np.mean(canvas_result.image_data, axis=2)
-        # Check if the canvas has any non-white pixels
-        if np.any(grayscale < 254):  # Using 254 as threshold to detect drawings
+        # Check if the canvas has any non-background pixels
+        if np.any(canvas_result.image_data < 254):  # Using 254 as threshold to detect drawings
             st.session_state[f"{key}_canvas_data"] = canvas_result.image_data
             return canvas_result.image_data
 
