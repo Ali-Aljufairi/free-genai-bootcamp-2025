@@ -1,3 +1,4 @@
 .env
 *.log
 *.pyc
+__pycache__
