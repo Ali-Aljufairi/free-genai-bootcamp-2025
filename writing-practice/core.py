@@ -90,7 +90,13 @@ class JapaneseApp:
                 temperature=0.7,
                 max_tokens=100
             )
-            sentence = response.choices[0].message.content.strip()
+            # Extract just the sentence part, removing any explanatory text
+            content = response.choices[0].message.content.strip()
+            # Remove any explanatory text before the actual sentence
+            if ':' in content:
+                sentence = content.split(':')[-1].strip()
+            else:
+                sentence = content
             logger.info(f"Generated sentence: {sentence}")
             return sentence
         except Exception as e:
