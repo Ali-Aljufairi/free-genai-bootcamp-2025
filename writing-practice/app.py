@@ -2,28 +2,31 @@ import streamlit as st
 import os
 import dotenv
 from core import JapaneseApp
+from PIL import Image
+import io
 
 # Load environment variables
 dotenv.load_dotenv()
 
 # Initialize session state if not already done
-if "app" not in st.session_state:
+if 'app' not in st.session_state:
     st.session_state.app = JapaneseApp()
 
-if "current_word" not in st.session_state:
+if 'current_word' not in st.session_state:
     st.session_state.current_word = None
 
-if "current_sentence" not in st.session_state:
+if 'current_sentence' not in st.session_state:
     st.session_state.current_sentence = None
 
 # Set page config
 st.set_page_config(
-    page_title="Japanese Learning Practice", page_icon="✍️", layout="wide"
+    page_title="Japanese Learning Practice",
+    page_icon="✍️",
+    layout="wide"
 )
 
 # Custom CSS
-st.markdown(
-    """
+st.markdown("""
     <style>
     .big-font {
         font-size: 40px !important;
@@ -66,9 +69,7 @@ st.markdown(
         background-color: #3E3E3E !important;
     }
     </style>
-""",
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 # Main title
 st.title("Japanese Learning Practice ✍️")
@@ -79,188 +80,84 @@ tab1, tab2 = st.tabs(["Word Practice", "Sentence Practice"])
 # Word Practice Tab
 with tab1:
     col1, col2 = st.columns(2)
-
+    
     with col1:
         if st.button("Get New Word", key="word_gen"):
-            kanji, english, reading, instruction = (
-                st.session_state.app.get_random_word()
-            )
+            kanji, english, reading, instruction = st.session_state.app.get_random_word()
             st.session_state.current_word = {
-                "kanji": kanji,
-                "english": english,
-                "reading": reading,
-                "instruction": instruction,
+                'kanji': kanji,
+                'english': english,
+                'reading': reading,
+                'instruction': instruction
             }
-
+        
         if st.session_state.current_word:
-            st.markdown(
-                f'<p class="big-font">{st.session_state.current_word["kanji"]}</p>',
-                unsafe_allow_html=True,
-            )
-            st.text_input(
-                "English", value=st.session_state.current_word["english"], disabled=True
-            )
-            st.text_input(
-                "Reading", value=st.session_state.current_word["reading"], disabled=True
-            )
-            st.text_input(
-                "Instructions",
-                value=st.session_state.current_word["instruction"],
-                disabled=True,
-            )
-
+            st.markdown(f'<p class="big-font">{st.session_state.current_word["kanji"]}</p>', unsafe_allow_html=True)
+            st.text_input("English", value=st.session_state.current_word["english"], disabled=True)
+            st.text_input("Reading", value=st.session_state.current_word["reading"], disabled=True)
+            st.text_input("Instructions", value=st.session_state.current_word["instruction"], disabled=True)
+    
     with col2:
-        input_method = st.radio(
-            "Select input method:",
-            ("Upload Image", "Draw on Canvas"),
-            key="word_input_method",
-        )
-        if input_method == "Upload Image":
-            file_input = st.file_uploader(
-                "Upload your handwritten word",
-                type=["png", "jpg", "jpeg"],
-                key="word_image",
-            )
-        else:
-            from components import draw_japanese_canvas
-
-            canvas_result = draw_japanese_canvas(key="word_canvas")
-            file_input = canvas_result is not None
-
-        submit_button = st.button("Submit", key="word_submit")
-        if submit_button and file_input:
-            # Process input based on method
-            if input_method == "Upload Image":
-                # Save the uploaded file temporarily
-                image_path = f"temp_word_{file_input.name}"
-                with open(image_path, "wb") as f:
-                    f.write(file_input.getbuffer())
-                try:
-                    transcription, target, grade, feedback = (
-                        st.session_state.app.grade_word_submission(image_path)
-                    )
-                except Exception as e:
-                    st.error(f"Error during grading: {e}")
-                    os.remove(image_path)
-                    raise
-                # Display results
-                st.markdown("### Feedback")
-                st.text_input("Your Writing", value=transcription, disabled=True)
-                st.text_input("Target Word", value=target, disabled=True)
-                st.text_input("Grade", value=grade, disabled=True)
-                st.text_area("Feedback", value=feedback, disabled=True)
-                os.remove(image_path)
-            else:
-                # Canvas returns a numpy array if not blank
-                if canvas_result is not None:
-                    try:
-                        transcription, target, grade, feedback = (
-                            st.session_state.app.grade_word_canvas_submission(
-                                canvas_result
-                            )
-                        )
-                        st.markdown("### Feedback")
-                        st.text_input(
-                            "Your Writing", value=transcription, disabled=True
-                        )
-                        st.text_input("Target Word", value=target, disabled=True)
-                        st.text_input("Grade", value=grade, disabled=True)
-                        st.text_area("Feedback", value=feedback, disabled=True)
-                    except Exception as e:
-                        st.error(f"Error during grading: {e}")
-                else:
-                    st.error("Canvas is empty. Please draw your word.")
+        uploaded_file = st.file_uploader("Upload your handwritten word", type=['png', 'jpg', 'jpeg'], key="word_image")
+        
+        if uploaded_file and st.button("Submit", key="word_submit"):
+            # Save the uploaded file temporarily
+            image_path = f"temp_word_{uploaded_file.name}"
+            with open(image_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            # Grade the submission
+            transcription, target, grade, feedback = st.session_state.app.grade_word_submission(image_path)
+            
+            # Display results
+            st.markdown("### Feedback")
+            st.text_input("Your Writing", value=transcription, disabled=True)
+            st.text_input("Target Word", value=target, disabled=True)
+            st.text_input("Grade", value=grade, disabled=True)
+            st.text_area("Feedback", value=feedback, disabled=True)
+            
+            # Clean up temporary file
+            os.remove(image_path)
 
 # Sentence Practice Tab
 with tab2:
     col1, col2 = st.columns(2)
-
+    
     with col1:
         if st.button("Generate New Sentence", key="sentence_gen"):
-            sentence, english, kanji, reading = (
-                st.session_state.app.get_random_word_and_sentence()
-            )
+            sentence, english, kanji, reading = st.session_state.app.get_random_word_and_sentence()
             st.session_state.current_sentence = {
-                "sentence": sentence,
-                "english": english,
-                "kanji": kanji,
-                "reading": reading,
+                'sentence': sentence,
+                'english': english,
+                'kanji': kanji,
+                'reading': reading
             }
-
+        
         if st.session_state.current_sentence:
-            st.markdown(
-                f'<p class="big-font">{st.session_state.current_sentence["sentence"]}</p>',
-                unsafe_allow_html=True,
-            )
+            st.markdown(f'<p class="big-font">{st.session_state.current_sentence["sentence"]}</p>', unsafe_allow_html=True)
             st.markdown("### Word Information")
-            st.text_input(
-                "English",
-                value=st.session_state.current_sentence["english"],
-                disabled=True,
-            )
-            st.text_input(
-                "Kanji", value=st.session_state.current_sentence["kanji"], disabled=True
-            )
-            st.text_input(
-                "Reading",
-                value=st.session_state.current_sentence["reading"],
-                disabled=True,
-            )
-
+            st.text_input("English", value=st.session_state.current_sentence["english"], disabled=True)
+            st.text_input("Kanji", value=st.session_state.current_sentence["kanji"], disabled=True)
+            st.text_input("Reading", value=st.session_state.current_sentence["reading"], disabled=True)
+    
     with col2:
-        input_method_sentence = st.radio(
-            "Select input method:",
-            ("Upload Image", "Draw on Canvas"),
-            key="sentence_input_method",
-        )
-        if input_method_sentence == "Upload Image":
-            sentence_file_input = st.file_uploader(
-                "Upload your handwritten sentence",
-                type=["png", "jpg", "jpeg"],
-                key="sentence_image",
-            )
-        else:
-            from components import draw_japanese_canvas
-
-            canvas_result = draw_japanese_canvas(key="sentence_canvas")
-            sentence_file_input = canvas_result is not None
-
-        submit_button = st.button("Submit", key="sentence_submit")
-        if submit_button and sentence_file_input:
-            if input_method_sentence == "Upload Image":
-                image_path = f"temp_sentence_{sentence_file_input.name}"
-                with open(image_path, "wb") as f:
-                    f.write(sentence_file_input.getbuffer())
-                try:
-                    transcription, translation, grade, feedback = (
-                        st.session_state.app.grade_sentence_submission(image_path)
-                    )
-                except Exception as e:
-                    st.error(f"Error during grading: {e}")
-                    os.remove(image_path)
-                    raise
-                st.markdown("### Feedback")
-                st.text_area("Transcription", value=transcription, disabled=True)
-                st.text_area("Translation", value=translation, disabled=True)
-                st.text_input("Grade", value=grade, disabled=True)
-                st.text_area("Feedback", value=feedback, disabled=True)
-                os.remove(image_path)
-            else:
-                if canvas_result is not None:
-                    try:
-                        transcription, translation, grade, feedback = (
-                            st.session_state.app.grade_sentence_canvas_submission(
-                                canvas_result
-                            )
-                        )
-                        st.markdown("### Feedback")
-                        st.text_area(
-                            "Transcription", value=transcription, disabled=True
-                        )
-                        st.text_area("Translation", value=translation, disabled=True)
-                        st.text_input("Grade", value=grade, disabled=True)
-                        st.text_area("Feedback", value=feedback, disabled=True)
-                    except Exception as e:
-                        st.error(f"Error during grading: {e}")
-                else:
-                    st.error("Canvas is empty. Please draw your sentence.")
+        uploaded_file = st.file_uploader("Upload your handwritten sentence", type=['png', 'jpg', 'jpeg'], key="sentence_image")
+        
+        if uploaded_file and st.button("Submit", key="sentence_submit"):
+            # Save the uploaded file temporarily
+            image_path = f"temp_sentence_{uploaded_file.name}"
+            with open(image_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            # Grade the submission
+            transcription, translation, grade, feedback = st.session_state.app.grade_sentence_submission(image_path)
+            
+            # Display results
+            st.markdown("### Feedback")
+            st.text_area("Transcription", value=transcription, disabled=True)
+            st.text_area("Translation", value=translation, disabled=True)
+            st.text_input("Grade", value=grade, disabled=True)
+            st.text_area("Feedback", value=feedback, disabled=True)
+            
+            # Clean up temporary file
+            os.remove(image_path)
