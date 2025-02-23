@@ -5,12 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "gradio>=5.3.0",
     "groq>=0.18.0",
     "manga-ocr>=0.1.14",
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
+    "streamlit>=1.42.2",
     "torch>=2.6.0",
     "torchvision==0.21.0",
 ]
