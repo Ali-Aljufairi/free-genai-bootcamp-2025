@@ -3,5 +3,12 @@ name = "agent"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = []
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13.3",
+    "google-api-python-client>=2.162.0",
+    "langchain-community>=0.3.18",
+    "langchain-groq>=0.2.4",
+    "langgraph>=0.3.1",
+    "tavily-python>=0.5.1",
+]
