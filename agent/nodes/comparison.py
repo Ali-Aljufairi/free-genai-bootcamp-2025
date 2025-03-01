@@ -24,7 +24,7 @@ def product_comparison_node(state: State):
             product_schema = state["product_schema"]
 
             prompt_template = """
-1. **List of Products for Comparison (`comparisons`):**
+. **List of Products for Comparison (`comparisons`):**
    - Each product should include:
      - **Product Name**: The name of the product (e.g., "Smartphone A").
      - **Specs Comparison**:
@@ -47,7 +47,56 @@ def product_comparison_node(state: State):
 
 ---
 
-Here is the product data to analyze:
+### Example Output:
+
+```json
+{{
+  "comparisons": [
+    {{
+      "product_name": "Smartphone A",
+      "specs_comparison": {{
+        "processor": "Snapdragon 888",
+        "battery": "4500mAh",
+        "camera": "108MP primary",
+        "display": "6.5 inch OLED, 120Hz",
+        "storage": "128GB, expandable"
+      }},
+      "ratings_comparison": {{
+        "overall_rating": 4.5,
+        "performance": 4.7,
+        "battery_life": 4.3,
+        "camera_quality": 4.6,
+        "display_quality": 4.8
+      }},
+      "reviews_summary": "Highly rated for display quality and camera performance, with a strong processor. Battery life is good but may drain faster with heavy use."
+    }},
+    {{
+      "product_name": "Smartphone B",
+      "specs_comparison": {{
+        "processor": "Apple A15 Bionic",
+        "battery": "4000mAh",
+        "camera": "12MP Dual",
+        "display": "6.1 inch Super Retina XDR, 60Hz",
+        "storage": "256GB, non-expandable"
+      }},
+      "ratings_comparison": {{
+        "overall_rating": 4.6,
+        "performance": 4.8,
+        "battery_life": 4.1,
+        "camera_quality": 4.5,
+        "display_quality": 4.7
+      }},
+      "reviews_summary": "Smooth user experience with excellent performance and display. The battery is slightly smaller but generally sufficient for moderate use."
+    }}
+  ],
+  "best_product": {{
+    "product_name": "Smartphone A",
+    "justification": "Chosen for its high-quality display, strong camera, and balanced performance that meets most user needs."
+  }}
+}}
+
+```
+Here is the product data to analyze:\n
 {product_data}
 
 """
