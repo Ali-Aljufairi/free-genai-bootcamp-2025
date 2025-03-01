@@ -7,7 +7,7 @@ import argparse
 import os
 from dotenv import load_dotenv
 
-from shopgenie.graph import run_shopgenie, create_shopgenie_graph, visualize_graph
+from graph import run_shopgenie, create_shopgenie_graph, visualize_graph
 
 def parse_arguments():
     """Parse command line arguments."""
