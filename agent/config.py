@@ -1,12 +1,12 @@
 """
 Configuration settings for ShopGenie application.
 """
+
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from tavily import TavilyClient
 from googleapiclient.discovery import build
-from utils.email_templates import EMAIL_TEMPLATE_PROMPT, EMAIL_HTML_TEMPLATE
 
 # Load environment variables from .env file
 load_dotenv()
@@ -31,4 +31,4 @@ llm = ChatGroq(
 
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
-youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
+youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
