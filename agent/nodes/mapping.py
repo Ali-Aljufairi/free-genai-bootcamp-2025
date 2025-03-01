@@ -5,8 +5,8 @@ import time
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
-from shopgenie.config import llm
-from shopgenie.models.schemas import State, ListOfSmartphoneReviews
+from config import llm
+from models.schemas import State, ListOfSmartphoneReviews
 
 def schema_mapping_node(state: State):
     """

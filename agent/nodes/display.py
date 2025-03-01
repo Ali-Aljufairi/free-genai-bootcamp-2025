@@ -1,7 +1,7 @@
 """
 Display node for ShopGenie.
 """
-from shopgenie.models.schemas import State
+from models.schemas import State
 
 def display_node(state: State):
     """

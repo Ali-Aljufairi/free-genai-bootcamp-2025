@@ -5,7 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from shopgenie.config import SMTP_SERVER, SMTP_PORT, GMAIL_USER, GMAIL_PASSWORD
+from config import SMTP_SERVER, SMTP_PORT, GMAIL_USER, GMAIL_PASSWORD
 
 def send_email(recipient_email, subject, body):
     """

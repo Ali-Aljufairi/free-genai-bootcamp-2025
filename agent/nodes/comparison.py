@@ -5,8 +5,8 @@ import json
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
-from shopgenie.models.schemas import State, ProductComparison
-from shopgenie.config import llm
+from models.schemas import State, ProductComparison
+from config import llm
 
 def product_comparison_node(state: State):
     """

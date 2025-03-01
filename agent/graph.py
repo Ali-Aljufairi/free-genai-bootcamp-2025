@@ -4,13 +4,13 @@ LangGraph workflow definition for ShopGenie.
 from langgraph.graph import StateGraph, START, END
 from IPython.display import Image
 
-from shopgenie.models.schemas import State
-from shopgenie.nodes.search import tavily_search_node
-from shopgenie.nodes.mapping import schema_mapping_node
-from shopgenie.nodes.comparison import product_comparison_node
-from shopgenie.nodes.youtube import youtube_review_node
-from shopgenie.nodes.display import display_node
-from shopgenie.nodes.email import send_email_node
+from models.schemas import State
+from nodes.search import tavily_search_node
+from nodes.mapping import schema_mapping_node
+from nodes.comparison import product_comparison_node
+from nodes.youtube import youtube_review_node
+from nodes.display import display_node
+from nodes.email import send_email_node
 
 def create_shopgenie_graph():
     """

@@ -3,9 +3,9 @@ Tavily search node for ShopGenie.
 """
 from tavily import TavilyClient
 import tavily
-from shopgenie.config import tavily_client
-from shopgenie.utils.web_utils import load_blog_content
-from shopgenie.models.schemas import State
+from config import tavily_client
+from utils.web_utils import load_blog_content
+from models.schemas import State
 
 def tavily_search_node(state: State):
     """

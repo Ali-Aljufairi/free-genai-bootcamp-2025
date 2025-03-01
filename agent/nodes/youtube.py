@@ -1,8 +1,8 @@
 """
 YouTube review search node for ShopGenie.
 """
-from shopgenie.config import youtube
-from shopgenie.models.schemas import State
+from config import youtube
+from models.schemas import State
 
 def youtube_review_node(state: State):
     """

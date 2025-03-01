@@ -4,9 +4,9 @@ Email node for ShopGenie.
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
-from shopgenie.models.schemas import State, EmailRecommendation
-from shopgenie.config import llm, EMAIL_TEMPLATE_PROMPT, EMAIL_HTML_TEMPLATE
-from shopgenie.utils.email_utils import send_email
+from models.schemas import State, EmailRecommendation
+from config import llm, EMAIL_TEMPLATE_PROMPT, EMAIL_HTML_TEMPLATE
+from utils.email_utils import send_email
 
 def send_email_node(state: State):
     """
