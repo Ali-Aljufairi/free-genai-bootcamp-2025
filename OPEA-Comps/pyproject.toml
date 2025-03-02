@@ -1,14 +1,28 @@
 [project]
-name = "opea-comps"
+name = "megaservice"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
-    "fastapi>=0.115.8",
-    "opea-comps",
+    "aiofiles>=24.1.0",
+    "aiohttp>=3.11.13",
+    "docarray>=0.40.0",
+    "docx2txt>=0.8",
+    "fastapi>=0.115.11",
+    "httpx>=0.28.1",
+    "kubernetes>=32.0.1",
+    "langchain>=0.3.19",
+    "langchain-community>=0.3.18",
+    "opentelemetry-api>=1.30.0",
+    "opentelemetry-exporter-otlp>=1.30.0",
+    "opentelemetry-sdk>=1.30.0",
+    "pillow>=11.1.0",
+    "prometheus-fastapi-instrumentator>=7.0.2",
+    "pypdf>=5.3.1",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6.0.2",
     "requests>=2.32.3",
+    "shortuuid>=1.0.13",
+    "uvicorn>=0.34.0",
 ]
-
-[tool.uv.sources]
-opea-comps = { workspace = true }
