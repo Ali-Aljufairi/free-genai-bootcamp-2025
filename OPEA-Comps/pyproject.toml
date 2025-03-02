@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.8",
     "opea-comps",
+    "requests>=2.32.3",
 ]
 
 [tool.uv.sources]
