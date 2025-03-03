@@ -7,6 +7,7 @@ import time
 import streamlit as st
 from PIL import Image
 import tempfile
+from pydub import AudioSegment  # Add missing import
 
 from ..utils.logger import get_logger
 from ..audio.recorder import record_and_save
@@ -90,23 +91,53 @@ class SpeechApp:
             uploaded_file = st.file_uploader(
                 "Upload an audio file", type=["wav", "mp3", "m4a"]
             )
-            if uploaded_file and st.button("Process Uploaded Audio"):
+            process_button = st.button("Process Uploaded Audio")
+            if uploaded_file and process_button:
                 logger.info(f"Processing uploaded audio file: {uploaded_file.name}")
-                with tempfile.NamedTemporaryFile(
-                    delete=False, suffix=".wav"
-                ) as tmp_file:
-                    tmp_file.write(uploaded_file.read())
-                    st.session_state.audio_file_path = tmp_file.name
-
-                self._process_audio()
+                try:
+                    # Read the uploaded file into memory
+                    audio_bytes = uploaded_file.read()
+                    
+                    # Create a temporary file with original extension
+                    original_ext = os.path.splitext(uploaded_file.name)[1].lower()
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=original_ext) as tmp_file:
+                        tmp_file.write(audio_bytes)
+                        temp_path = tmp_file.name
+                    
+                    # Convert to WAV using pydub
+                    logger.debug(f"Converting uploaded file to WAV format: {temp_path}")
+                    audio = AudioSegment.from_file(temp_path)
+                    
+                    # Set parameters for Whisper API compatibility
+                    audio = audio.set_frame_rate(16000)
+                    audio = audio.set_channels(1)
+                    
+                    # Save as WAV
+                    wav_path = temp_path.replace(original_ext, '.wav')
+                    audio.export(wav_path, format='wav')
+                    
+                    # Clean up original temp file
+                    os.unlink(temp_path)
+                    
+                    st.session_state.audio_file_path = wav_path
+                    logger.info(f"Successfully converted uploaded file to WAV: {wav_path}")
+                    
+                    # Process the uploaded audio
+                    self._process_audio()
+                    
+                except Exception as e:
+                    logger.error(f"Error processing uploaded file: {str(e)}")
+                    st.error(f"Error processing audio file: {str(e)}")
         else:
-            # Audio recorder component (simplified approach)
-            audio_file_path = record_and_save()
-
-            # If we have a new recording, process it
-            if audio_file_path and (
-                st.session_state.audio_file_path != audio_file_path
-            ):
+            # Audio recorder component with process button
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                audio_file_path = record_and_save()
+            with col2:
+                process_recording = st.button("Process Recording")
+                
+            # If we have a recording and the process button is clicked, process it
+            if audio_file_path and process_recording:
                 st.session_state.audio_file_path = audio_file_path
                 st.success("Recording completed! Processing audio...")
                 self._process_audio()
@@ -119,7 +150,7 @@ class SpeechApp:
 
     def _process_audio(self):
         """Process the recorded or uploaded audio."""
-        logger.info("Processing audio")
+        logger.info(f"Processing audio file: {st.session_state.audio_file_path}")
         if not self.whisper_client:
             st.error("Whisper service is not available")
             return
@@ -131,6 +162,7 @@ class SpeechApp:
                 )
                 st.session_state.transcript = result["text"]
                 logger.info("Transcription successful")
+                logger.debug(f"Transcript: {st.session_state.transcript}")
             except Exception as e:
                 logger.error(f"Transcription error: {str(e)}")
                 st.error(f"Transcription error: {str(e)}")

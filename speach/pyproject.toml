@@ -18,5 +18,7 @@ dependencies = [
     "loguru>=0.7.3",
     "dotenv>=0.9.9",
     "audio-recorder-streamlit>=0.0.10",
+    "pydub>=0.25.1",
+    "python-dotenv>=1.0.0",
 ]
 
