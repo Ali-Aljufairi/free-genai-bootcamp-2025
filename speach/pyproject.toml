@@ -1,0 +1,13 @@
+[project]
+name = "speach"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "boto3>=1.37.4",
+    "openai>=1.65.2",
+    "pandas>=2.2.3",
+    "plotly>=6.0.0",
+    "streamlit>=1.42.2",
+]
