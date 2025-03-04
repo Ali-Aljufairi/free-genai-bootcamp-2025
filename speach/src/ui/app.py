@@ -157,8 +157,6 @@ class SpeechApp:
             if st.session_state.feedback:
                 self._generate_image()
         st.session_state.processing = False
-        # Force a rerun to update the UI
-        st.experimental_rerun()
 
     def _process_audio(self):
         """Process the recorded or uploaded audio."""

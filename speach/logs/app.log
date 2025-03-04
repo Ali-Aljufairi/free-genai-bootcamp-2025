@@ -1154,3 +1154,70 @@
 2025-03-05 00:56:49 | DEBUG    | src.utils.helpers:generate_unique_filename:44 - Generated unique filename: titan__20250305_005649_de5e3acb.png
 2025-03-05 00:56:49 | INFO     | src.image_generation.bedrock_client:generate_image:108 - Image saved to /Users/ali/github/free-genai-bootcamp-2025/speach/data/images/titan__20250305_005649_de5e3acb.png
 2025-03-05 00:56:49 | INFO     | src.ui.app:_generate_image:222 - Image generation successful: /Users/ali/github/free-genai-bootcamp-2025/speach/data/images/titan__20250305_005649_de5e3acb.png
+2025-03-05 01:21:23 | INFO     | __main__:<module>:16 - Starting Speech application
+2025-03-05 01:21:23 | INFO     | src.ui.app:main:238 - Starting Speech application
+2025-03-05 01:21:23 | INFO     | src.ui.app:__init__:26 - Initializing SpeechApp
+2025-03-05 01:21:23 | DEBUG    | src.ui.app:_initialize_session_state:32 - Initializing session state
+2025-03-05 01:21:23 | DEBUG    | src.ui.app:_load_services:46 - Loading services
+2025-03-05 01:21:23 | DEBUG    | src.transcription.whisper_client:__init__:29 - Initializing WhisperClient with model: whisper-1
+2025-03-05 01:21:23 | INFO     | src.ui.app:_load_services:49 - WhisperClient loaded successfully
+2025-03-05 01:21:23 | DEBUG    | src.image_generation.bedrock_client:__init__:35 - Initializing BedrockImageGenerator with model: amazon.titan-image-generator-v1 in region: us-east-1
+2025-03-05 01:21:23 | INFO     | src.image_generation.bedrock_client:__init__:44 - Bedrock client initialized successfully
+2025-03-05 01:21:23 | INFO     | src.ui.app:_load_services:56 - BedrockImageGenerator loaded successfully
+2025-03-05 01:21:23 | DEBUG    | src.feedback.groq_client:__init__:27 - Initializing GroqClient with model: llama3-70b-8192
+2025-03-05 01:21:23 | INFO     | src.ui.app:_load_services:63 - GroqClient loaded successfully
+2025-03-05 01:21:23 | INFO     | src.ui.app:run:70 - Starting SpeechApp UI
+2025-03-05 01:21:23 | INFO     | src.audio.recorder:record_and_save:39 - Starting audio recording process with audio_recorder_streamlit
+2025-03-05 01:21:23 | WARNING  | src.audio.recorder:record_and_save:124 - No audio was recorded
+2025-03-05 01:21:25 | INFO     | __main__:<module>:16 - Starting Speech application
+2025-03-05 01:21:25 | INFO     | src.ui.app:main:238 - Starting Speech application
+2025-03-05 01:21:25 | INFO     | src.ui.app:__init__:26 - Initializing SpeechApp
+2025-03-05 01:21:25 | DEBUG    | src.ui.app:_initialize_session_state:32 - Initializing session state
+2025-03-05 01:21:25 | DEBUG    | src.ui.app:_load_services:46 - Loading services
+2025-03-05 01:21:25 | DEBUG    | src.transcription.whisper_client:__init__:29 - Initializing WhisperClient with model: whisper-1
+2025-03-05 01:21:25 | INFO     | src.ui.app:_load_services:49 - WhisperClient loaded successfully
+2025-03-05 01:21:25 | DEBUG    | src.image_generation.bedrock_client:__init__:35 - Initializing BedrockImageGenerator with model: amazon.titan-image-generator-v1 in region: us-east-1
+2025-03-05 01:21:25 | INFO     | src.image_generation.bedrock_client:__init__:44 - Bedrock client initialized successfully
+2025-03-05 01:21:25 | INFO     | src.ui.app:_load_services:56 - BedrockImageGenerator loaded successfully
+2025-03-05 01:21:25 | DEBUG    | src.feedback.groq_client:__init__:27 - Initializing GroqClient with model: llama3-70b-8192
+2025-03-05 01:21:25 | INFO     | src.ui.app:_load_services:63 - GroqClient loaded successfully
+2025-03-05 01:21:25 | INFO     | src.ui.app:run:70 - Starting SpeechApp UI
+2025-03-05 01:21:30 | INFO     | __main__:<module>:16 - Starting Speech application
+2025-03-05 01:21:30 | INFO     | src.ui.app:main:238 - Starting Speech application
+2025-03-05 01:21:30 | INFO     | src.ui.app:__init__:26 - Initializing SpeechApp
+2025-03-05 01:21:30 | DEBUG    | src.ui.app:_initialize_session_state:32 - Initializing session state
+2025-03-05 01:21:30 | DEBUG    | src.ui.app:_load_services:46 - Loading services
+2025-03-05 01:21:30 | DEBUG    | src.transcription.whisper_client:__init__:29 - Initializing WhisperClient with model: whisper-1
+2025-03-05 01:21:30 | INFO     | src.ui.app:_load_services:49 - WhisperClient loaded successfully
+2025-03-05 01:21:30 | DEBUG    | src.image_generation.bedrock_client:__init__:35 - Initializing BedrockImageGenerator with model: amazon.titan-image-generator-v1 in region: us-east-1
+2025-03-05 01:21:30 | INFO     | src.image_generation.bedrock_client:__init__:44 - Bedrock client initialized successfully
+2025-03-05 01:21:30 | INFO     | src.ui.app:_load_services:56 - BedrockImageGenerator loaded successfully
+2025-03-05 01:21:30 | DEBUG    | src.feedback.groq_client:__init__:27 - Initializing GroqClient with model: llama3-70b-8192
+2025-03-05 01:21:30 | INFO     | src.ui.app:_load_services:63 - GroqClient loaded successfully
+2025-03-05 01:21:30 | INFO     | src.ui.app:run:70 - Starting SpeechApp UI
+2025-03-05 01:21:30 | INFO     | src.ui.app:_render_audio_section:104 - Processing uploaded audio file: Shioyamachi 2.m4a
+2025-03-05 01:21:30 | DEBUG    | src.ui.app:_render_audio_section:116 - Converting uploaded file to WAV format: /var/folders/8q/184fhpd57gb4nb2dxpddw0fh0000gq/T/tmprw_ednhd.m4a
+2025-03-05 01:21:31 | INFO     | src.ui.app:_render_audio_section:127 - Successfully converted uploaded file to WAV: /var/folders/8q/184fhpd57gb4nb2dxpddw0fh0000gq/T/tmprw_ednhd.wav
+2025-03-05 01:21:31 | INFO     | src.ui.app:_process_audio:165 - Processing audio file: /var/folders/8q/184fhpd57gb4nb2dxpddw0fh0000gq/T/tmprw_ednhd.wav
+2025-03-05 01:21:31 | INFO     | src.transcription.whisper_client:transcribe_japanese:88 - Starting Japanese-specific transcription
+2025-03-05 01:21:31 | INFO     | src.transcription.whisper_client:transcribe:45 - Transcribing audio file: tmprw_ednhd.wav
+2025-03-05 01:21:31 | DEBUG    | src.transcription.whisper_client:transcribe:63 - Sending transcription request with parameters: {'file': <_io.BufferedReader name='/var/folders/8q/184fhpd57gb4nb2dxpddw0fh0000gq/T/tmprw_ednhd.wav'>, 'model': 'whisper-1', 'language': 'ja', 'prompt': 'This is Japanese speech focusing on sentence structure.'}
+2025-03-05 01:21:33 | INFO     | src.transcription.whisper_client:transcribe:66 - Transcription successful
+2025-03-05 01:21:33 | INFO     | src.ui.app:_process_audio:176 - Transcription successful
+2025-03-05 01:21:33 | DEBUG    | src.ui.app:_process_audio:177 - Transcript: 私は今日東京行きます。 だから、東京タワー見せて。
+2025-03-05 01:21:33 | INFO     | src.ui.app:_analyze_japanese:189 - Analyzing Japanese sentence structure
+2025-03-05 01:21:33 | INFO     | src.feedback.groq_client:analyze_japanese_sentence:70 - Analyzing Japanese sentence structure
+2025-03-05 01:21:33 | INFO     | src.feedback.groq_client:get_response:41 - Sending request to Groq model: llama3-70b-8192
+2025-03-05 01:21:33 | DEBUG    | src.feedback.groq_client:get_response:42 - Prompt: 
+あなたは日本語の専門家です。次の日本語の文章を分析し、文法的な問題、文の構造、自然な表現について詳...
+2025-03-05 01:21:34 | INFO     | src.feedback.groq_client:get_response:52 - Received response from Groq
+2025-03-05 01:21:34 | DEBUG    | src.feedback.groq_client:get_response:53 - Response: I'd be happy to provide a detailed analysis of the...
+2025-03-05 01:21:34 | INFO     | src.ui.app:_analyze_japanese:200 - Japanese analysis successful
+2025-03-05 01:21:34 | INFO     | src.ui.app:_generate_image:212 - Generating image from transcript
+2025-03-05 01:21:34 | INFO     | src.image_generation.bedrock_client:generate_image_from_transcript:131 - Generated image prompt from transcript: Create a visualization of: '私は今日東京行きます。 だから、東京タワー見...
+2025-03-05 01:21:34 | INFO     | src.image_generation.bedrock_client:generate_image:65 - Generating image for prompt: Create a visualization of: '私は今日東京行きます。 だから、東京タワー見...
+2025-03-05 01:21:34 | DEBUG    | src.image_generation.bedrock_client:generate_image:87 - Bedrock request parameters: {'taskType': 'TEXT_IMAGE', 'textToImageParams': {'text': "Create a visualization of: '私は今日東京行きます。 だから、東京タワー見せて。'. Style: realistic photo"}, 'imageGenerationConfig': {'numberOfImages': 1, 'quality': 'standard', 'cfgScale': 8.0, 'height': 512, 'width': 512, 'seed': 1056549561}}
+2025-03-05 01:21:46 | DEBUG    | src.utils.helpers:generate_unique_filename:44 - Generated unique filename: titan__20250305_012146_2ba5003d.png
+2025-03-05 01:21:47 | INFO     | src.image_generation.bedrock_client:generate_image:108 - Image saved to /Users/ali/github/free-genai-bootcamp-2025/speach/data/images/titan__20250305_012146_2ba5003d.png
+2025-03-05 01:21:47 | INFO     | src.ui.app:_generate_image:223 - Image generation successful: /Users/ali/github/free-genai-bootcamp-2025/speach/data/images/titan__20250305_012146_2ba5003d.png
+2025-03-05 01:21:47 | ERROR    | src.ui.app:_render_audio_section:133 - Error processing uploaded file: module 'streamlit' has no attribute 'experimental_rerun'
