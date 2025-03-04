@@ -1,4 +1,4 @@
 .env
 uv.lock
 __pycache__
-.log
+app.log

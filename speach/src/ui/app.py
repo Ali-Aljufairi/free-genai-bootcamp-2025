@@ -38,6 +38,8 @@ class SpeechApp:
             st.session_state.feedback = None
         if "image_path" not in st.session_state:
             st.session_state.image_path = None
+        if "processing" not in st.session_state:
+            st.session_state.processing = False
 
     def _load_services(self):
         """Load the required services."""
@@ -68,36 +70,41 @@ class SpeechApp:
         logger.info("Starting SpeechApp UI")
         st.title("Voice Analysis & Visualization App")
         st.write(
-            "Record your voice to transcribe, analyze Japanese structure, and generate images."
+            "Record or upload your voice to automatically transcribe, analyze Japanese structure, and generate images."
         )
-
-        self._render_audio_section()
-
-        if st.session_state.transcript:
-            self._render_transcript_section()
-            self._render_feedback_section()
-            self._render_image_section()
+        
+        # Create two columns for the main layout
+        left_col, right_col = st.columns(2)
+        
+        # Left column for audio input and transcript
+        with left_col:
+            self._render_audio_section()
+            if st.session_state.transcript:
+                self._render_transcript_section()
+        
+        # Right column for feedback and image
+        with right_col:
+            if st.session_state.feedback:
+                self._render_feedback_section()
+            if st.session_state.image_path:
+                self._render_image_section()
+            elif st.session_state.processing:
+                st.spinner("Processing...")
 
     def _render_audio_section(self):
         """Render the audio recording section."""
         st.header("🎤 Voice Recording")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            upload_option = st.checkbox("Upload audio file instead", value=False)
-
+        upload_option = st.checkbox("Upload audio file instead", value=False)
+        
         if upload_option:
             uploaded_file = st.file_uploader(
                 "Upload an audio file", type=["wav", "mp3", "m4a"]
             )
-            process_button = st.button("Process Uploaded Audio")
-            if uploaded_file and process_button:
+            if uploaded_file:
                 logger.info(f"Processing uploaded audio file: {uploaded_file.name}")
                 try:
                     # Read the uploaded file into memory
                     audio_bytes = uploaded_file.read()
-
                     # Create a temporary file with original extension
                     original_ext = os.path.splitext(uploaded_file.name)[1].lower()
                     with tempfile.NamedTemporaryFile(
@@ -105,52 +112,53 @@ class SpeechApp:
                     ) as tmp_file:
                         tmp_file.write(audio_bytes)
                         temp_path = tmp_file.name
-
                     # Convert to WAV using pydub
                     logger.debug(f"Converting uploaded file to WAV format: {temp_path}")
                     audio = AudioSegment.from_file(temp_path)
-
                     # Set parameters for Whisper API compatibility
                     audio = audio.set_frame_rate(16000)
                     audio = audio.set_channels(1)
-
                     # Save as WAV
                     wav_path = temp_path.replace(original_ext, ".wav")
                     audio.export(wav_path, format="wav")
-
                     # Clean up original temp file
                     os.unlink(temp_path)
-
                     st.session_state.audio_file_path = wav_path
                     logger.info(
                         f"Successfully converted uploaded file to WAV: {wav_path}"
                     )
-
-                    # Process the uploaded audio
-                    self._process_audio()
-
+                    # Automatically process the uploaded audio
+                    self._process_audio_and_continue()
                 except Exception as e:
                     logger.error(f"Error processing uploaded file: {str(e)}")
                     st.error(f"Error processing audio file: {str(e)}")
         else:
-            # Audio recorder component with process button
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                audio_file_path = record_and_save()
-            with col2:
-                process_recording = st.button("Process Recording")
-
-            # If we have a recording and the process button is clicked, process it
-            if audio_file_path and process_recording:
+            # Audio recorder component
+            audio_file_path = record_and_save()
+            if audio_file_path and audio_file_path != st.session_state.get("last_recorded_path", None):
+                st.session_state.last_recorded_path = audio_file_path
                 st.session_state.audio_file_path = audio_file_path
                 st.success("Recording completed! Processing audio...")
-                self._process_audio()
-
+                # Automatically process the recorded audio
+                self._process_audio_and_continue()
+        
         # Display audio player if audio exists
         if st.session_state.audio_file_path and os.path.exists(
             st.session_state.audio_file_path
         ):
             st.audio(st.session_state.audio_file_path)
+
+    def _process_audio_and_continue(self):
+        """Process audio and continue with all subsequent steps automatically."""
+        st.session_state.processing = True
+        self._process_audio()
+        if st.session_state.transcript:
+            self._analyze_japanese()
+            if st.session_state.feedback:
+                self._generate_image()
+        st.session_state.processing = False
+        # Force a rerun to update the UI
+        st.experimental_rerun()
 
     def _process_audio(self):
         """Process the recorded or uploaded audio."""
@@ -176,9 +184,6 @@ class SpeechApp:
         st.header("📝 Transcription")
         st.write(st.session_state.transcript)
 
-        if st.button("Analyze Japanese Structure"):
-            self._analyze_japanese()
-
     def _analyze_japanese(self):
         """Analyze Japanese sentence structure."""
         logger.info("Analyzing Japanese sentence structure")
@@ -199,12 +204,8 @@ class SpeechApp:
 
     def _render_feedback_section(self):
         """Render the feedback section."""
-        if st.session_state.feedback:
-            st.header("🔍 Japanese Structure Analysis")
-            st.write(st.session_state.feedback)
-
-            if not st.session_state.image_path and st.button("Generate Visualization"):
-                self._generate_image()
+        st.header("🔍 Japanese Structure Analysis")
+        st.write(st.session_state.feedback)
 
     def _generate_image(self):
         """Generate an image based on the transcript."""
