@@ -97,34 +97,38 @@ class SpeechApp:
                 try:
                     # Read the uploaded file into memory
                     audio_bytes = uploaded_file.read()
-                    
+
                     # Create a temporary file with original extension
                     original_ext = os.path.splitext(uploaded_file.name)[1].lower()
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=original_ext) as tmp_file:
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, suffix=original_ext
+                    ) as tmp_file:
                         tmp_file.write(audio_bytes)
                         temp_path = tmp_file.name
-                    
+
                     # Convert to WAV using pydub
                     logger.debug(f"Converting uploaded file to WAV format: {temp_path}")
                     audio = AudioSegment.from_file(temp_path)
-                    
+
                     # Set parameters for Whisper API compatibility
                     audio = audio.set_frame_rate(16000)
                     audio = audio.set_channels(1)
-                    
+
                     # Save as WAV
-                    wav_path = temp_path.replace(original_ext, '.wav')
-                    audio.export(wav_path, format='wav')
-                    
+                    wav_path = temp_path.replace(original_ext, ".wav")
+                    audio.export(wav_path, format="wav")
+
                     # Clean up original temp file
                     os.unlink(temp_path)
-                    
+
                     st.session_state.audio_file_path = wav_path
-                    logger.info(f"Successfully converted uploaded file to WAV: {wav_path}")
-                    
+                    logger.info(
+                        f"Successfully converted uploaded file to WAV: {wav_path}"
+                    )
+
                     # Process the uploaded audio
                     self._process_audio()
-                    
+
                 except Exception as e:
                     logger.error(f"Error processing uploaded file: {str(e)}")
                     st.error(f"Error processing audio file: {str(e)}")
@@ -135,7 +139,7 @@ class SpeechApp:
                 audio_file_path = record_and_save()
             with col2:
                 process_recording = st.button("Process Recording")
-                
+
             # If we have a recording and the process button is clicked, process it
             if audio_file_path and process_recording:
                 st.session_state.audio_file_path = audio_file_path

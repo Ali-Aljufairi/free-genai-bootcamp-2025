@@ -548,3 +548,33 @@
 2025-03-04 00:46:17 | DEBUG    | src.image_generation.bedrock_client:generate_image:81 - Bedrock request parameters: {'text_prompts': [{'text': "Create a visualization of: '私は今日東京行きます。 だから、東京タワー見せて。'. Style: realistic photo", 'weight': 1.0}], 'height': 512, 'width': 512, 'cfg_scale': 7, 'steps': 30}
 2025-03-04 00:46:18 | ERROR    | src.image_generation.bedrock_client:generate_image:114 - Error generating image: An error occurred (ValidationException) when calling the InvokeModel operation: The provided model identifier is invalid.
 2025-03-04 00:46:18 | ERROR    | src.ui.app:_generate_image:220 - Image generation error: An error occurred (ValidationException) when calling the InvokeModel operation: The provided model identifier is invalid.
+2025-03-04 12:53:37 | INFO     | __main__:<module>:16 - Starting Speech application
+2025-03-04 12:53:37 | INFO     | src.ui.app:main:233 - Starting Speech application
+2025-03-04 12:53:37 | INFO     | src.ui.app:__init__:26 - Initializing SpeechApp
+2025-03-04 12:53:37 | DEBUG    | src.ui.app:_initialize_session_state:32 - Initializing session state
+2025-03-04 12:53:37 | DEBUG    | src.ui.app:_load_services:44 - Loading services
+2025-03-04 12:53:37 | DEBUG    | src.transcription.whisper_client:__init__:29 - Initializing WhisperClient with model: whisper-1
+2025-03-04 12:53:37 | INFO     | src.ui.app:_load_services:47 - WhisperClient loaded successfully
+2025-03-04 12:53:37 | DEBUG    | src.image_generation.bedrock_client:__init__:34 - Initializing BedrockImageGenerator with model: stability.stable-diffusion-xl-v1
+2025-03-04 12:53:37 | INFO     | src.image_generation.bedrock_client:__init__:41 - Bedrock client initialized successfully
+2025-03-04 12:53:37 | INFO     | src.ui.app:_load_services:54 - BedrockImageGenerator loaded successfully
+2025-03-04 12:53:37 | DEBUG    | src.feedback.groq_client:__init__:27 - Initializing GroqClient with model: llama3-70b-8192
+2025-03-04 12:53:37 | INFO     | src.ui.app:_load_services:61 - GroqClient loaded successfully
+2025-03-04 12:53:37 | INFO     | src.ui.app:run:68 - Starting SpeechApp UI
+2025-03-04 12:53:37 | INFO     | src.audio.recorder:record_and_save:39 - Starting audio recording process with audio_recorder_streamlit
+2025-03-04 12:53:37 | WARNING  | src.audio.recorder:record_and_save:124 - No audio was recorded
+2025-03-04 16:00:13 | INFO     | __main__:<module>:16 - Starting Speech application
+2025-03-04 16:00:13 | INFO     | src.ui.app:main:233 - Starting Speech application
+2025-03-04 16:00:13 | INFO     | src.ui.app:__init__:26 - Initializing SpeechApp
+2025-03-04 16:00:13 | DEBUG    | src.ui.app:_initialize_session_state:32 - Initializing session state
+2025-03-04 16:00:13 | DEBUG    | src.ui.app:_load_services:44 - Loading services
+2025-03-04 16:00:13 | DEBUG    | src.transcription.whisper_client:__init__:29 - Initializing WhisperClient with model: whisper-1
+2025-03-04 16:00:13 | INFO     | src.ui.app:_load_services:47 - WhisperClient loaded successfully
+2025-03-04 16:00:13 | DEBUG    | src.image_generation.bedrock_client:__init__:34 - Initializing BedrockImageGenerator with model: stability.stable-diffusion-xl-v1
+2025-03-04 16:00:13 | INFO     | src.image_generation.bedrock_client:__init__:41 - Bedrock client initialized successfully
+2025-03-04 16:00:13 | INFO     | src.ui.app:_load_services:54 - BedrockImageGenerator loaded successfully
+2025-03-04 16:00:13 | DEBUG    | src.feedback.groq_client:__init__:27 - Initializing GroqClient with model: llama3-70b-8192
+2025-03-04 16:00:13 | INFO     | src.ui.app:_load_services:61 - GroqClient loaded successfully
+2025-03-04 16:00:13 | INFO     | src.ui.app:run:68 - Starting SpeechApp UI
+2025-03-04 16:00:13 | INFO     | src.audio.recorder:record_and_save:39 - Starting audio recording process with audio_recorder_streamlit
+2025-03-04 16:00:13 | WARNING  | src.audio.recorder:record_and_save:124 - No audio was recorded
