@@ -30,5 +30,5 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 # Model configuration
 WHISPER_MODEL = "whisper-1"
-BEDROCK_IMAGE_MODEL = "stability.stable-diffusion-xl-v1"
+BEDROCK_IMAGE_MODEL = "amazon.titan-image-generator-v1"
 GROQ_MODEL = "llama3-70b-8192"

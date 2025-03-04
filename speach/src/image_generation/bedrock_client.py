@@ -1,10 +1,10 @@
 """
-Image generation service using Amazon Bedrock.
+Image generation service using Amazon Bedrock Titan Image Generator.
 """
 
 import json
 import base64
-from pathlib import Path
+import random
 import boto3
 from PIL import Image
 import io
@@ -17,93 +17,91 @@ logger = get_logger("image_generation.bedrock")
 
 
 class BedrockImageGenerator:
-    """Client for Amazon Bedrock image generation services."""
+    """Client for Amazon Bedrock Titan Image Generator."""
 
     def __init__(
-        self,
-        model_id=BEDROCK_IMAGE_MODEL,
+        self, model_id="amazon.titan-image-generator-v1", region_name="us-east-1"
     ):
         """
-        Initialize the Bedrock client.
+        Initialize the Bedrock client for Titan Image Generator.
 
         Args:
-            model_id (str): Bedrock model ID to use
+            model_id (str): Bedrock model ID to use (default is Titan Image Generator)
+            region_name (str): AWS Region name
         """
         self.model_id = model_id
+        self.region_name = region_name
 
-        logger.debug(f"Initializing BedrockImageGenerator with model: {model_id}")
+        logger.debug(
+            f"Initializing BedrockImageGenerator with model: {model_id} in region: {region_name}"
+        )
 
         try:
-            # Use AWS credentials from environment (aws configure)
-            self.bedrock_runtime = boto3.client(
-                service_name="bedrock-runtime",
+            # Create a Bedrock Runtime client in the specified AWS Region
+            self.client = boto3.client(
+                service_name="bedrock-runtime", region_name=region_name
             )
             logger.info("Bedrock client initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Bedrock client: {str(e)}")
             raise
 
-    def generate_image(self, prompt, height=512, width=512, cfg_scale=7, steps=30):
+    def generate_image(
+        self, prompt, height=512, width=512, cfg_scale=8.0, quality="standard"
+    ):
         """
-        Generate an image based on the provided prompt.
+        Generate an image using Amazon Titan Image Generator based on the provided prompt.
 
         Args:
             prompt (str): Text prompt describing the image to generate
             height (int): Image height
             width (int): Image width
-            cfg_scale (int): CFG scale parameter (how strictly to follow the prompt)
-            steps (int): Number of diffusion steps
+            cfg_scale (float): CFG scale parameter (how strictly to follow the prompt)
+            quality (str): Quality setting for the image generation
 
         Returns:
             tuple: (PIL.Image object, path to saved image)
         """
         logger.info(f"Generating image for prompt: {prompt[:50]}...")
 
-        if "stability" in self.model_id:
-            # For Stability AI models like Stable Diffusion
-            request_body = {
-                "text_prompts": [{"text": prompt, "weight": 1.0}],
-                "height": height,
-                "width": width,
-                "cfg_scale": cfg_scale,
-                "steps": steps,
-            }
-        else:
-            # For other models, use a generic format
-            # This can be extended for other specific models
-            request_body = {
-                "prompt": prompt,
-                "height": height,
-                "width": width,
-                "num_steps": steps,
-            }
+        # Generate a random seed
+        seed = random.randint(0, 2147483647)
 
-        logger.debug(f"Bedrock request parameters: {request_body}")
+        # Format the request payload using the model's native structure
+        native_request = {
+            "taskType": "TEXT_IMAGE",
+            "textToImageParams": {"text": prompt},
+            "imageGenerationConfig": {
+                "numberOfImages": 1,
+                "quality": quality,
+                "cfgScale": cfg_scale,
+                "height": height,
+                "width": width,
+                "seed": seed,
+            },
+        }
+
+        # Convert the native request to JSON
+        request = json.dumps(native_request)
+
+        logger.debug(f"Bedrock request parameters: {native_request}")
 
         try:
-            response = self.bedrock_runtime.invoke_model(
-                modelId=self.model_id, body=json.dumps(request_body)
-            )
+            # Invoke the model with the request
+            response = self.client.invoke_model(modelId=self.model_id, body=request)
 
-            response_body = json.loads(response.get("body").read())
+            # Decode the response body
+            model_response = json.loads(response["body"].read())
 
-            if "stability" in self.model_id:
-                # For Stability AI models
-                base64_image = response_body["artifacts"][0]["base64"]
-            else:
-                # Generic handling
-                base64_image = response_body.get("image", response_body.get("base64"))
-
-            if not base64_image:
-                logger.error("No image data found in response")
-                raise ValueError("No image data in response")
+            # Extract the image data
+            base64_image_data = model_response["images"][0]
 
             # Decode the base64 image
-            image_data = base64.b64decode(base64_image)
+            image_data = base64.b64decode(base64_image_data)
             image = Image.open(io.BytesIO(image_data))
 
             # Save the image
-            filename = generate_unique_filename(prefix="bedrock_image", extension="png")
+            filename = generate_unique_filename(prefix="titan_", extension="png")
             image_path = IMAGE_DIR / filename
             image.save(image_path)
 
