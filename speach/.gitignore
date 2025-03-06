@@ -2,3 +2,5 @@
 uv.lock
 __pycache__
 *.log
+*.png
+*.wav
