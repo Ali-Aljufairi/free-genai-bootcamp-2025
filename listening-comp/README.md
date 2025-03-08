@@ -1,6 +1,37 @@
 
 ## Project Overview
-This is a JLPT (Japanese Language Proficiency Test) listening practice application with a frontend-backend architecture.
+This is a JLPT (Japanese Language Proficiency Test) listening practice application with a frontend-backend architecture. The application helps users practice their Japanese listening skills by providing JLPT-style questions generated from YouTube content, with text-to-speech audio powered by AWS Bedrock.
+
+## Installation
+
+1. Clone the repository
+2. Ensure you have Python 3.13 installed
+3. Install dependencies:
+   ```bash
+   pip install .
+   ```
+
+## Development Setup
+
+1. Configure AWS Credentials for Bedrock access
+2. Start the frontend application:
+   ```bash
+   cd frontend
+   streamlit run main.py
+   ```
+
+## Usage
+
+1. **Adding Content**:
+   - Paste a Japanese YouTube video URL in the sidebar
+   - Select the appropriate JLPT level
+   - Click "Add Transcript" to process the video
+
+2. **Practicing**:
+   - Choose a topic from the dropdown menu
+   - Click "Generate Question from Transcripts"
+   - Listen to the audio and answer the questions
+   - Review your answers and save questions for later practice
 
 ## Directory Structure
 
