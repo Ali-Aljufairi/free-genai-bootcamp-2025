@@ -1,10 +1,10 @@
 services:
-  speach-app:
+  writing-practice:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8501:8501"
+      - "8502:8502"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data
