@@ -3,7 +3,7 @@ name = "speach"
 version = "0.1.0"
 description = "Voice recording app with transcription, image generation and feedback"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.37.4",
     "groq>=0.18.0",
