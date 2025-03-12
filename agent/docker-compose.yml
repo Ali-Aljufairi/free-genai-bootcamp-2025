@@ -1,0 +1,26 @@
+services:
+  writing-practice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8502:8502"
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+    # These are optional settings you might want to consider:
+    restart: unless-stopped
+    # For development, uncomment the 'develop' section below:
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: .
+    #       target: /app
+    #       ignore:
+    #         - .venv/
+    #     - action: rebuild
+    #       path: ./pyproject.toml
