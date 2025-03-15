@@ -5,6 +5,7 @@ import (
 	"lang-portal/internal/database/models"
 	"strconv"
 	"time"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -126,14 +127,15 @@ func (h *StudySessionHandler) ReviewWord(c *fiber.Ctx) error {
 	var req ReviewRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error": fmt.Sprintf("Invalid request body: %v", err),
 		})
 	}
 
 	err = h.db.CreateWordReview(sessionID, wordID, req.Correct)
 	if err != nil {
+		fmt.Printf("Error creating word review: %v\n", err) // Add logging
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create word review",
+			"error": fmt.Sprintf("Failed to create word review: %v", err),
 		})
 	}
 

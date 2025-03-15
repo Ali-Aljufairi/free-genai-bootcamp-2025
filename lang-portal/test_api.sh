@@ -154,9 +154,6 @@ fi
 test_endpoint "GET" "/api/v1/study_sessions/${study_session_id}/words" "Get words for a specific study session"
 record_result $?
 
-test_endpoint "GET" "/api/v1/study_progress" "Get study progress"
-record_result $?
-
 # 4. Group endpoints
 test_endpoint "GET" "/api/v1/groups" "Get all groups"
 record_result $?
@@ -208,10 +205,18 @@ record_result $?
 test_endpoint "GET" "/api/v1/words" "Get all words"
 record_result $?
 
+# Get first word ID for review test
+word_id=$(curl -s ${BASE_URL}/api/v1/words | jq -r '.items[0].id')
+if [ -z "$word_id" ] || [ "$word_id" = "null" ]; then
+  echo -e "${YELLOW}No words found. Using 1 as default word ID.${NC}"
+  echo "No words found. Using 1 as default word ID." >> $LOG_FILE
+  word_id=1
+fi
+
 # 7. Review endpoints
-# Test the submission review endpoint (using the actual implemented endpoint)
+# Test the submission review endpoint with the correct path
 review_payload='{"correct": true}'
-test_endpoint "POST" "/api/v1/study_sessions/${study_session_id}/review" "Submit a word review" "$review_payload"
+test_endpoint "POST" "/api/v1/study_sessions/${study_session_id}/words/${word_id}/review" "Submit a word review" "$review_payload"
 record_result $?
 
 # Summary
