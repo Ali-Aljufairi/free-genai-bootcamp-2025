@@ -128,30 +128,25 @@ record_result $?
 test_endpoint "GET" "/api/v1/study_sessions" "Get all study sessions"
 record_result $?
 
-# Get the ID of the first study session for subsequent tests
-study_session_id=$(curl -s ${BASE_URL}/api/v1/study_sessions | jq -r '.items[0].id')
-if [ -z "$study_session_id" ] || [ "$study_session_id" = "null" ]; then
-  echo -e "${YELLOW}No existing study session found. Creating a new one for testing...${NC}"
-  echo "No existing study session found. Creating a new one for testing..." >> $LOG_FILE
-  
-  # Create a study session for testing
-  study_session_payload='{"group_id": 1, "study_activity_id": 1}'
-  test_endpoint "POST" "/api/v1/study_sessions" "Create a new study session" "$study_session_payload"
-  record_result $?
-  
-  # Try to get the ID again
-  study_session_id=$(curl -s ${BASE_URL}/api/v1/study_sessions | jq -r '.items[0].id')
-  if [ -z "$study_session_id" ] || [ "$study_session_id" = "null" ]; then
-    echo -e "${YELLOW}Still no study session available. Using 1 as default ID.${NC}"
-    echo "Still no study session available. Using 1 as default ID." >> $LOG_FILE
-    study_session_id=1
-  fi
+# Create a new study session specifically for testing reviews
+echo -e "${YELLOW}Creating a new study session for review testing...${NC}"
+echo "Creating a new study session for review testing..." >> $LOG_FILE
+study_session_payload='{"group_id": 1, "study_activity_id": 1}'
+test_endpoint "POST" "/api/v1/study_sessions" "Create a new study session" "$study_session_payload"
+record_result $?
+
+# Get the ID of the newly created study session
+new_session_id=$(curl -s -X POST ${BASE_URL}/api/v1/study_sessions -H 'Content-Type: application/json' -d "$study_session_payload" | jq -r '.id')
+if [ -z "$new_session_id" ] || [ "$new_session_id" = "null" ]; then
+  echo -e "${YELLOW}Failed to get new session ID. Using 1 as fallback.${NC}"
+  echo "Failed to get new session ID. Using 1 as fallback." >> $LOG_FILE
+  new_session_id=1
 else
-  echo -e "Using existing study session with ID: ${study_session_id}"
-  echo "Using existing study session with ID: ${study_session_id}" >> $LOG_FILE
+  echo -e "Created new study session with ID: ${new_session_id}"
+  echo "Created new study session with ID: ${new_session_id}" >> $LOG_FILE
 fi
 
-test_endpoint "GET" "/api/v1/study_sessions/${study_session_id}/words" "Get words for a specific study session"
+test_endpoint "GET" "/api/v1/study_sessions/${new_session_id}/words" "Get words for a specific study session"
 record_result $?
 
 # 4. Group endpoints
@@ -214,9 +209,9 @@ if [ -z "$word_id" ] || [ "$word_id" = "null" ]; then
 fi
 
 # 7. Review endpoints
-# Test the submission review endpoint with the correct path
+# Test the submission review endpoint with the newly created session
 review_payload='{"correct": true}'
-test_endpoint "POST" "/api/v1/study_sessions/${study_session_id}/words/${word_id}/review" "Submit a word review" "$review_payload"
+test_endpoint "POST" "/api/v1/study_sessions/${new_session_id}/words/${word_id}/review" "Submit a word review" "$review_payload"
 record_result $?
 
 # Summary

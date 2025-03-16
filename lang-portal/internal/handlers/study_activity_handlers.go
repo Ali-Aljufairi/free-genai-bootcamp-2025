@@ -5,6 +5,7 @@ import (
 	"lang-portal/internal/database"
 	"lang-portal/internal/database/models"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -90,7 +91,9 @@ func (h *StudyActivityHandler) GetStudyActivitySessions(c *fiber.Ctx) error {
 // CreateStudyActivity creates a new study activity
 func (h *StudyActivityHandler) CreateStudyActivity(c *fiber.Ctx) error {
 	var input struct {
-		GroupID int64 `json:"group_id"`
+		GroupID     int64  `json:"group_id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}
 
 	if err := c.BodyParser(&input); err != nil {
@@ -101,9 +104,15 @@ func (h *StudyActivityHandler) CreateStudyActivity(c *fiber.Ctx) error {
 	if input.GroupID <= 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid group_id"})
 	}
+	if input.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Name is required"})
+	}
 
 	activity := models.StudyActivity{
-		GroupID: input.GroupID,
+		GroupID:     input.GroupID,
+		Name:        input.Name,
+		Description: input.Description,
+		CreatedAt:   time.Now(),
 	}
 
 	result := h.db.GetDB().Create(&activity)

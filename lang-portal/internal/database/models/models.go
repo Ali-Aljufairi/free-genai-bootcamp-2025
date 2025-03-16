@@ -74,6 +74,8 @@ type StudySession struct {
 // StudyActivity represents a specific learning activity
 type StudyActivity struct {
 	ID             int64     `json:"id"`
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
 	StudySessionID int64     `json:"study_session_id"`
 	GroupID        int64     `json:"group_id"`
 	CreatedAt      time.Time `json:"created_at"`
