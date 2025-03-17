@@ -1,0 +1,44 @@
+{
+  "words": [
+    {
+      "japanese": "寿司",
+      "romanji": "sushi",
+      "english": "sushi",
+      "parts": {
+        "type": "noun"
+      }
+    },
+    {
+      "japanese": "握り",
+      "romanji": "nigiri",
+      "english": "hand-pressed sushi",
+      "parts": {
+        "type": "noun"
+      }
+    },
+    {
+      "japanese": "巻き",
+      "romanji": "maki",
+      "english": "sushi roll",
+      "parts": {
+        "type": "noun"
+      }
+    },
+    {
+      "japanese": "海苔",
+      "romanji": "nori",
+      "english": "seaweed",
+      "parts": {
+        "type": "noun"
+      }
+    },
+    {
+      "japanese": "酢飯",
+      "romanji": "sushi meshi",
+      "english": "vinegared sushi rice",
+      "parts": {
+        "type": "noun"
+      }
+    }
+  ]
+}

@@ -10,58 +10,48 @@ from groq import Groq
 dotenv.load_dotenv()
 groq = Groq(api_key=os.environ["GROQ_API_KEY"])
 
-
-# Data model for LLM to generate
-class Ingredient(BaseModel):
-    name: str
-    quantity: str
-    quantity_unit: Optional[str]
-
-
-class Recipe(BaseModel):
-    recipe_name: str
-    ingredients: List[Ingredient]
-    directions: List[str]
+class type (BaseModel):
+    type: str
+    
+class Japanesewords(BaseModel):
+    words: List["word"]
 
 
-def get_recipe(recipe_name: str) -> Recipe:
+class word(BaseModel):
+    japanese: str
+    romanji: str
+    english: str
+    parts: type
+    
+
+
+
+def get_japanese(recipe_name: str) -> Japanesewords:
     chat_completion = groq.chat.completions.create(
         messages=[
             {
                 "role": "system",
-                "content": "You are a recipe database that outputs recipes in JSON.\n"
+                "content": "You are a word database that outputs Japanese words in JSON and write Japense Kanji and what type of word is this.\n"
                 # Pass the json schema to the model. Pretty printing improves results.
-                f" The JSON object must use the schema: {json.dumps(Recipe.model_json_schema(), indent=2)}",
+                f" The JSON object must use the schema: {json.dumps(Japanesewords.model_json_schema(), indent=2)}",
             },
             {
                 "role": "user",
-                "content": f"Fetch a recipe for {recipe_name}",
+                "content": f"Fetch Japanese words for {recipe_name}",
             },
         ],
-        model="llama3-70b-8192",
+        model="qwen-2.5-32b",
         temperature=0,
         # Streaming is not supported in JSON mode
         stream=False,
         # Enable JSON mode by setting the response format
         response_format={"type": "json_object"},
     )
-    return Recipe.model_validate_json(chat_completion.choices[0].message.content)
+    return Japanesewords.model_validate_json(chat_completion.choices[0].message.content)
 
 
-def print_recipe(recipe: Recipe):
-    print("Recipe:", recipe.recipe_name)
 
-    print("\nIngredients:")
-    for ingredient in recipe.ingredients:
-        print(
-            f"- {ingredient.name}: {ingredient.quantity} {ingredient.quantity_unit or ''}"
-        )
-    print("\nDirections:")
-    for step, direction in enumerate(recipe.directions, start=1):
-        print(f"{step}. {direction}")
-
-
-def save_recipe_to_json(recipe: Recipe, filepath: str = None):
+def save_recipe_to_json(Japenesewords: Japanesewords, filepath: Optional[str] = None):
     """
     Save a recipe to a JSON file.
 
@@ -72,11 +62,11 @@ def save_recipe_to_json(recipe: Recipe, filepath: str = None):
     if filepath is None:
         # Create a filename based on the recipe name
         # Replace spaces with underscores and convert to lowercase for a clean filename
-        filename = recipe.recipe_name.lower().replace(" ", "_") + ".json"
+        filename = Japenesewords.words[0].japanese.lower().replace(" ", "_") + ".json"
         filepath = filename
 
     # Convert the recipe to a dictionary and then to JSON
-    recipe_json = recipe.model_dump_json(indent=2)
+    recipe_json = Japenesewords.model_dump_json(indent=2)
 
     with open(filepath, "w") as f:
         f.write(recipe_json)
@@ -84,11 +74,7 @@ def save_recipe_to_json(recipe: Recipe, filepath: str = None):
     print(f"Recipe saved to {filepath}")
 
 
-# Get the recipe
-recipe = get_recipe("apple pie")
 
-# Print the recipe
-print_recipe(recipe)
+Japanesewords = get_japanese("sushi")
 
-# Save the recipe to a JSON file
-save_recipe_to_json(recipe)
+save_recipe_to_json(Japanesewords, "sushi.json")
