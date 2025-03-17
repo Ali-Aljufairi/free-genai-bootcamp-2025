@@ -51,6 +51,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	wordHandler := handlers.NewWordHandler(s.db)
 	s.App.Get("/api/v1/words", wordHandler.GetWords)
 	s.App.Get("/api/v1/words/:id", wordHandler.GetWord)
+	s.App.Post("/api/v1/words", wordHandler.CreateWord)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
