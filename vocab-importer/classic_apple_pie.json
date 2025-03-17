@@ -1,0 +1,63 @@
+{
+  "recipe_name": "Classic Apple Pie",
+  "ingredients": [
+    {
+      "name": "Apples",
+      "quantity": "6-8",
+      "quantity_unit": "medium-sized"
+    },
+    {
+      "name": "All-purpose flour",
+      "quantity": "2 1/4",
+      "quantity_unit": "cups"
+    },
+    {
+      "name": "Cold unsalted butter",
+      "quantity": "1",
+      "quantity_unit": "cup"
+    },
+    {
+      "name": "Ice-cold water",
+      "quantity": "1/2",
+      "quantity_unit": "cup"
+    },
+    {
+      "name": "Granulated sugar",
+      "quantity": "1/2",
+      "quantity_unit": "cup"
+    },
+    {
+      "name": "Salt",
+      "quantity": "1/4",
+      "quantity_unit": "teaspoon"
+    },
+    {
+      "name": "Ground cinnamon",
+      "quantity": "1/2",
+      "quantity_unit": "teaspoon"
+    },
+    {
+      "name": "Ground nutmeg",
+      "quantity": "1/4",
+      "quantity_unit": "teaspoon"
+    },
+    {
+      "name": "Egg, beaten",
+      "quantity": "1",
+      "quantity_unit": "large"
+    }
+  ],
+  "directions": [
+    "Preheat oven to 375°F (190°C).",
+    "In a large bowl, combine flour, sugar, and salt.",
+    "Add cold butter and use a pastry blender or your fingers to work it into the flour mixture until it resembles coarse crumbs.",
+    "Gradually add ice-cold water, stirring with a fork until the dough comes together in a ball.",
+    "Divide the dough in half and shape into disks. Wrap each disk in plastic wrap and refrigerate for at least 1 hour.",
+    "In a separate bowl, combine apples, cinnamon, and nutmeg. Mix until apples are evenly coated.",
+    "Roll out one of the chilled dough disks to a thickness of about 1/8 inch. Place into a 9-inch pie dish.",
+    "Fill the pie crust with the apple mixture and dot the top with beaten egg.",
+    "Roll out the second dough disk to a thickness of about 1/8 inch. Use this to cover the pie and crimp the edges to seal.",
+    "Cut a few slits in the top crust to allow steam to escape.",
+    "Bake for 40-50 minutes, or until the crust is golden brown and the apples are tender."
+  ]
+}
