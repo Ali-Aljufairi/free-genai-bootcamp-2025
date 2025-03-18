@@ -1,0 +1,31 @@
+{
+  "words": [
+    {
+      "japanese": "仕事",
+      "hiragana": "しごと",
+      "romanji": "shigoto",
+      "english": "work",
+      "parts": {
+        "type": "noun"
+      }
+    },
+    {
+      "japanese": "働く",
+      "hiragana": "はたらく",
+      "romanji": "hataraku",
+      "english": "to work",
+      "parts": {
+        "type": "verb"
+      }
+    },
+    {
+      "japanese": "職業",
+      "hiragana": "しょくぎょう",
+      "romanji": "shokugyou",
+      "english": "occupation",
+      "parts": {
+        "type": "noun"
+      }
+    }
+  ]
+}
