@@ -12,6 +12,12 @@ from messages import SYSTEM_MESSAGE, USER_MESSAGE_TEMPLATE
 dotenv.load_dotenv()
 groq = Groq(api_key=os.environ["GROQ_API_KEY"])
 
+# Define the JSON files directory
+JSON_FILES_DIR = "json_files"
+
+# Ensure the directory exists
+os.makedirs(JSON_FILES_DIR, exist_ok=True)
+
 
 class type(BaseModel):
     type: str
@@ -73,7 +79,10 @@ def save_recipe_to_json(japanesewords: Japanesewords, filepath: Optional[str] = 
     if filepath is None:
         # Create a filename based on the topic
         filename = japanesewords.words[0].japanese.lower().replace(" ", "_") + ".json"
-        filepath = filename
+        filepath = os.path.join(JSON_FILES_DIR, filename)
+    elif not os.path.dirname(filepath):
+        # If filepath doesn't include a directory, put it in JSON_FILES_DIR
+        filepath = os.path.join(JSON_FILES_DIR, filepath)
 
     # Convert to JSON
     words_json = japanesewords.model_dump_json(indent=2)
