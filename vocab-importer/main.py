@@ -28,9 +28,9 @@ class Japanesewords(BaseModel):
 
 
 class word(BaseModel):
-    japanese: str
-    romanji: str
-    english: str
+    Japanese: str
+    romaji: str
+    English: str
     parts: type
 
 
@@ -78,7 +78,7 @@ def save_recipe_to_json(japanesewords: Japanesewords, filepath: Optional[str] = 
     """
     if filepath is None:
         # Create a filename based on the topic
-        filename = japanesewords.words[0].japanese.lower().replace(" ", "_") + ".json"
+        filename = japanesewords.words[0].Japanese.lower().replace(" ", "_") + ".json"
         filepath = os.path.join(JSON_FILES_DIR, filename)
     elif not os.path.dirname(filepath):
         # If filepath doesn't include a directory, put it in JSON_FILES_DIR
@@ -105,7 +105,7 @@ def display_words_table(japanesewords: Japanesewords):
     # Create columns for each word property
     col1, col2, col3, col4 = st.columns(4)
     col1.write("**Japanese**")
-    col2.write("**Romanji**")
+    col2.write("**romaji**")
     col3.write("**English**")
     col4.write("**Part of Speech**")
 
@@ -115,9 +115,9 @@ def display_words_table(japanesewords: Japanesewords):
     # Display each word
     for word_item in japanesewords.words:
         col1, col2, col3, col4 = st.columns(4)
-        col1.write(word_item.japanese)
-        col2.write(word_item.romanji)
-        col3.write(word_item.english)
+        col1.write(word_item.Japanese)
+        col2.write(word_item.romaji)
+        col3.write(word_item.English)
         col4.write(word_item.parts.type)
 
 
