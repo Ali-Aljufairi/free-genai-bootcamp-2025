@@ -33,5 +33,5 @@ ENTRYPOINT []
 
 # Run the FastAPI application by default
 # Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
-# Uses `--host 0.0.0.0` to allow access from outside the container
+# Uses `--host 0.0.0.0` to allow accevoacab_importerss from outside the container
 CMD ["streamlit", "run", "main.py"]
