@@ -2,8 +2,16 @@
 
 import { BookOpen, Brain, Clock } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useQuickStats } from "@/hooks/api/useDashboard"
 
 export function StatsCards() {
+  const { data: stats, isLoading, error } = useQuickStats();
+
+  // Default values for stats if loading or error
+  const wordsLearned = stats?.wordsLearned ?? 247;
+  const studyTime = stats?.studyTime ?? "12.5 hrs";
+  const masteryLevel = stats?.masteryLevel ?? "Intermediate";
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card className="glass-card">
@@ -14,12 +22,11 @@ export function StatsCards() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Words Learned</p>
-              <p className="text-2xl font-bold">247</p>
+              <p className="text-2xl font-bold">{isLoading ? "Loading..." : wordsLearned}</p>
             </div>
           </div>
         </CardContent>
       </Card>
-
       <Card className="glass-card">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
@@ -28,12 +35,11 @@ export function StatsCards() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Study Time</p>
-              <p className="text-2xl font-bold">12.5 hrs</p>
+              <p className="text-2xl font-bold">{isLoading ? "Loading..." : studyTime}</p>
             </div>
           </div>
         </CardContent>
       </Card>
-
       <Card className="glass-card">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
@@ -42,7 +48,8 @@ export function StatsCards() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Mastery Level</p>
-              <p className="text-2xl font-bold">Intermediate</p>
+              <p className="text-2xl font-bold">{isLoading ? "Loading..." : masteryLevel}</p>
+              {error && <p className="text-xs text-red-500 mt-1">Could not load data</p>}
             </div>
           </div>
         </CardContent>
