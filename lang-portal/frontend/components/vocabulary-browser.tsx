@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -8,18 +8,52 @@ import { useGroups } from "@/hooks/api/useGroup"
 import { useWords } from "@/hooks/api/useWord"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 export function VocabularyBrowser() {
   const [searchTerm, setSearchTerm] = useState("")
   const { data: groups, isLoading: groupsLoading } = useGroups()
-  const { data: words, isLoading: wordsLoading, refetch } = useWords()
+  const { 
+    data, 
+    isLoading: wordsLoading, 
+    loadMore, 
+    hasMore 
+  } = useWords()
+  
+  const words = data?.items || []
+  const loader = useRef(null)
 
-  const filteredWords = words?.filter(word =>
-    word.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    word.definition.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || []
+  const filteredWords = words.filter(word =>
+    word.japanese.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    word.romaji.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    word.english.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const handleStudyWord = async (wordId: string) => {
+  // Implement infinite scroll using Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0]
+        if (first.isIntersecting && hasMore && !wordsLoading) {
+          loadMore(data?.page ? data.page + 1 : 1)
+        }
+      },
+      { threshold: 1.0 }
+    )
+
+    const currentLoader = loader.current
+    if (currentLoader) {
+      observer.observe(currentLoader)
+    }
+
+    return () => {
+      if (currentLoader) {
+        observer.unobserve(currentLoader)
+      }
+    }
+  }, [loadMore, hasMore, data?.page, wordsLoading])
+
+  const handleStudyWord = async (wordId: number) => {
     try {
       // Here you could implement logic to add the word to a study session
       toast.success("Word added to study session")
@@ -28,7 +62,7 @@ export function VocabularyBrowser() {
     }
   }
 
-  if (wordsLoading || groupsLoading) {
+  if (wordsLoading && !words.length) {
     return (
       <div className="space-y-4">
         <Input
@@ -70,41 +104,53 @@ export function VocabularyBrowser() {
           {searchTerm ? "No words found matching your search." : "No vocabulary words available."}
         </p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredWords.map((word) => (
-            <Card key={word.id} className="glass-card">
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">{word.term}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {word.definition}
-                </p>
-                {word.examples?.map((example, i) => (
-                  <p key={i} className="text-sm italic mt-2">
-                    {example}
-                  </p>
-                ))}
-              </CardContent>
-              <CardFooter className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => handleStudyWord(word.id)}
-                >
-                  Study
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={() => window.open(`https://jisho.org/search/${encodeURIComponent(word.term)}`, '_blank')}
-                >
-                  Look up
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredWords.map((word) => (
+              <Card key={word.id} className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium flex flex-col gap-1">
+                    <span className="text-xl">{word.japanese}</span>
+                    <span className="text-sm text-muted-foreground font-normal">{word.romaji}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-base mb-2">{word.english}</p>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="secondary">{word.parts.type}</Badge>
+                    {word.parts.category && (
+                      <Badge variant="outline">{word.parts.category}</Badge>
+                    )}
+                    {word.parts.formality && (
+                      <Badge>{word.parts.formality}</Badge>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleStudyWord(word.id)}
+                  >
+                    Study
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="flex-1"
+                    onClick={() => window.open(`https://jisho.org/search/${encodeURIComponent(word.japanese)}`, '_blank')}
+                  >
+                    Look up
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          {hasMore && (
+            <div ref={loader} className="flex justify-center py-4">
+              <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+          )}
+        </>
       )}
     </div>
   )

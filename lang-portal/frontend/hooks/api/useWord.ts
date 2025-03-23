@@ -1,14 +1,108 @@
 "use client";
 
-import { useFetch } from "./useFetch";
+import { useCallback, useEffect, useState } from "react";
 import { wordApi } from "@/services/api";
-import { useState } from "react";
+import { Word, WordsResponse } from "@/types/api";
+
+const CACHE_DURATION = parseInt(process.env.NEXT_PUBLIC_API_CACHE_DURATION || '300000');
+const ITEMS_PER_PAGE = 20;
+
+interface Cache {
+  data: WordsResponse;
+  timestamp: number;
+}
+
+let wordsCache: Record<number, Cache> = {};
 
 /**
- * Hook to fetch all words
+ * Hook to fetch all words with pagination and caching
  */
 export function useWords() {
-  return useFetch(wordApi.getWords);
+  const [data, setData] = useState<WordsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchPage = useCallback(async (page: number) => {
+    try {
+      const now = Date.now();
+      
+      // Check cache first
+      if (wordsCache[page] && (now - wordsCache[page].timestamp) < CACHE_DURATION) {
+        return wordsCache[page].data;
+      }
+
+      const response = await wordApi.getWords(page, ITEMS_PER_PAGE);
+      
+      // Update cache
+      wordsCache[page] = {
+        data: response,
+        timestamp: now
+      };
+
+      return response;
+    } catch (err) {
+      throw err;
+    }
+  }, []);
+
+  const prefetchNextPages = useCallback(async (currentPage: number, totalPages: number) => {
+    // Prefetch next 2 pages if they exist
+    const pagesToPrefetch = Math.min(currentPage + 2, totalPages);
+    for (let page = currentPage + 1; page <= pagesToPrefetch; page++) {
+      fetchPage(page).catch(() => {
+        // Silently fail on prefetch errors
+      });
+    }
+  }, [fetchPage]);
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        setIsLoading(true);
+        const firstPage = await fetchPage(1);
+        setData(firstPage);
+        
+        // Start prefetching next pages
+        if (firstPage.totalPages > 1) {
+          prefetchNextPages(1, firstPage.totalPages);
+        }
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, [fetchPage, prefetchNextPages]);
+
+  const loadMore = useCallback(async (page: number) => {
+    try {
+      const newData = await fetchPage(page);
+      setData(prev => {
+        if (!prev) return newData;
+        return {
+          ...newData,
+          items: [...prev.items, ...newData.items]
+        };
+      });
+      
+      // Prefetch next pages
+      if (page < newData.totalPages) {
+        prefetchNextPages(page, newData.totalPages);
+      }
+    } catch (err) {
+      setError(err as Error);
+    }
+  }, [fetchPage, prefetchNextPages]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    loadMore,
+    hasMore: data ? data.page < data.totalPages : false
+  };
 }
 
 /**

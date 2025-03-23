@@ -10,9 +10,10 @@ import {
   QuickStats,
   StudyProgress,
   StudyActivity,
+  WordsResponse
 } from "@/types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
 /**
  * Basic fetch wrapper with error handling
@@ -86,7 +87,8 @@ export const studyActivityApi = {
 
 // Word API calls
 export const wordApi = {
-  getWords: () => fetchData<Word[]>('/words'),
+  getWords: (page: number = 1, pageSize: number = 20) => 
+    fetchData<WordsResponse>(`/words?page=${page}&pageSize=${pageSize}`),
   getWord: (id: string) => fetchData<Word>(`/words/${id}`),
   createWord: (data: Partial<Word>) => fetchData<Word>('/words', {
     method: 'POST',

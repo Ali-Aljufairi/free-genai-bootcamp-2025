@@ -11,15 +11,15 @@ export interface StudySession {
 
 // Word Types
 export interface Word {
-  id: string;
-  term: string;
-  definition: string;
-  reading?: string;
-  examples?: string[];
-  groupId: string;
-  createdAt: string;
-  lastReviewed?: string;
-  proficiency: number;
+  id: number;
+  japanese: string;
+  romaji: string;
+  english: string;
+  parts: {
+    type: string;
+    category?: string;
+    formality?: string;
+  };
 }
 
 // Group Types
@@ -56,4 +56,12 @@ export interface StudyActivity {
   created_at: string;
   completed_at?: string;
   word_count: number;
+}
+
+export interface WordsResponse {
+  items: Word[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
