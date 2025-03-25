@@ -20,6 +20,7 @@ os.makedirs(JSON_FILES_DIR, exist_ok=True)
 
 
 class type(BaseModel):
+    formailty: str
     type: str
 
 

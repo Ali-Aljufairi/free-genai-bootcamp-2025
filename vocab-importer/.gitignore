@@ -38,3 +38,4 @@ json_files/
 .vscode/
 *.swp
 *.swo
+uv.lock

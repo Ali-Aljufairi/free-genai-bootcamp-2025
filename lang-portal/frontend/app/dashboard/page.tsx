@@ -95,18 +95,6 @@ export default function Dashboard() {
           </CardFooter>
         </Card>
       </div>
-      {/* Sample text for highlighting */}
-      <div className="p-6 glass-card rounded-lg">
-        <h2 className="text-xl font-bold mb-3">Try Highlighting This Text</h2>
-        <p className="mb-3">
-          Select any text on this page to see the blue highlight animation effect. This is a custom styling that
-          enhances the user experience when interacting with text content.
-        </p>
-        <p>
-          Sorami provides an immersive language learning experience with interactive lessons, vocabulary practice, and
-          progress tracking. Our goal is to make language learning enjoyable and effective.
-        </p>
-      </div>
     </div>
   )
 }
