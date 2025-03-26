@@ -38,8 +38,8 @@ class ImageSubmission(BaseModel):
 class RandomSentenceResponse(BaseModel):
     sentence: str
     english: str
-    kanji: str
     romaji: str
+    word: str  # The word used to generate the sentence
 
 class FeedbackResponse(BaseModel):
     transcription: str  # The OCR result of what was written
@@ -59,14 +59,16 @@ async def get_random_sentence():
         
         # Clean up the returned values
         english = english.replace("English: ", "")
-        kanji = kanji.replace("Kanji: ", "")
         romaji = romaji.replace("Reading: ", "")
+        
+        # Get the word that was used to generate the sentence
+        source_word = japanese_app.current_word.get("japanese", "") if japanese_app.current_word else ""
         
         return RandomSentenceResponse(
             sentence=sentence,
             english=english,
-            kanji=kanji,
-            romaji=romaji
+            romaji=romaji,
+            word=source_word
         )
     except Exception as e:
         logger.error(f"Error generating random sentence: {str(e)}")
