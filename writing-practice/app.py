@@ -1,10 +1,18 @@
 import streamlit as st
 import os
-import dotenv
+from dotenv import load_dotenv
 from core import JapaneseApp
+import logging
 
-# Load environment variables
-dotenv.load_dotenv()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='app.log'
+)
+
+# Load environment variables with dotenv
+load_dotenv()
 
 # Initialize session state if not already done
 if "app" not in st.session_state:
@@ -82,26 +90,31 @@ with tab1:
 
     with col1:
         if st.button("Get New Word", key="word_gen"):
-            kanji, english, reading, instruction = (
-                st.session_state.app.get_random_word()
-            )
-            st.session_state.current_word = {
-                "kanji": kanji,
-                "english": english,
-                "reading": reading,
-                "instruction": instruction,
-            }
+            try:
+                japanese, english, romaji, instruction = (
+                    st.session_state.app.get_random_word()
+                )
+                st.session_state.current_word = {
+                    "japanese": japanese,
+                    "english": english,
+                    "romaji": romaji,
+                    "instruction": instruction,
+                }
+                logging.info(f"Retrieved new word: {st.session_state.current_word}")
+            except Exception as e:
+                logging.error(f"Error getting random word: {str(e)}")
+                st.error(f"Error getting new word: {str(e)}")
 
         if st.session_state.current_word:
             st.markdown(
-                f'<p class="big-font">{st.session_state.current_word["kanji"]}</p>',
+                f'<p class="big-font">{st.session_state.current_word["japanese"]}</p>',
                 unsafe_allow_html=True,
             )
             st.text_input(
                 "English", value=st.session_state.current_word["english"], disabled=True
             )
             st.text_input(
-                "Reading", value=st.session_state.current_word["reading"], disabled=True
+                "Reading", value=st.session_state.current_word["romaji"], disabled=True
             )
             st.text_input(
                 "Instructions",
@@ -129,49 +142,66 @@ with tab1:
 
         submit_button = st.button("Submit", key="word_submit")
         if submit_button and file_input:
-            # Process input based on method
-            if input_method == "Upload Image":
-                # Save the uploaded file temporarily
-                image_path = f"temp_word_{file_input.name}"
-                with open(image_path, "wb") as f:
-                    f.write(file_input.getbuffer())
-                try:
-                    transcription, target, grade, feedback = (
-                        st.session_state.app.grade_word_submission(image_path)
-                    )
-                except Exception as e:
-                    st.error(f"Error during grading: {e}")
-                    os.remove(image_path)
-                    raise
-                # Move feedback to col1
-                with col1:
-                    st.markdown("### Feedback")
-                    st.text_input("Your Writing", value=transcription, disabled=True)
-                    st.text_input("Target Word", value=target, disabled=True)
-                    st.text_input("Grade", value=grade, disabled=True)
-                    st.text_area("Feedback", value=feedback, disabled=True)
-                os.remove(image_path)
-            else:
-                # Canvas returns a numpy array if not blank
-                if canvas_result is not None:
+            try:
+                logging.info("Processing submission")
+                # Process input based on method
+                if input_method == "Upload Image":
+                    # Save the uploaded file temporarily
+                    image_path = f"temp_word_{file_input.name}"
+                    with open(image_path, "wb") as f:
+                        f.write(file_input.getbuffer())
+                    logging.info(f"Saved temporary file: {image_path}")
+                    
                     try:
                         transcription, target, grade, feedback = (
-                            st.session_state.app.grade_word_canvas_submission(
-                                canvas_result
-                            )
+                            st.session_state.app.grade_word_submission(image_path)
                         )
-                        with col1:
-                            st.markdown("### Feedback")
-                            st.text_input(
-                                "Your Writing", value=transcription, disabled=True
-                            )
-                            st.text_input("Target Word", value=target, disabled=True)
-                            st.text_input("Grade", value=grade, disabled=True)
-                            st.text_area("Feedback", value=feedback, disabled=True)
+                        logging.info(f"Grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}")
                     except Exception as e:
-                        st.error(f"Error during grading: {e}")
+                        logging.error(f"Error during grading: {str(e)}")
+                        st.error(f"Error during grading: {str(e)}")
+                        if os.path.exists(image_path):
+                            os.remove(image_path)
+                        raise
+                    
+                    # Move feedback to col1
+                    with col1:
+                        st.markdown("### Feedback")
+                        st.text_input("Your Writing", value=transcription, disabled=True)
+                        st.text_input("Target Word", value=target, disabled=True)
+                        st.text_input("Grade", value=grade, disabled=True)
+                        st.text_area("Feedback", value=feedback, disabled=True)
+                    
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
                 else:
-                    st.error("Canvas is empty. Please draw your word.")
+                    # Canvas handling
+                    if canvas_result is not None:
+                        try:
+                            logging.info("Processing canvas submission")
+                            transcription, target, grade, feedback = (
+                                st.session_state.app.grade_word_canvas_submission(
+                                    canvas_result
+                                )
+                            )
+                            logging.info(f"Canvas grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}")
+                            
+                            with col1:
+                                st.markdown("### Feedback")
+                                st.text_input(
+                                    "Your Writing", value=transcription, disabled=True
+                                )
+                                st.text_input("Target Word", value=target, disabled=True)
+                                st.text_input("Grade", value=grade, disabled=True)
+                                st.text_area("Feedback", value=feedback, disabled=True)
+                        except Exception as e:
+                            logging.error(f"Error processing canvas: {str(e)}")
+                            st.error(f"Error processing canvas: {str(e)}")
+                    else:
+                        st.error("Canvas is empty. Please draw your word.")
+            except Exception as e:
+                logging.error(f"Unexpected error in submission handling: {str(e)}")
+                st.error(f"An unexpected error occurred: {str(e)}")
 
 # Sentence Practice Tab
 with tab2:
@@ -179,14 +209,14 @@ with tab2:
 
     with col1:
         if st.button("Generate New Sentence", key="sentence_gen"):
-            sentence, english, kanji, reading = (
+            sentence, english, japanese, romaji = (
                 st.session_state.app.get_random_word_and_sentence()
             )
             st.session_state.current_sentence = {
                 "sentence": sentence,
-                "english": english,
-                "kanji": kanji,
-                "reading": reading,
+                "english": english.replace("English: ", ""),
+                "japanese": japanese.replace("Kanji: ", ""),
+                "romaji": romaji.replace("Reading: ", ""),
             }
 
         if st.session_state.current_sentence:
@@ -201,11 +231,13 @@ with tab2:
                 disabled=True,
             )
             st.text_input(
-                "Kanji", value=st.session_state.current_sentence["kanji"], disabled=True
+                "Japanese",
+                value=st.session_state.current_sentence["japanese"],
+                disabled=True,
             )
             st.text_input(
                 "Reading",
-                value=st.session_state.current_sentence["reading"],
+                value=st.session_state.current_sentence["romaji"],
                 disabled=True,
             )
 
