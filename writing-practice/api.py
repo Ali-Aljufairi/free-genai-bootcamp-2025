@@ -51,7 +51,7 @@ class FeedbackResponse(BaseModel):
 async def root():
     return {"message": "Japanese Writing Practice API"}
 
-@app.get("/random-sentence", response_model=RandomSentenceResponse)
+@app.get("/api/v1/random-sentence", response_model=RandomSentenceResponse)
 async def get_random_sentence():
     """Generate a random sentence"""
     try:
@@ -74,7 +74,7 @@ async def get_random_sentence():
         logger.error(f"Error generating random sentence: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating random sentence: {str(e)}")
 
-@app.post("/feedback-word", response_model=FeedbackResponse)
+@app.post("/api/v1/feedback-word", response_model=FeedbackResponse)
 async def get_word_feedback(submission: ImageSubmission):
     """Get feedback on a word writing submission"""
     try:
@@ -95,7 +95,7 @@ async def get_word_feedback(submission: ImageSubmission):
         logger.error(f"Error processing word submission: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing submission: {str(e)}")
 
-@app.post("/feedback-sentence", response_model=FeedbackResponse)
+@app.post("/api/v1/feedback-sentence", response_model=FeedbackResponse)
 async def get_sentence_feedback(submission: ImageSubmission):
     """Get feedback on a sentence writing submission"""
     try:
