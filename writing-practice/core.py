@@ -4,10 +4,19 @@ import os
 from dotenv import load_dotenv
 import requests
 from manga_ocr import MangaOcr
-from utils import load_prompts
 from PIL import Image
 import numpy as np
 import warnings
+import json
+from messages import (
+    SENTENCE_SYSTEM_MESSAGE,
+    SENTENCE_USER_TEMPLATE,
+    TRANSLATION_SYSTEM_MESSAGE,
+    TRANSLATION_USER_TEMPLATE,
+    GRADING_SYSTEM_MESSAGE,
+    GRADING_USER_TEMPLATE,
+)
+from models import Sentence, WordFeedback, SentenceFeedback
 
 # Load environment variables
 load_dotenv()
@@ -64,34 +73,97 @@ class JapaneseApp:
             return "", "", "", f"An error occurred: {str(e)}"
 
     def generate_sentence(self, word):
-        """Generate a sentence using Groq API"""
+        """Generate a sentence using Groq API with JSON mode"""
         logger.debug(f"Generating sentence for word: {word.get('japanese', '')}")
         try:
-            prompts = load_prompts()
+            # Prepare the Sentence model schema
+            sentence_schema = json.dumps(Sentence.model_json_schema(), indent=2)
+
+            # Updated system message with more explicit instructions
+            system_message = (
+                SENTENCE_SYSTEM_MESSAGE
+                + f"""
+The JSON object must exactly follow this schema: {sentence_schema}
+
+Here's a specific example of the expected format:
+{{
+  "sentence": "彼女は学生です。", 
+  "english": "She is a student.",
+  "kanji": "学生",  
+  "romaji": "kanojo wa gakusei desu."
+}}
+
+Make sure all fields are filled with appropriate values. If there are no kanji characters, still include the field with an empty string.
+"""
+            )
+
+            # Using JSON mode with the Groq API
             response = self.client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
-                    {
-                        "role": "system",
-                        "content": prompts["sentence_generation"]["system"],
-                    },
+                    {"role": "system", "content": system_message},
                     {
                         "role": "user",
-                        "content": prompts["sentence_generation"]["user"].format(
+                        "content": SENTENCE_USER_TEMPLATE.format(
                             word=word.get("japanese", "")
                         ),
                     },
                 ],
                 temperature=self.llm_temperature,
-                max_tokens=self.llm_max_tokens,
+                response_format={"type": "json_object"},
             )
+
+            # Parse the JSON response
             content = response.choices[0].message.content.strip()
-            sentence = content.split(":")[-1].strip() if ":" in content else content
-            logger.info(f"Generated sentence: {sentence}")
-            return sentence
+            logger.debug(f"Raw Groq response: {content}")
+
+            # Parse to Pydantic model to validate structure
+            sentence_data = Sentence.model_validate_json(content)
+            logger.info(f"Generated sentence: {sentence_data.sentence}")
+
+            # Store the full sentence data
+            self.current_sentence_data = sentence_data
+
+            return sentence_data.sentence
         except Exception as e:
             logger.error(f"Error generating sentence: {str(e)}")
-            return "Error generating sentence. Please try again."
+
+            # Attempt to create a fallback sentence if the JSON generation fails
+            try:
+                # Fallback to regular text generation without JSON mode
+                fallback_response = self.client.chat.completions.create(
+                    model=self.llm_model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a Japanese language teacher. Generate a simple Japanese sentence using the provided word.",
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Create a very simple sentence using the Japanese word '{word.get('japanese', '')}'. Return only the sentence in Japanese without any explanation.",
+                        },
+                    ],
+                    temperature=self.llm_temperature,
+                    max_tokens=50,
+                )
+
+                fallback_sentence = fallback_response.choices[0].message.content.strip()
+                logger.info(f"Generated fallback sentence: {fallback_sentence}")
+
+                # Create a basic sentence object with the fallback
+                self.current_sentence_data = Sentence(
+                    sentence=fallback_sentence,
+                    english=f"Sentence with {word.get('english', '')}",
+                    kanji=word.get("japanese", ""),
+                    romaji=word.get("romaji", ""),
+                )
+
+                return fallback_sentence
+            except Exception as fallback_error:
+                logger.error(
+                    f"Error generating fallback sentence: {str(fallback_error)}"
+                )
+                return "Error generating sentence. Please try again."
 
     def get_random_word_and_sentence(self):
         """Get a random word and generate a sentence"""
@@ -100,13 +172,25 @@ class JapaneseApp:
         if not kanji:
             return "No word available", "", "", "Please try again."
 
+        # Generate sentence using JSON mode
         self.current_sentence = self.generate_sentence(self.current_word)
-        return (
-            self.current_sentence,
-            f"English: {english}",
-            f"Kanji: {kanji}",
-            f"Reading: {reading}",
-        )
+
+        # Return data from the stored sentence data
+        if hasattr(self, "current_sentence_data"):
+            return (
+                self.current_sentence_data.sentence,
+                f"English: {self.current_sentence_data.english}",
+                f"Kanji: {self.current_sentence_data.kanji}",
+                f"Reading: {self.current_sentence_data.romaji}",
+            )
+        else:
+            # Fallback to the old format if JSON parsing failed
+            return (
+                self.current_sentence,
+                f"English: {english}",
+                f"Kanji: {kanji}",
+                f"Reading: {reading}",
+            )
 
     def grade_word_submission(self, image):
         """Process word submission and grade it using MangaOCR"""
@@ -118,8 +202,10 @@ class JapaneseApp:
                     self.mocr = MangaOcr()
 
             logger.info(f"Processing image type: {type(image)}")
-            logger.info(f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}")
-            
+            logger.info(
+                f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}"
+            )
+
             transcription = self.mocr(image)
             logger.info(f"OCR Transcription result: {transcription}")
             logger.info(f"Current word data: {self.current_word}")
@@ -144,7 +230,7 @@ class JapaneseApp:
                     messages=[
                         {
                             "role": "system",
-                            "content": "You are a Japanese writing evaluator. Compare the submission with the target and provide constructive feedback.",
+                            "content": GRADING_SYSTEM_MESSAGE,
                         },
                         {
                             "role": "user",
@@ -180,20 +266,15 @@ class JapaneseApp:
             transcription = self.mocr(image)
             logger.debug(f"Transcription result: {transcription}")
 
-            # Load prompts
-            prompts = load_prompts()
-
             # Get literal translation
             logger.info("Getting literal translation")
             translation_response = self.client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
-                    {"role": "system", "content": prompts["translation"]["system"]},
+                    {"role": "system", "content": TRANSLATION_SYSTEM_MESSAGE},
                     {
                         "role": "user",
-                        "content": prompts["translation"]["user"].format(
-                            text=transcription
-                        ),
+                        "content": TRANSLATION_USER_TEMPLATE.format(text=transcription),
                     },
                 ],
                 temperature=self.llm_temperature,
@@ -206,10 +287,10 @@ class JapaneseApp:
             grading_response = self.client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
-                    {"role": "system", "content": prompts["grading"]["system"]},
+                    {"role": "system", "content": GRADING_SYSTEM_MESSAGE},
                     {
                         "role": "user",
-                        "content": prompts["grading"]["user"].format(
+                        "content": GRADING_USER_TEMPLATE.format(
                             target_sentence=self.current_sentence,
                             submission=transcription,
                             translation=translation,
@@ -254,7 +335,7 @@ class JapaneseApp:
             threshold = 200
             processed_image = image.point(lambda p: p < threshold and 255)
             logger.info(f"Image processed with threshold {threshold}")
-            
+
             return self.grade_word_submission(processed_image)
         except Exception as e:
             logger.error(f"Error in process_word_image: {str(e)}", exc_info=True)

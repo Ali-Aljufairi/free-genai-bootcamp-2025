@@ -7,8 +7,8 @@ import logging
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='app.log'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename="app.log",
 )
 
 # Load environment variables with dotenv
@@ -151,27 +151,31 @@ with tab1:
                     with open(image_path, "wb") as f:
                         f.write(file_input.getbuffer())
                     logging.info(f"Saved temporary file: {image_path}")
-                    
+
                     try:
                         transcription, target, grade, feedback = (
                             st.session_state.app.grade_word_submission(image_path)
                         )
-                        logging.info(f"Grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}")
+                        logging.info(
+                            f"Grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}"
+                        )
                     except Exception as e:
                         logging.error(f"Error during grading: {str(e)}")
                         st.error(f"Error during grading: {str(e)}")
                         if os.path.exists(image_path):
                             os.remove(image_path)
                         raise
-                    
+
                     # Move feedback to col1
                     with col1:
                         st.markdown("### Feedback")
-                        st.text_input("Your Writing", value=transcription, disabled=True)
+                        st.text_input(
+                            "Your Writing", value=transcription, disabled=True
+                        )
                         st.text_input("Target Word", value=target, disabled=True)
                         st.text_input("Grade", value=grade, disabled=True)
                         st.text_area("Feedback", value=feedback, disabled=True)
-                    
+
                     if os.path.exists(image_path):
                         os.remove(image_path)
                 else:
@@ -184,14 +188,18 @@ with tab1:
                                     canvas_result
                                 )
                             )
-                            logging.info(f"Canvas grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}")
-                            
+                            logging.info(
+                                f"Canvas grading results - Transcription: {transcription}, Target: {target}, Grade: {grade}"
+                            )
+
                             with col1:
                                 st.markdown("### Feedback")
                                 st.text_input(
                                     "Your Writing", value=transcription, disabled=True
                                 )
-                                st.text_input("Target Word", value=target, disabled=True)
+                                st.text_input(
+                                    "Target Word", value=target, disabled=True
+                                )
                                 st.text_input("Grade", value=grade, disabled=True)
                                 st.text_area("Feedback", value=feedback, disabled=True)
                         except Exception as e:
@@ -209,13 +217,12 @@ with tab2:
 
     with col1:
         if st.button("Generate New Sentence", key="sentence_gen"):
-            sentence, english, japanese, romaji = (
+            sentence, english, _, romaji = (
                 st.session_state.app.get_random_word_and_sentence()
             )
             st.session_state.current_sentence = {
                 "sentence": sentence,
                 "english": english.replace("English: ", ""),
-                "japanese": japanese.replace("Kanji: ", ""),
                 "romaji": romaji.replace("Reading: ", ""),
             }
 
@@ -226,18 +233,13 @@ with tab2:
             )
             st.markdown("### Word Information")
             st.text_input(
-                "English",
-                value=st.session_state.current_sentence["english"],
-                disabled=True,
-            )
-            st.text_input(
-                "Japanese",
-                value=st.session_state.current_sentence["japanese"],
-                disabled=True,
-            )
-            st.text_input(
                 "Reading",
                 value=st.session_state.current_sentence["romaji"],
+                disabled=True,
+            )
+            st.text_input(
+                "English",
+                value=st.session_state.current_sentence["english"],
                 disabled=True,
             )
 
