@@ -65,15 +65,23 @@ export function DrawingStudy() {
                 ? `${process.env.NEXT_PUBLIC_WRITING_PRAC}/feedback-word`
                 : `${process.env.NEXT_PUBLIC_WRITING_PRAC}/feedback-sentence`;
 
+            // Create appropriate request body based on study mode
+            const requestBody = studyMode === 'word'
+                ? {
+                    image: base64Image.split(',')[1],
+                    target_word: word?.japanese
+                }
+                : {
+                    image: base64Image.split(',')[1],
+                    target_sentence: sentence?.sentence
+                };
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    image: base64Image.split(',')[1], // Remove data:image/png;base64, prefix
-                    target: studyMode === 'word' ? word?.japanese : sentence?.sentence
-                }),
+                body: JSON.stringify(requestBody)
             })
 
             const data = await response.json()

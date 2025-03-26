@@ -327,7 +327,7 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
                 f"An error occurred: {str(e)}",
             )
 
-    def process_word_image(self, image: Image.Image):
+    def process_word_image(self, image: Image.Image, target_word=None):
         """Process the provided image (PIL Image) and perform OCR and grading for word submission"""
         try:
             logger.info("Processing word image")
@@ -336,19 +336,19 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
             processed_image = image.point(lambda p: p < threshold and 255)
             logger.info(f"Image processed with threshold {threshold}")
 
-            return self.grade_word_submission(processed_image)
+            return self.grade_word_submission_with_target(processed_image, target_word)
         except Exception as e:
             logger.error(f"Error in process_word_image: {str(e)}", exc_info=True)
             raise
 
-    def process_sentence_image(self, image: Image.Image):
+    def process_sentence_image(self, image: Image.Image, target_sentence=None):
         """Process the provided image (PIL Image) and perform OCR and grading for sentence submission"""
         # Enhance contrast for better OCR while preserving color
         # Convert red strokes to black for OCR while keeping original color for display
         threshold = 200  # Adjust this value if needed
         image = image.point(lambda p: p < threshold and 255)
 
-        return self.grade_sentence_submission(image)
+        return self.grade_sentence_submission_with_target(image, target_sentence)
 
     def grade_word_canvas_submission(self, canvas_image: any):
         """Process the canvas drawing (numpy array) for word practice"""
@@ -383,3 +383,155 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
         except Exception as e:
             logger.error(f"Error processing canvas submission: {str(e)}")
             raise ValueError(f"Invalid canvas image data: {e}")
+
+    def grade_word_submission_with_target(self, image, target_word=None):
+        """Process word submission and grade it using MangaOCR with a specific target word"""
+        try:
+            if self.mocr is None:
+                logger.info("Reinitializing MangaOCR")
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self.mocr = MangaOcr()
+            
+            logger.info(f"Processing image type: {type(image)}")
+            logger.info(
+                f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}"
+            )
+            
+            transcription = self.mocr(image)
+            logger.info(f"OCR Transcription result: {transcription}")
+            
+            # Use provided target_word if available, otherwise fall back to current_word
+            if target_word:
+                logger.info(f"Using provided target word: {target_word}")
+                japanese_target = target_word
+            elif self.current_word:
+                logger.info(f"Using current word: {self.current_word}")
+                japanese_target = self.current_word.get("japanese", "")
+            else:
+                logger.warning("No target word available")
+                japanese_target = "No target word available"
+            
+            # Compare with target word
+            grade = "C"
+            feedback = ""
+            
+            if transcription == japanese_target:
+                grade = "S"
+                feedback = "Perfect match! Excellent writing."
+            elif transcription and japanese_target and (transcription.lower() == japanese_target.lower()):
+                grade = "A"
+                feedback = "Very good! The characters are clear and correct."
+            else:
+                # Use Groq for detailed feedback
+                response = self.client.chat.completions.create(
+                    model=self.llm_model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": GRADING_SYSTEM_MESSAGE,
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Target word: {japanese_target}\nSubmission: {transcription}\nProvide brief feedback on accuracy and writing quality.",
+                        },
+                    ],
+                    temperature=self.llm_temperature,
+                    max_tokens=self.llm_max_tokens,
+                )
+                feedback = response.choices[0].message.content.strip()
+                grade = "B" if "good" in feedback.lower() else "C"
+                
+            return transcription, japanese_target, grade, feedback
+        except Exception as e:
+            logger.error(f"Error in grade_submission_with_target: {str(e)}", exc_info=True)
+            return (
+                f"Error processing submission: {str(e)}",
+                target_word or self.current_word.get("japanese", "Error getting target word"),
+                "C",
+                f"An error occurred during OCR processing: {str(e)}",
+            )
+
+    def grade_sentence_submission_with_target(self, image, target_sentence=None):
+        """Process sentence submission and grade it using MangaOCR and Groq with a specific target sentence"""
+        try:
+            if self.mocr is None:
+                logger.info("Initializing MangaOCR")
+                self.mocr = MangaOcr()
+
+            # Transcribe the image
+            logger.info("Transcribing image with MangaOCR")
+            transcription = self.mocr(image)
+            logger.debug(f"Transcription result: {transcription}")
+
+            # Use provided target_sentence if available, otherwise fall back to current_sentence
+            if target_sentence:
+                logger.info(f"Using provided target sentence: {target_sentence}")
+                target = target_sentence
+            elif self.current_sentence:
+                logger.info(f"Using current sentence: {self.current_sentence}")
+                target = self.current_sentence
+            else:
+                logger.warning("No target sentence available")
+                target = "No target sentence available"
+
+            # Get literal translation
+            logger.info("Getting literal translation")
+            translation_response = self.client.chat.completions.create(
+                model=self.llm_model,
+                messages=[
+                    {"role": "system", "content": TRANSLATION_SYSTEM_MESSAGE},
+                    {
+                        "role": "user",
+                        "content": TRANSLATION_USER_TEMPLATE.format(text=transcription),
+                    },
+                ],
+                temperature=self.llm_temperature,
+            )
+            translation = translation_response.choices[0].message.content.strip()
+            logger.debug(f"Translation: {translation}")
+
+            # Get grading and feedback
+            logger.info("Getting grade and feedback")
+            grading_response = self.client.chat.completions.create(
+                model=self.llm_model,
+                messages=[
+                    {"role": "system", "content": GRADING_SYSTEM_MESSAGE},
+                    {
+                        "role": "user",
+                        "content": GRADING_USER_TEMPLATE.format(
+                            target_sentence=target,
+                            submission=transcription,
+                            translation=translation,
+                        ),
+                    },
+                ],
+                temperature=self.llm_temperature,
+            )
+
+            feedback = grading_response.choices[0].message.content.strip()
+            # Parse grade and feedback from response
+            grade = "C"  # Default grade
+            if "Grade: S" in feedback:
+                grade = "S"
+            elif "Grade: A" in feedback:
+                grade = "A"
+            elif "Grade: B" in feedback:
+                grade = "B"
+
+            # Extract just the feedback part
+            feedback = feedback.split("Feedback:")[-1].strip()
+
+            logger.info(f"Grading complete: {grade}")
+            logger.debug(f"Feedback: {feedback}")
+
+            return transcription, translation, grade, feedback, target
+        except Exception as e:
+            logger.error(f"Error in grade_sentence_submission_with_target: {str(e)}")
+            return (
+                "Error processing submission",
+                "Error processing submission",
+                "C",
+                f"An error occurred: {str(e)}",
+                target_sentence or self.current_sentence or "Error getting target sentence"
+            )
