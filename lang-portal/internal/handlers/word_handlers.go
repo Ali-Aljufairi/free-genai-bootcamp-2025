@@ -10,8 +10,8 @@ import (
 
 // WordWithGroups represents a request to create a word with associated groups
 type WordWithGroups struct {
-	Word      models.Word `json:"word"`
-	GroupIDs  []int64     `json:"group_ids,omitempty"`
+	Word     models.Word `json:"word"`
+	GroupIDs []int64     `json:"group_ids,omitempty"`
 }
 
 // WordsWithGroupsBatch represents a request to create multiple words with groups
@@ -49,10 +49,10 @@ func (h *WordHandler) GetWords(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"items": words,
-		"total": total,
-		"page": page,
-		"pageSize": pageSize,
+		"items":      words,
+		"total":      total,
+		"page":       page,
+		"pageSize":   pageSize,
 		"totalPages": (total + int64(pageSize) - 1) / int64(pageSize),
 	})
 }
@@ -82,7 +82,7 @@ func (h *WordHandler) CreateWord(c *fiber.Ctx) error {
 	// Check if the request body is an array or a single object
 	contentType := c.Get("Content-Type")
 	var bodyBytes []byte
-	
+
 	if contentType == "application/json" {
 		bodyBytes = c.Body()
 	} else {
@@ -90,13 +90,13 @@ func (h *WordHandler) CreateWord(c *fiber.Ctx) error {
 			"error": "Content-Type must be application/json",
 		})
 	}
-	
+
 	// If the first non-whitespace character is '[', it's an array of words
 	for _, b := range bodyBytes {
 		if b == ' ' || b == '\t' || b == '\n' || b == '\r' {
 			continue // Skip whitespace
 		}
-		
+
 		if b == '[' {
 			// Process multiple words
 			return h.createMultipleWords(c)
@@ -105,7 +105,7 @@ func (h *WordHandler) CreateWord(c *fiber.Ctx) error {
 			return h.createSingleWord(c)
 		}
 	}
-	
+
 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 		"error": "Invalid JSON format",
 	})
@@ -118,12 +118,12 @@ func (h *WordHandler) createSingleWord(c *fiber.Ctx) error {
 	if err := c.BodyParser(&wordWithGroups); err == nil && len(wordWithGroups.GroupIDs) > 0 {
 		return h.createWordWithGroups(c, wordWithGroups)
 	}
-	
+
 	// If not a word with groups, process as a standard word
 	var word models.Word
 	if err := c.BodyParser(&word); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error":   "Invalid request body",
 			"details": err.Error(),
 		})
 	}
@@ -139,7 +139,7 @@ func (h *WordHandler) createSingleWord(c *fiber.Ctx) error {
 	result := h.db.GetDB().Create(&word)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create word",
+			"error":   "Failed to create word",
 			"details": result.Error.Error(),
 		})
 	}
@@ -163,7 +163,7 @@ func (h *WordHandler) createWordWithGroups(c *fiber.Ctx, req WordWithGroups) err
 	if err := tx.Create(&req.Word).Error; err != nil {
 		tx.Rollback()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create word",
+			"error":   "Failed to create word",
 			"details": err.Error(),
 		})
 	}
@@ -176,46 +176,46 @@ func (h *WordHandler) createWordWithGroups(c *fiber.Ctx, req WordWithGroups) err
 		if err := tx.Model(&models.Group{}).Where("id = ?", groupID).Count(&count).Error; err != nil {
 			tx.Rollback()
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Error verifying group",
+				"error":   "Error verifying group",
 				"details": err.Error(),
 			})
 		}
-		
+
 		if count == 0 {
 			tx.Rollback()
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Group not found",
+				"error":    "Group not found",
 				"group_id": groupID,
 			})
 		}
 
 		// Create association
 		association := models.WordGroup{
-			WordID: req.Word.ID,
+			WordID:  req.Word.ID,
 			GroupID: groupID,
 		}
-		
+
 		if err := tx.Create(&association).Error; err != nil {
 			tx.Rollback()
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to create word-group association",
+				"error":   "Failed to create word-group association",
 				"details": err.Error(),
 			})
 		}
-		
+
 		associations = append(associations, association)
 	}
 
 	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to commit transaction",
+			"error":   "Failed to commit transaction",
 			"details": err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"word": req.Word,
+		"word":               req.Word,
 		"group_associations": associations,
 	})
 }
@@ -227,16 +227,16 @@ func (h *WordHandler) createMultipleWords(c *fiber.Ctx) error {
 	if err := c.BodyParser(&wordsWithGroups); err == nil && len(wordsWithGroups.Words) > 0 {
 		return h.createMultipleWordsWithGroups(c, wordsWithGroups)
 	}
-	
+
 	// If not words with groups, process as standard words
 	var words []models.Word
 	if err := c.BodyParser(&words); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error":   "Invalid request body",
 			"details": err.Error(),
 		})
 	}
-	
+
 	// Validate all words
 	invalidWords := []int{}
 	for i, word := range words {
@@ -244,48 +244,48 @@ func (h *WordHandler) createMultipleWords(c *fiber.Ctx) error {
 			invalidWords = append(invalidWords, i)
 		}
 	}
-	
+
 	if len(invalidWords) > 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Some words are missing required fields",
+			"error":          "Some words are missing required fields",
 			"invalidIndices": invalidWords,
 		})
 	}
-	
+
 	// Create all words in the database
 	tx := h.db.GetDB().Begin()
-	
+
 	for _, word := range words {
 		if result := tx.Create(&word); result.Error != nil {
 			tx.Rollback()
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to create words",
+				"error":   "Failed to create words",
 				"details": result.Error.Error(),
 			})
 		}
 	}
-	
+
 	if err := tx.Commit().Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to commit transaction",
+			"error":   "Failed to commit transaction",
 			"details": err.Error(),
 		})
 	}
-	
+
 	// Reload words to get their assigned IDs
 	var createdWords []models.Word
 	if err := h.db.GetDB().Where("id IN ?", h.getLastInsertedIDs(len(words))).Find(&createdWords).Error; err != nil {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": true,
 			"message": "Words created successfully, but couldn't fetch created words",
-			"count": len(words),
+			"count":   len(words),
 		})
 	}
-	
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
-		"count": len(words),
-		"words": createdWords,
+		"count":   len(words),
+		"words":   createdWords,
 	})
 }
 
@@ -298,33 +298,33 @@ func (h *WordHandler) createMultipleWordsWithGroups(c *fiber.Ctx, req WordsWithG
 			invalidWords = append(invalidWords, i)
 		}
 	}
-	
+
 	if len(invalidWords) > 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Some words are missing required fields",
+			"error":          "Some words are missing required fields",
 			"invalidIndices": invalidWords,
 		})
 	}
-	
+
 	// Begin transaction
 	tx := h.db.GetDB().Begin()
-	
+
 	createdWords := []models.Word{}
 	allAssociations := []map[string]interface{}{}
-	
+
 	// Create all words and their group associations
 	for _, wordReq := range req.Words {
 		// Create the word
 		if err := tx.Create(&wordReq.Word).Error; err != nil {
 			tx.Rollback()
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to create word",
+				"error":   "Failed to create word",
 				"details": err.Error(),
 			})
 		}
-		
+
 		createdWords = append(createdWords, wordReq.Word)
-		
+
 		// Create word-group associations if any
 		for _, groupID := range wordReq.GroupIDs {
 			// Verify group exists
@@ -332,52 +332,52 @@ func (h *WordHandler) createMultipleWordsWithGroups(c *fiber.Ctx, req WordsWithG
 			if err := tx.Model(&models.Group{}).Where("id = ?", groupID).Count(&count).Error; err != nil {
 				tx.Rollback()
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Error verifying group",
+					"error":   "Error verifying group",
 					"details": err.Error(),
 				})
 			}
-			
+
 			if count == 0 {
 				tx.Rollback()
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error": "Group not found",
+					"error":    "Group not found",
 					"group_id": groupID,
 				})
 			}
-			
+
 			// Create association
 			association := models.WordGroup{
-				WordID: wordReq.Word.ID,
+				WordID:  wordReq.Word.ID,
 				GroupID: groupID,
 			}
-			
+
 			if err := tx.Create(&association).Error; err != nil {
 				tx.Rollback()
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Failed to create word-group association",
+					"error":   "Failed to create word-group association",
 					"details": err.Error(),
 				})
 			}
-			
+
 			allAssociations = append(allAssociations, map[string]interface{}{
-				"word_id": wordReq.Word.ID,
+				"word_id":  wordReq.Word.ID,
 				"group_id": groupID,
 			})
 		}
 	}
-	
+
 	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to commit transaction",
+			"error":   "Failed to commit transaction",
 			"details": err.Error(),
 		})
 	}
-	
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"count": len(createdWords),
-		"words": createdWords,
+		"success":            true,
+		"count":              len(createdWords),
+		"words":              createdWords,
 		"group_associations": allAssociations,
 	})
 }
@@ -386,11 +386,23 @@ func (h *WordHandler) createMultipleWordsWithGroups(c *fiber.Ctx, req WordsWithG
 func (h *WordHandler) getLastInsertedIDs(n int) []int64 {
 	var maxID int64
 	h.db.GetDB().Model(&models.Word{}).Select("MAX(id)").Scan(&maxID)
-	
+
 	ids := make([]int64, n)
 	for i := 0; i < n; i++ {
 		ids[i] = maxID - int64(n-i-1)
 	}
-	
+
 	return ids
+}
+
+// GetRandomWord returns a random word from the database
+func (h *WordHandler) GetRandomWord(c *fiber.Ctx) error {
+	var word models.Word
+	result := h.db.GetDB().Order("RANDOM()").First(&word)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get random word",
+		})
+	}
+	return c.JSON(word)
 }

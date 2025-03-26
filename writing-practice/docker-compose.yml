@@ -1,10 +1,11 @@
 services:
-  writing-practice:
+  # Streamlit service
+  writing_practice_ui:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: .docker/Dockerfile.streamlit
     ports:
-      - "8502:8502"
+      - "${WRITING_PRACTICE_UI_PORT:-8502}:8502"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data
@@ -12,15 +13,42 @@ services:
     environment:
       # Add any environment variables your app needs here
       - UV_LINK_MODE=copy
+      - SERVICE_TYPE=streamlit
     # These are optional settings you might want to consider:
     restart: unless-stopped
     # For development, uncomment the 'develop' section below:
-    # develop:
-    #   watch:
-    #     - action: sync
-    #       path: .
-    #       target: /app
-    #       ignore:
-    #         - .venv/
-    #     - action: rebuild
-    #       path: ./pyproject.toml
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml
+  # FastAPI service
+  writing_practice_api:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.fastapi
+    ports:
+      - "${WRITING_PRACTICE_API_PORT:-8001}:8001"
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+      - SERVICE_TYPE=fastapi
+    # These are optional settings you might want to consider:
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml

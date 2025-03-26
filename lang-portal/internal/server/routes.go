@@ -50,6 +50,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	// Word routes
 	wordHandler := handlers.NewWordHandler(s.db)
 	s.App.Get("/api/v1/words", wordHandler.GetWords)
+	s.App.Get("/api/v1/words/random", wordHandler.GetRandomWord)
 	s.App.Get("/api/v1/words/:id", wordHandler.GetWord)
 	s.App.Post("/api/v1/words", wordHandler.CreateWord)
 }
