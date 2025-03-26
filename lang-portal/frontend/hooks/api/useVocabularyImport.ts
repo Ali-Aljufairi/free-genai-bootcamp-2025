@@ -2,10 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Word } from "@/types/api";
 
-interface VocabularyTopic {
-  topic: string;
-}
-
 interface UseVocabularyImportReturn {
   importVocabularyByTopic: (topic: string) => Promise<any>;
   isLoading: boolean;
@@ -16,40 +12,31 @@ export function useVocabularyImport(): UseVocabularyImportReturn {
   const queryClient = useQueryClient();
   
   const vocabularyMutation = useMutation({
-    mutationFn: async (topicData: VocabularyTopic): Promise<any> => {
+    mutationFn: async (topic: string): Promise<any> => {
       try {
-        // Step 1: Get vocabulary suggestions from the vocabulary endpoint
-        const response = await fetch("http://localhost:8000/api/v1/vocabulary", {
+        // Step 1: Fetch vocabulary suggestions from the vocabulary API
+        const vocabResponse = await fetch(process.env.NEXT_PUBLIC_VOCAB_IMPORT || '', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "accept": "application/json"
           },
-          body: JSON.stringify(topicData),
+          body: JSON.stringify({ topic }),
         });
         
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          toast.error("Failed to get vocabulary", {
-            description: error.message || `Status: ${response.status}`,
-            className: "bg-destructive text-destructive-foreground",
-          });
-          throw new Error(error.message || `Failed to get vocabulary: ${response.status}`);
+        if (!vocabResponse.ok) {
+          throw new Error(`Failed to get vocabulary: ${vocabResponse.status}`);
         }
         
-        const suggestions = await response.json();
-        const words = suggestions.vocabulary?.words || [];
+        const vocabData = await vocabResponse.json();
+        const words = vocabData.vocabulary?.words || [];
         
         if (words.length === 0) {
-          toast.warning("No words found", {
-            description: `No vocabulary found for topic: ${topicData.topic}`,
-            className: "bg-warning text-warning-foreground",
-          });
-          return { totalSuggestions: 0, successfulImports: 0, topic: topicData.topic };
+          return { totalSuggestions: 0, successfulImports: 0, topic };
         }
 
-        // Send all words at once to the words endpoint
-        const wordResponse = await fetch("http://localhost:8080/api/v1/words", {
+        // Step 2: Send words directly to the words API
+        const wordResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/words`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -58,23 +45,13 @@ export function useVocabularyImport(): UseVocabularyImportReturn {
         });
         
         if (!wordResponse.ok) {
-          const errorData = await wordResponse.json().catch(() => ({}));
-          toast.error("Failed to add words", {
-            description: errorData.message || `Status: ${wordResponse.status}`,
-            className: "bg-destructive text-destructive-foreground",
-          });
-          throw new Error(errorData.message || `Failed to add words: ${wordResponse.status}`);
+          throw new Error(`Failed to add words: ${wordResponse.status}`);
         }
         
-        toast.success("Words imported successfully", {
-          description: `Added ${words.length} words for topic: ${topicData.topic}`,
-          className: "bg-primary text-primary-foreground",
-        });
-
         return {
           totalSuggestions: words.length,
           successfulImports: words.length,
-          topic: topicData.topic
+          topic
         };
         
       } catch (error) {
@@ -82,14 +59,18 @@ export function useVocabularyImport(): UseVocabularyImportReturn {
         throw error;
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["words"] });
       queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
+      toast.success("Vocabulary imported successfully");
+    },
+    onError: (error) => {
+      toast.error(`Import failed: ${error.message}`);
     }
   });
 
   const importVocabularyByTopic = async (topic: string): Promise<any> => {
-    return await vocabularyMutation.mutateAsync({ topic });
+    return await vocabularyMutation.mutateAsync(topic);
   };
 
   return {
