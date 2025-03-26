@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useGroups } from "@/hooks/api/useGroup"
@@ -9,9 +9,15 @@ import { useWords } from "@/hooks/api/useWord"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { Plus, X } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { useVocabularyImport } from "@/hooks/api/useVocabularyImport"
 
 export function VocabularyBrowser() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [showImport, setShowImport] = useState(false)
+  const [topic, setTopic] = useState("")
+  const { importVocabularyByTopic, isLoading: importLoading } = useVocabularyImport()
   const { data: groups, isLoading: groupsLoading } = useGroups()
   const { 
     data, 
@@ -62,6 +68,27 @@ export function VocabularyBrowser() {
     }
   }
 
+  const handleImport = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!topic.trim()) {
+      toast.error("Please enter a topic")
+      return
+    }
+    
+    try {
+      await importVocabularyByTopic(topic.trim())
+      toast.success("Vocabulary imported successfully!", {
+        description: `Words for topic "${topic}" have been added to your vocabulary list`
+      })
+      setTopic("")
+    } catch (error) {
+      toast.error("Failed to import vocabulary", {
+        description: error instanceof Error ? error.message : "Unknown error"
+      })
+    }
+  }
+
   if (wordsLoading && !words.length) {
     return (
       <div className="space-y-4">
@@ -91,14 +118,73 @@ export function VocabularyBrowser() {
   }
 
   return (
-    <div className="space-y-4">
-      <Input
-        type="search"
-        placeholder="Search vocabulary..."
-        className="max-w-sm"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
+        <Input
+          type="search"
+          placeholder="Search vocabulary..."
+          className="max-w-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setShowImport(!showImport)}
+        >
+          {showImport ? (
+            <>
+              <X className="mr-2 h-4 w-4" />
+              Hide Import
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Import Words
+            </>
+          )}
+        </Button>
+      </div>
+
+      {showImport && (
+        <Card className="w-full mb-6">
+          <CardHeader>
+            <CardTitle>Import Vocabulary by Topic</CardTitle>
+            <CardDescription>
+              Instantly add words related to a specific topic to your study list
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleImport} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  name="topic"
+                  placeholder="e.g. Sea animals, Kitchen utensils, Travel phrases"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  required
+                />
+                <p className="text-sm text-muted-foreground">
+                  Enter a specific topic to automatically generate related vocabulary words
+                </p>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={importLoading || !topic.trim()}
+              >
+                {importLoading ? "Importing..." : "Import Vocabulary"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-between border-t p-4 text-xs text-muted-foreground">
+            <p>Words will be added to your vocabulary for study sessions.</p>
+          </CardFooter>
+        </Card>
+      )}
+
       {filteredWords.length === 0 ? (
         <p className="text-center py-8 text-muted-foreground">
           {searchTerm ? "No words found matching your search." : "No vocabulary words available."}

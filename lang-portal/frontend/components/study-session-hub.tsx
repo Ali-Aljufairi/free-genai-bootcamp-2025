@@ -36,78 +36,80 @@ export function StudySessionHub() {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Flashcards
-          </CardTitle>
-          <CardDescription>Practice vocabulary with flashcards</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Review words using spaced repetition. Perfect for memorizing vocabulary and their meanings.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button
-            className="w-full"
-            onClick={() => startSession("flashcards")}
-            disabled={isLoading}
-          >
-            Start Flashcards
-          </Button>
-        </CardFooter>
-      </Card>
+    <div className="space-y-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Flashcards
+            </CardTitle>
+            <CardDescription>Practice vocabulary with flashcards</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Review words using spaced repetition. Perfect for memorizing vocabulary and their meanings.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => startSession("flashcards")}
+              disabled={isLoading}
+            >
+              Start Flashcards
+            </Button>
+          </CardFooter>
+        </Card>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ScrollText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Quiz
-          </CardTitle>
-          <CardDescription>Test your knowledge</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Take a quiz to test your understanding of vocabulary and track your progress.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button
-            className="w-full"
-            onClick={() => startSession("quiz")}
-            disabled={isLoading}
-          >
-            Start Quiz
-          </Button>
-        </CardFooter>
-      </Card>
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ScrollText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Quiz
+            </CardTitle>
+            <CardDescription>Test your knowledge</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Take a quiz to test your understanding of vocabulary and track your progress.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => startSession("quiz")}
+              disabled={isLoading}
+            >
+              Start Quiz
+            </Button>
+          </CardFooter>
+        </Card>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Free Study
-          </CardTitle>
-          <CardDescription>Create your own study session</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Choose your own words and study method. Perfect for customized learning.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button
-            className="w-full"
-            onClick={() => startSession("free")}
-            disabled={isLoading}
-          >
-            Start Free Study
-          </Button>
-        </CardFooter>
-      </Card>
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Free Study
+            </CardTitle>
+            <CardDescription>Create your own study session</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Choose your own words and study method. Perfect for customized learning.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => startSession("free")}
+              disabled={isLoading}
+            >
+              Start Free Study
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   )
 }
