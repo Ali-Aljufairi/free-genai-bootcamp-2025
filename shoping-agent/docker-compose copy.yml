@@ -1,0 +1,55 @@
+services:
+  # Streamlit service (renamed from voacab_importer)
+  shopping_agent_ui:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.streamlit
+    ports:
+      - "${VOCAB_IMPORT_UI_PORT:-8502}:8502"
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+      - SERVICE_TYPE=streamlit
+    # These are optional settings you might want to consider:
+    restart: unless-stopped
+    # For development, uncomment the 'develop' section below:
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml
+
+  # FastAPI service
+  shopping_agent_api:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.fastapi
+    ports:
+      - "${VOCAB_IMPORT_API_PORT:-8002}:8002"
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+      - SERVICE_TYPE=fastapi
+    # These are optional settings you might want to consider:
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml
