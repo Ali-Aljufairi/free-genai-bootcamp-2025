@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "dotenv>=0.9.9",
+    "fastapi>=0.115.12",
     "groq>=0.18.0",
     "manga-ocr>=0.1.14",
     "python-dotenv>=1.0.1",
@@ -15,4 +16,5 @@ dependencies = [
     "streamlit>=1.42.2",
     "torch>=2.6.0",
     "torchvision==0.21.0",
+    "uvicorn>=0.34.0",
 ]
