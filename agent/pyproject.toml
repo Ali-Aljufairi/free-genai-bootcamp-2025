@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.13.3",
+    "fastapi>=0.115.12",
     "google-api-python-client>=2.162.0",
     "ipython>=9.0.0",
     "langchain-community>=0.3.18",
@@ -13,7 +14,9 @@ dependencies = [
     "langgraph>=0.3.1",
     "pandas>=2.2.3",
     "plotly>=6.0.0",
+    "pydantic>=2.10.6",
     "streamlit>=1.42.2",
     "tavily-python>=0.5.1",
+    "uvicorn>=0.34.0",
     "watchdog>=6.0.0",
 ]
