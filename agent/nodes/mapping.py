@@ -14,6 +14,7 @@ from utils.prompt_templates import (
 )
 
 import json
+from utils import log
 
 
 def schema_mapping_node(state: State):
@@ -55,32 +56,32 @@ def schema_mapping_node(state: State):
                         # Store the structured schema in the state but map to product_schema
                         return {"product_schema": response["reviews"]}
                     else:
-                        print(
+                        log(
                             f"Attempt {attempt} failed: Product schema has one or fewer products or wrong format."
                         )
 
                 except Exception as retry_exception:
-                    print(f"Retry {attempt} error: {retry_exception}")
+                    log(f"Retry {attempt} error: {retry_exception}")
 
                 # Wait before retrying if not successful and retry limit not reached
                 if attempt < max_retries:
                     time.sleep(wait_time)
 
             # Return an empty schema if all retries fail
-            print(
+            log(
                 "All retry attempts failed to create a valid product schema with more than one product."
             )
             return {"product_schema": []}
         else:
             # If "blogs_content" is not present or is empty, log and return state unmodified
-            print(
+            log(
                 "No blog content available or content is empty; schema extraction skipped."
             )
             return {"product_schema": []}
 
     except Exception as e:
         # Error handling to catch any unexpected issues and log the error message
-        print(f"Error occurred during schema extraction: {e}")
+        log(f"Error occurred during schema extraction: {e}")
         return state
 
 
@@ -115,9 +116,9 @@ def product_comparison_node(state: State):
 
         else:
             # If "product_schema" is missing or empty, log and skip comparison logic
-            print("No product schema available; product comparison skipped.")
+            log("No product schema available; product comparison skipped.")
             return state
 
     except Exception as e:
-        print(f"Error during product comparison: {e}")
+        log(f"Error during product comparison: {e}")
         return {"best_product": {}, "comparison_report": "Comparison failed"}

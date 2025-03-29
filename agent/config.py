@@ -22,6 +22,10 @@ GMAIL_PASSWORD = os.environ.get("GMAIL_PASS")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
+# Debug settings
+# Set to False to disable logging via print statements
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
 # Initialize services
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
