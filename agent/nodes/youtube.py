@@ -17,7 +17,7 @@ def youtube_review_node(state: State):
     best_product_name = state.get("best_product", {}).get("product_name")
 
     if not best_product_name:
-        print("Skipping YouTube search: No best product found.")
+        # print("Skipping YouTube search: No best product found.")
         return {"youtube_link": None}
 
     try:

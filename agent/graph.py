@@ -110,7 +110,7 @@ def run_shopgenie(query, email):
     # Execute the graph
     result = None
     for event in graph.stream(input=initial_state, stream_mode="updates"):
-        print(event)
+        # print(event)
         result = event
 
     return result

@@ -47,7 +47,7 @@ def tavily_search_node(state: State):
 
         # Store all blog contents in the state
         if len(blogs_content) > 0:
-            print("Extracted Blogs Content:", blogs_content)
+            # print("Extracted Blogs Content:", blogs_content)
             return {"blogs_content": blogs_content}
         else:
             raise ValueError("No blogs content found.")

@@ -10,18 +10,19 @@ EMAIL_HTML_TEMPLATE = """
                 font-family: Arial, sans-serif;
                 margin: 0;
                 padding: 0;
-                background-color: #f4f4f4;
+                background-color: #1a1a2e;
+                color: #eaeaea;
             }}
             .email-container {{
                 max-width: 600px;
                 margin: 20px auto;
-                background-color: #ffffff;
+                background-color: #16213e;
                 border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
                 overflow: hidden;
             }}
             .header {{
-                background-color: #007BFF;
+                background-color: #0f3460;
                 color: #ffffff;
                 padding: 20px;
                 text-align: center;
@@ -34,23 +35,28 @@ EMAIL_HTML_TEMPLATE = """
                 padding: 20px;
             }}
             .content h2 {{
-                color: #333333;
+                color: #eaeaea;
                 font-size: 20px;
                 margin-bottom: 10px;
             }}
             .content p {{
-                color: #555555;
+                color: #c4c4c4;
                 font-size: 16px;
                 line-height: 1.5;
             }}
             .button {{
                 display: inline-block;
                 margin-top: 20px;
-                background-color: #007BFF;
+                background-color: #0f3460;
                 color: #ffffff;
                 padding: 10px 20px;
                 text-decoration: none;
                 border-radius: 5px;
+                font-weight: bold;
+            }}
+            .button:hover {{
+                background-color: #1a73e8;
+                color: #ffffff;
             }}
             .footer {{
                 text-align: center;
@@ -59,7 +65,7 @@ EMAIL_HTML_TEMPLATE = """
                 padding: 10px 20px;
             }}
             .footer a {{
-                color: #007BFF;
+                color: #ffffff;
                 text-decoration: none;
             }}
         </style>
@@ -73,14 +79,14 @@ EMAIL_HTML_TEMPLATE = """
                 <h2>Our Top Pick: {product_name}</h2>
                 <p>{justification}</p>
                 <p>Watch our in-depth review to explore why this phone is the best choice for you:</p>
-                <a href="{youtube_link}" class="button" target="_blank">Watch the Review</a>
+                <a href="{youtube_link}" class="button" target="_blank" style="color: #ffffff;">Watch the Review</a>
             </div>
             <div class="footer">
                 <p>
-                    Want to learn more? Visit our website or follow us for more recommendations.
-                    <a href="https://www.youtube.com">Explore Now</a>
+                    Want to learn more about how I did this? Please check my GitHub:
+                    <a href="https://github.com/Ali-Aljufairi/">Ali Aljufairi</a>
                 </p>
-                <p>&copy; 2024 Smartphone Recommendations, All Rights Reserved.</p>
+                <p>&copy; 2025 Ali Jufairi, All Rights Reserved.</p>
             </div>
         </div>
     </body>
