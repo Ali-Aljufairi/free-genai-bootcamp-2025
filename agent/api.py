@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from graph import run_shopgenie
+from graph import run_shopgenie, run_shopgenie_api
 from config import GROQ_API_KEY, TAVILY_API_KEY, YOUTUBE_API_KEY
 
 # Initialize FastAPI app
@@ -55,6 +55,10 @@ class SearchResponse(BaseModel):
     message: str = Field(default="Your search is being processed. Results will be sent to your email.")
     request_id: str = Field(default="")
 
+class DirectSearchResponse(BaseModel):
+    status: str = Field(default="success")
+    data: dict = Field(default={}, description="Complete workflow data including search results, comparisons, and recommendations")
+
 # Background task to run the search
 def process_search_in_background(query: str, email: str):
     """Run the ShopGenie workflow in the background."""
@@ -94,11 +98,15 @@ async def search(request: SearchRequest, background_tasks: BackgroundTasks):
         request_id=f"{hash(request.query + request.email)}"  # Simple request ID
     )
 
-@api.post("/search/full")
-async def search_with_full_response(request: SearchRequest):
+@api.post("/search/direct", response_model=DirectSearchResponse)
+async def search_direct(request: SearchRequest):
     """
-    Endpoint to search for products and return the full result data.
-    This is a synchronous endpoint that will return the complete result data.
+    Endpoint to search for products and return complete results directly in the API response.
+    This endpoint doesn't send emails but provides all the data including search results, 
+    comparisons, and recommendations.
+    
+    Note: This is a synchronous endpoint that will process the full workflow and may take 
+    some time to respond depending on the complexity of the query.
     """
     # Check if required API keys are set
     missing_keys = check_api_keys()
@@ -109,15 +117,18 @@ async def search_with_full_response(request: SearchRequest):
     if not request.query:
         raise HTTPException(status_code=400, detail="Search query cannot be empty")
     
-    # Validate email format
+    # Validate email format (still needed for tracking purposes)
     if not is_valid_email(request.email):
         raise HTTPException(status_code=400, detail="Invalid email format")
     
     try:
-        # Run the search and get the full result
-        result = run_shopgenie(request.query, request.email)
+        # Run the search workflow and get complete data
+        complete_data = run_shopgenie_api(request.query, request.email)
         
-        # Return the full result data
-        return result
+        # Return the complete data
+        return DirectSearchResponse(
+            status="success",
+            data=complete_data
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing search: {str(e)}")
