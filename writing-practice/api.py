@@ -17,10 +17,10 @@ fh.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 logger.addHandler(fh)
 
 # Create FastAPI app
-app = FastAPI(title="Japanese Writing Practice API")
+api = FastAPI(title="Japanese Writing Practice API")
 
 # Add CORS middleware
-app.add_middleware(
+api.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For development; restrict in production
     allow_credentials=True,
@@ -54,12 +54,12 @@ class FeedbackResponse(BaseModel):
     feedback: str  # Detailed feedback
 
 
-@app.get("/")
+@api.get("/")
 async def root():
     return {"message": "Japanese Writing Practice API"}
 
 
-@app.get("/api/v1/random-sentence", response_model=RandomSentenceResponse)
+@api.get("/api/v1/random-sentence", response_model=RandomSentenceResponse)
 async def get_random_sentence():
     """Generate a random sentence"""
     try:
@@ -86,7 +86,7 @@ async def get_random_sentence():
         )
 
 
-@app.post("/api/v1/feedback-word", response_model=FeedbackResponse)
+@api.post("/api/v1/feedback-word", response_model=FeedbackResponse)
 async def get_word_feedback(submission: ImageSubmission):
     """Get feedback on a word writing submission"""
     try:
@@ -109,7 +109,7 @@ async def get_word_feedback(submission: ImageSubmission):
         )
 
 
-@app.post("/api/v1/feedback-sentence", response_model=FeedbackResponse)
+@api.post("/api/v1/feedback-sentence", response_model=FeedbackResponse)
 async def get_sentence_feedback(submission: ImageSubmission):
     """Get feedback on a sentence writing submission"""
     try:
@@ -119,13 +119,15 @@ async def get_sentence_feedback(submission: ImageSubmission):
 
         # Process the image with the target sentence if provided
         result = japanese_app.process_sentence_image(image, submission.target_sentence)
-        
+
         # Check if we're receiving the newer 5-tuple result or the older 4-tuple result
         if len(result) == 5:
             transcription, translation, grade, feedback, target = result
         else:
             transcription, translation, grade, feedback = result
-            target = submission.target_sentence or japanese_app.current_sentence  # Use provided target if available
+            target = (
+                submission.target_sentence or japanese_app.current_sentence
+            )  # Use provided target if available
 
         # For sentence feedback, return the response with the target sentence
         return FeedbackResponse(
@@ -144,4 +146,3 @@ async def get_sentence_feedback(submission: ImageSubmission):
 # For direct execution
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=8001, reload=True)
- 
