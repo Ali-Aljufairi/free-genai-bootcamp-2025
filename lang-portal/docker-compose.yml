@@ -15,12 +15,11 @@ services:
       - sqlite_bp:/app/db
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
-      target: frontend
     restart: unless-stopped
     ports:
-      - 5173:5173
+      - 3000:3000
     depends_on:
       - app
 volumes:
