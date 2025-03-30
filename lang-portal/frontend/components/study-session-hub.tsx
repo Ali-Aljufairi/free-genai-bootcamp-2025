@@ -1,7 +1,7 @@
 "use client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Brain, Edit, ScrollText, BookOpen } from "lucide-react"
+import { Brain, Edit, ScrollText, BookOpen, Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
@@ -127,6 +127,29 @@ export function StudySessionHub() {
               disabled={isLoading}
             >
               Start Drawing
+            </Button>
+          </CardFooter>
+        </Card>
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Learning Resources
+            </CardTitle>
+            <CardDescription>Find resources to learn Japanese</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              AI-powered agent that helps you find the best books, videos, and resources for learning Japanese.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => startSession("agent")}
+              disabled={isLoading}
+            >
+              Find Resources
             </Button>
           </CardFooter>
         </Card>
