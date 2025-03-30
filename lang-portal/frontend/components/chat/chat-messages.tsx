@@ -1,6 +1,7 @@
 import { UIMessage } from "ai";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLayoutEffect, useRef } from "react";
+import { Markdown } from "@/components/ui/markdown";
 
 interface ChatMessageProps {
     messages: UIMessage[];
@@ -44,8 +45,8 @@ export function ChatMessages({ messages, isLoading }: ChatMessageProps) {
                         <div className="text-xs text-muted-foreground mb-1">
                             {message.role === "user" ? "You" : "Language Tutor"}
                         </div>
-                        <div className="text-sm whitespace-pre-wrap">
-                            {message.content}
+                        <div className="text-sm">
+                            <Markdown>{message.content}</Markdown>
                         </div>
                     </div>
                 </div>

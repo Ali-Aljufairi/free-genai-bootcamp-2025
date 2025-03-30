@@ -1,7 +1,7 @@
 "use client"
 
 import { useChat } from '@ai-sdk/react';
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,14 +19,21 @@ export function Chat({ sessionId, onComplete }: ChatProps) {
     const [selectedModel, setSelectedModel] = useState<modelID>("llama-3.3-70b-versatile");
     const [selectedPrompt, setSelectedPrompt] = useState<SystemPromptID>(defaultPrompt);
     const [isComplete, setIsComplete] = useState(false);
+    const initialized = useRef(false);
 
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: "/api/chat",
         body: {
             selectedModel,
             selectedPrompt
-        }
+        },
+        id: sessionId
     });
+
+    // Add this useEffect to prevent unnecessary re-renders on first use
+    useEffect(() => {
+        initialized.current = true;
+    }, []);
 
     const handleCompleteSession = () => {
         toast.success("Chat session completed!");

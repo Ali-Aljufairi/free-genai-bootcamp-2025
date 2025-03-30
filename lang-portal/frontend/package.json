@@ -61,6 +61,7 @@
     "react-resizable-panels": "^2.1.7",
     "react-sketch-canvas": "^6.2.0",
     "recharts": "2.15.0",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
