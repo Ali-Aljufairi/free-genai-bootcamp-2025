@@ -1,0 +1,71 @@
+name: Build and Push Docker Compose Services
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push lang-portal services
+        run: |
+          cd lang-portal
+          docker compose build
+          docker compose push
+
+      - name: Build and push agent services
+        run: |
+          cd agent
+          docker compose build
+          docker compose push
+
+      - name: Build and push writing-practice services
+        run: |
+          cd writing-practice
+          docker compose build
+          docker compose push
+
+      - name: Build and push vocab-importer services
+        run: |
+          cd vocab-importer
+          docker compose build
+          docker compose push
+
+      - name: Build and push video-translation services
+        run: |
+          cd Video-Trasnslation
+          docker compose build
+          docker compose push
+
+      - name: Build and push listening-comp services
+        run: |
+          cd listening-comp
+          docker compose build
+          docker compose push
+
+      - name: Build and push speech services
+        run: |
+          cd speach
+          docker compose build
+          docker compose push 
