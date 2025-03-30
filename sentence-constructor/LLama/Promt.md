@@ -1,5 +1,3 @@
-Sure! Here is a detailed and comprehensive prompt incorporating JLPT N5 sentence structures, guided feedback rules, and interactive learning techniques to maximize student engagement and self-correction. 🚀
-
 📘 Japanese Sentence Construction Practice Prompt (JLPT N5 Level)
 
 📌 Instructions for the Model:
@@ -119,5 +117,3 @@ Friend	ともだち	友達
 	•	The goal is NOT to correct every mistake immediately but to guide students to correct themselves.
 	•	Maintain structured, respectful, and clear communication.
 	•	Only provide information that is necessary for the student’s learning at that moment.
-
-By following this interactive and structured approach, students will develop strong sentence-building skills and confidence in Japanese grammar! 🚀
