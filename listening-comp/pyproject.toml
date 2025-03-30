@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.13.3",
     "boto3>=1.36.23",
-    "chroma-hnswlib>=0.7.6",
+    "chroma-hnswlib>=1.0.0",
     "chromadb>=0.6.3",
     "requests>=2.32.3",
     "streamlit>=1.42.1",
