@@ -124,14 +124,39 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
           duration: 3000
         })
         
-        // Display the results in a more user-friendly format
+        // Filter out tavily_search data before displaying
+        let processedResults = "";
+        
         if (data.results && Array.isArray(data.results)) {
-          setDirectResults(data.results.join("\n"));
+          processedResults = data.results.join("\n");
         } else if (typeof data.results === 'string') {
-          setDirectResults(data.results);
+          processedResults = data.results;
         } else {
-          setDirectResults(JSON.stringify(data, null, 2));
+          // Create a deep copy to avoid modifying the original data
+          const cleanedData = JSON.parse(JSON.stringify(data));
+          
+          // Check for nested tavily_search data structure and remove it
+          if (cleanedData.data && cleanedData.data.tavily_search) {
+            delete cleanedData.data.tavily_search;
+          }
+          
+          // Also check for the capitalized version just in case
+          if (cleanedData.data && cleanedData.data.Tavily_search) {
+            delete cleanedData.data.Tavily_search;
+          }
+          
+          // Also check for direct properties
+          if (cleanedData.tavily_search) {
+            delete cleanedData.tavily_search;
+          }
+          if (cleanedData.Tavily_search) {
+            delete cleanedData.Tavily_search;
+          }
+          
+          processedResults = JSON.stringify(cleanedData, null, 2);
         }
+        
+        setDirectResults(processedResults);
         
         toast({
           title: "Search Complete",
