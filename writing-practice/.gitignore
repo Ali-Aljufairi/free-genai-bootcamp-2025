@@ -2,4 +2,3 @@
 *.log
 *.pyc
 __pycache__
-uv.lock
