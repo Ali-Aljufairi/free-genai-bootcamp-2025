@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
-import { Search, BookOpen, BookText, Video, GraduationCap } from "lucide-react"
+import { Search, BookOpen, BookText, Video, GraduationCap, Zap, Copy, Check } from "lucide-react"
 
 interface AgentStudyProps {
   sessionId: string;
@@ -14,7 +14,12 @@ interface AgentStudyProps {
 export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
   const [query, setQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isDirectLoading, setIsDirectLoading] = useState(false)
   const [email, setEmail] = useState<string>("")
+  const [directResults, setDirectResults] = useState<string>("")
+  const [isCopied, setIsCopied] = useState(false)
+
+  const resourceApiUrl = process.env.NEXT_PUBLIC_RESOURCE_API || "http://localhost:8002"
 
   const handleSearch = async () => {
     if (!query) {
@@ -38,7 +43,6 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
     setIsLoading(true)
     try {
       // Use environment variable for the API URL instead of hardcoding it
-      const resourceApiUrl = process.env.NEXT_PUBLIC_RESOURCE_API || "http://localhost:8002"
       
       const response = await fetch(`${resourceApiUrl}/search`, {
         method: "POST",
@@ -79,6 +83,100 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
     }
   }
 
+  const handleDirectSearch = async () => {
+    if (!query) {
+      toast({
+        variant: "destructive",
+        title: "Query is required",
+        description: "Please enter what you want to search for"
+      })
+      return
+    }
+
+    if (!email || !email.includes('@')) {
+      toast({
+        variant: "destructive",
+        title: "Valid email required",
+        description: "Please enter a valid email address to receive your results"
+      })
+      return
+    }
+
+    setIsDirectLoading(true)
+    try {
+      const response = await fetch(`${resourceApiUrl}/search/direct`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          query: query,
+          email: email
+        })
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        toast({
+          title: "Direct Search Results",
+          description: "Results retrieved successfully",
+          duration: 3000
+        })
+        
+        // Display the results in a more user-friendly format
+        if (data.results && Array.isArray(data.results)) {
+          setDirectResults(data.results.join("\n"));
+        } else if (typeof data.results === 'string') {
+          setDirectResults(data.results);
+        } else {
+          setDirectResults(JSON.stringify(data, null, 2));
+        }
+        
+        toast({
+          title: "Search Complete",
+          description: "Direct search results are available",
+          duration: 5000
+        })
+      } else {
+        throw new Error(data.message || "Failed to get direct search results")
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Direct search failed",
+        description: error instanceof Error ? error.message : "Please try again"
+      })
+    } finally {
+      setIsDirectLoading(false)
+    }
+  }
+
+  const handleCopyResults = () => {
+    if (directResults) {
+      navigator.clipboard.writeText(directResults)
+        .then(() => {
+          setIsCopied(true)
+          toast({
+            title: "Copied to clipboard",
+            description: "Search results copied to clipboard",
+            duration: 2000
+          })
+          
+          setTimeout(() => {
+            setIsCopied(false)
+          }, 2000)
+        })
+        .catch(err => {
+          toast({
+            variant: "destructive",
+            title: "Copy failed",
+            description: "Could not copy text to clipboard"
+          })
+        })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Card className="glass-card">
@@ -105,7 +203,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
                   placeholder="Enter your email to receive results"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoading || isDirectLoading}
                 />
               </div>
               
@@ -118,17 +216,52 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
                   placeholder="e.g., Best books for JLPT N5, Kanji practice apps, Beginner listening resources..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoading || isDirectLoading}
                 />
               </div>
               
-              <Button 
-                onClick={handleSearch} 
-                disabled={isLoading || !query || !email}
-                className="w-full"
-              >
-                {isLoading ? "Searching..." : "Find Resources"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSearch} 
+                  disabled={isLoading || isDirectLoading || !query || !email}
+                  className="flex-1"
+                >
+                  {isLoading ? "Searching..." : "Find Resources"}
+                </Button>
+                
+                <Button 
+                  onClick={handleDirectSearch}
+                  disabled={isLoading || isDirectLoading || !query || !email}
+                  variant="outline"
+                  size="icon"
+                  title="Quick search"
+                  className="h-10 w-10"
+                >
+                  <Zap className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {directResults && (
+                <div className="mt-4 p-4 bg-muted rounded-lg max-h-60 overflow-y-auto relative">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-medium">Direct Search Results:</h4>
+                    <Button 
+                      onClick={handleCopyResults} 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 px-2"
+                    >
+                      {isCopied ? (
+                        <Check className="h-4 w-4 mr-1" />
+                      ) : (
+                        <Copy className="h-4 w-4 mr-1" />
+                      )}
+                      {isCopied ? "Copied" : "Copy"}
+                    </Button>
+                  </div>
+                  <pre className="text-sm whitespace-pre-wrap">{directResults}</pre>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
