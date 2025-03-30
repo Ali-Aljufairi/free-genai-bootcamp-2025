@@ -1,4 +1,5 @@
 import { modelID } from "@/ai/providers";
+import { SystemPromptID, defaultPrompt } from "@/ai/prompts";
 import { Textarea as ShadcnTextarea } from "@/components/ui/textarea";
 import { ArrowUp } from "lucide-react";
 import { useState } from "react";
@@ -10,6 +11,8 @@ interface ChatInputProps {
     isLoading: boolean;
     selectedModel: modelID;
     setSelectedModel: (model: modelID) => void;
+    selectedPrompt?: SystemPromptID;
+    setSelectedPrompt?: (prompt: SystemPromptID) => void;
 }
 
 export function ChatInput({
@@ -19,8 +22,20 @@ export function ChatInput({
     isLoading,
     selectedModel,
     setSelectedModel,
+    selectedPrompt = defaultPrompt,
+    setSelectedPrompt,
 }: ChatInputProps) {
     const [showModelPicker, setShowModelPicker] = useState(false);
+    const [showPromptPicker, setShowPromptPicker] = useState(false);
+
+    const promptLabels: Record<SystemPromptID, string> = {
+        "general": "General",
+        "japanese-only": "Japanese Only",
+        "grammar-focus": "Grammar Focus",
+        "conversation-partner": "Conversation Partner",
+        "vocabulary-builder": "Vocabulary Builder",
+        "pronunciation-coach": "Pronunciation Coach",
+    };
 
     return (
         <form onSubmit={handleSubmit} className="w-full">
@@ -42,21 +57,36 @@ export function ChatInput({
                             }
                         }
                     }}
-                    onClick={() => setShowModelPicker(false)}
+                    onClick={() => {
+                        setShowModelPicker(false);
+                        setShowPromptPicker(false);
+                    }}
                 />
-
-                <div className="absolute left-2 bottom-2">
+                <div className="absolute left-2 bottom-2 flex space-x-2">
                     <button
                         type="button"
                         onClick={(e) => {
                             e.preventDefault();
                             setShowModelPicker(!showModelPicker);
+                            setShowPromptPicker(false);
                         }}
                         className="text-xs text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
                     >
                         {selectedModel.split('-')[0].charAt(0).toUpperCase() + selectedModel.split('-')[0].slice(1)} ▾
                     </button>
-
+                    {setSelectedPrompt && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setShowPromptPicker(!showPromptPicker);
+                                setShowModelPicker(false);
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+                        >
+                            {promptLabels[selectedPrompt]} ▾
+                        </button>
+                    )}
                     {showModelPicker && (
                         <div className="absolute bottom-10 left-0 bg-background border border-border rounded-md p-2 z-10 w-[200px] shadow-md">
                             <div className="space-y-2">
@@ -93,8 +123,26 @@ export function ChatInput({
                             </div>
                         </div>
                     )}
+                    {showPromptPicker && setSelectedPrompt && (
+                        <div className="absolute bottom-10 left-[150px] bg-background border border-border rounded-md p-2 z-10 w-[200px] shadow-md">
+                            <div className="space-y-2">
+                                {Object.entries(promptLabels).map(([id, label]) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedPrompt(id as SystemPromptID);
+                                            setShowPromptPicker(false);
+                                        }}
+                                        className={`w-full text-left text-xs px-2 py-1 rounded-md ${selectedPrompt === id ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/50"}`}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
-
                 <button
                     type="submit"
                     disabled={isLoading || !input.trim()}

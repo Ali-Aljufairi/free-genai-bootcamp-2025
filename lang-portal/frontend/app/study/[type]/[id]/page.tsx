@@ -5,7 +5,7 @@ import { FlashcardStudy } from "@/components/study/flashcard-study"
 import { QuizStudy } from "@/components/study/quiz-study"
 import { DrawingStudy } from "@/components/study/drawing-study"
 import { AgentStudy } from "@/components/study/agent-study"
-import { Chat } from "@/components/chat/chat"
+import { Chat } from "@/components/study/chat-study"
 import React from "react"
 
 export default function StudySessionPage({

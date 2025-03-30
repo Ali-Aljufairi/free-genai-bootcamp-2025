@@ -1,39 +1,35 @@
 "use client"
 
 import { useChat } from '@ai-sdk/react';
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { modelID } from "@/ai/providers";
-import { Textarea } from "./chat-textarea";
+import { SystemPromptID, defaultPrompt } from "@/ai/prompts";
+import { ChatInput } from "../chat/chat-input";
+import { ChatMessages } from "../chat/chat-messages";
 
-interface ChatStudyProps {
+interface ChatProps {
     sessionId: string;
     onComplete: () => void;
 }
 
-export function ChatStudy({ sessionId, onComplete }: ChatStudyProps) {
+export function Chat({ sessionId, onComplete }: ChatProps) {
     const [selectedModel, setSelectedModel] = useState<modelID>("llama-3.3-70b-versatile");
+    const [selectedPrompt, setSelectedPrompt] = useState<SystemPromptID>(defaultPrompt);
     const [isComplete, setIsComplete] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: "/api/chat",
         body: {
-            selectedModel
+            selectedModel,
+            selectedPrompt
         }
     });
 
-    // Using useLayoutEffect instead of useEffect for DOM manipulation
-    // This runs synchronously after DOM mutations but before browser paint
-    useLayoutEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, isLoading]);
-
     const handleCompleteSession = () => {
-        toast.success("Chat study session completed!");
+        toast.success("Chat session completed!");
         onComplete();
     }
 
@@ -51,65 +47,25 @@ export function ChatStudy({ sessionId, onComplete }: ChatStudyProps) {
 
     return (
         <div className="flex flex-col h-[calc(100vh-8rem)]">
-            <Card className="flex-1 glass-card flex flex-col h-full overflow-hidden">
+            <Card className="flex-1 glass-card flex flex-col h-full overflow-hidden border-0 shadow-lg bg-background/60 backdrop-blur-sm">
                 <CardContent className="flex-1 overflow-y-auto p-4 pt-6 pb-0">
-                    <div className="space-y-4">
-                        {messages.length === 0 && (
-                            <div className="text-center py-8">
-                                <p className="text-muted-foreground">
-                                    Start chatting to practice your language skills. The AI will respond in the language you're learning.
-                                </p>
-                            </div>
-                        )}
-
-                        {messages.map(m => (
-                            <div
-                                key={m.id}
-                                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div
-                                    className={`
-                                        max-w-[80%] rounded-lg px-4 py-2
-                                        ${m.role === 'user'
-                                            ? 'bg-primary/10 text-foreground'
-                                            : 'bg-muted text-foreground'}
-                                    `}
-                                >
-                                    <div className="text-xs text-muted-foreground mb-1">
-                                        {m.role === 'user' ? 'You' : 'Language Tutor'}
-                                    </div>
-                                    <div className="text-sm whitespace-pre-wrap">
-                                        {m.content}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
-                                    <Skeleton className="h-4 w-[200px] mb-2" />
-                                    <Skeleton className="h-4 w-[150px]" />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Invisible element to scroll to */}
-                        <div ref={messagesEndRef} />
-                    </div>
+                    <ChatMessages messages={messages} isLoading={isLoading} />
                 </CardContent>
 
                 <CardFooter className="border-t p-4 mt-auto">
-                    <Textarea
+                    <ChatInput
                         input={input}
                         handleInputChange={handleInputChange}
                         handleSubmit={handleSubmit}
                         isLoading={isLoading}
                         selectedModel={selectedModel}
                         setSelectedModel={setSelectedModel}
+                        selectedPrompt={selectedPrompt}
+                        setSelectedPrompt={setSelectedPrompt}
                     />
                 </CardFooter>
             </Card>
+
         </div>
     )
 }
