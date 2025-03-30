@@ -2,7 +2,6 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 # Copy .env file
-COPY .env /app/.env
 
 # Install the project into `/app`
 WORKDIR /app
