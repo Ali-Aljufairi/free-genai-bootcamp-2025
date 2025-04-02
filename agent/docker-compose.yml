@@ -4,7 +4,7 @@ services:
     image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/shopping-agent-ui:${TAG:-latest}
     build:
       context: .
-      dockerfile: .docker/Dockerfile.streamlit
+      dockerfile: .docker/Dockerfile.streamlit.multistage
     ports:
       - "${VOCAB_IMPORT_UI_PORT:-8503}:8503"
     volumes:
@@ -12,6 +12,7 @@ services:
       - ./logs:/app/logs
     environment:
       # Add any environment variables your app needs here
+      - UV_COMPILE_BYTECODE=1
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=streamlit
       - REGISTRY=ghcr.io
@@ -34,7 +35,7 @@ services:
     image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/shopping-agent-api:${TAG:-latest}
     build:
       context: .
-      dockerfile: .docker/Dockerfile.fastapi
+      dockerfile: .docker/Dockerfile.fastapi.multistage
     ports:
       - "${VOCAB_IMPORT_API_PORT:-8002}:8002"
     volumes:
@@ -43,6 +44,7 @@ services:
       - ./logs:/app/logs
     environment:
       # Add any environment variables your app needs here
+      - UV_COMPILE_BYTECODE=1
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=fastapi
       - REGISTRY=ghcr.io
@@ -58,3 +60,11 @@ services:
             - .venv/
         - action: rebuild
           path: ./pyproject.toml
+
+volumes:
+  fastapi_venv:
+  streamlit_venv:
+
+networks:
+  app-network:
+    driver: bridge
