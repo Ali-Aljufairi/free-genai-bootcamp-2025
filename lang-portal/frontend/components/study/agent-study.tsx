@@ -19,7 +19,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
     const [directResults, setDirectResults] = useState<string>("")
     const [isCopied, setIsCopied] = useState(false)
 
-    const resourceApiUrl = process.env.NEXT_PUBLIC_RESOURCE_API || "http://localhost:8002"
+    const resourceApiUrl = process.env.NEXT_PUBLIC_AGENT || "http://localhost:8002"
 
     const handleSearch = async () => {
         if (!query) {

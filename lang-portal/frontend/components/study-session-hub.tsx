@@ -110,29 +110,6 @@ export function StudySessionHub() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Free Study
-            </CardTitle>
-            <CardDescription>Create your own study session</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Choose your own words and study method. Perfect for customized learning.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button
-              className="w-full"
-              onClick={() => startSession("free")}
-              disabled={isLoading}
-            >
-              Start Free Study
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Writing Practice
             </CardTitle>

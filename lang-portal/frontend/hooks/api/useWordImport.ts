@@ -8,13 +8,13 @@ interface UseWordImportReturn {
   isLoading: boolean;
   error: Error | null;
 }
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export function useWordImport(): UseWordImportReturn {
   const queryClient = useQueryClient();
   
   const mutation = useMutation({
     mutationFn: async (wordData: Partial<Word>): Promise<Word> => {
-      const response = await fetch("http://localhost:8080/api/v1/words", {
+      const response = await fetch(`${API_URL}/words`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

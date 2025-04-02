@@ -27,24 +27,6 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden md:flex gap-6">
-            <Link
-              href="/features"
-              className="text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              Features
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/about"
-              className="text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              About
-            </Link>
           </nav>
         </div>
 
