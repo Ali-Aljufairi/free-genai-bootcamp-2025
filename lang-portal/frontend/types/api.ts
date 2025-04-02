@@ -1,7 +1,7 @@
 // Study Session Types
 export interface StudySession {
   id: string;
-  type: 'quiz' | 'flashcards' | 'free';
+  type: 'quiz' | 'flashcards' | 'free' | 'speech';
   name: string;
   description: string;
   created_at: string;

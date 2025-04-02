@@ -13,6 +13,7 @@ services:
       BLUEPRINT_DB_URL: ${BLUEPRINT_DB_URL}
     volumes:
       - sqlite_bp:/app/db
+      - ./words.db:/app/words.db
   frontend:
     build:
       context: ./frontend

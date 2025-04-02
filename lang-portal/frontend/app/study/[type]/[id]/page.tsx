@@ -6,6 +6,7 @@ import { QuizStudy } from "@/components/study/quiz-study"
 import { DrawingStudy } from "@/components/study/drawing-study"
 import { AgentStudy } from "@/components/study/agent-study"
 import { Chat } from "@/components/study/chat-study"
+import { SpeechStudy } from "@/components/study/speech-study"
 import React from "react"
 
 export default function StudySessionPage({
@@ -46,6 +47,10 @@ export default function StudySessionPage({
 
             {type === "chat" && (
                 <Chat sessionId={id} onComplete={handleComplete} />
+            )}
+
+            {type === "speech" && (
+                <SpeechStudy sessionId={id} onComplete={handleComplete} />
             )}
         </div>
     )

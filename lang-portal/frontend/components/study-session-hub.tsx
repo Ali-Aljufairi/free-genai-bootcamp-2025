@@ -1,7 +1,7 @@
 "use client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare } from "lucide-react"
+import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare, Mic } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
@@ -173,6 +173,29 @@ export function StudySessionHub() {
               disabled={isLoading}
             >
               Find Resources
+            </Button>
+          </CardFooter>
+        </Card>
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mic className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Speech to Image
+            </CardTitle>
+            <CardDescription>Turn your spoken words into images</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Describe a scene in Japanese or English and watch AI generate an image based on your speech.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => startSession("speech")}
+              disabled={isLoading}
+            >
+              Start Speaking
             </Button>
           </CardFooter>
         </Card>
