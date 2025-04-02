@@ -17,9 +17,7 @@ services:
       - SERVICE_TYPE=streamlit
       - REGISTRY=ghcr.io
       - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
-    # These are optional settings you might want to consider:
     restart: unless-stopped
-    # For development, uncomment the 'develop' section below:
     develop:
       watch:
         - action: sync
