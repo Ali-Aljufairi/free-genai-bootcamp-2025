@@ -11,7 +11,6 @@ from googleapiclient.discovery import build
 # Load environment variables from .env file
 load_dotenv()
 
-# API keys
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
