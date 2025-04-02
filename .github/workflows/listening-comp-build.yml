@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'listening-comp/**'
+      - "listening-comp/**"
   pull_request:
     branches: [main]
     paths:
-      - 'listening-comp/**'
+      - "listening-comp/**"
 
 env:
   REGISTRY: ghcr.io

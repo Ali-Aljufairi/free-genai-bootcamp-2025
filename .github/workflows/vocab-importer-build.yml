@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'vocab-importer/**'
+      - "vocab-importer/**"
   pull_request:
     branches: [main]
     paths:
-      - 'vocab-importer/**'
+      - "vocab-importer/**"
 
 env:
   REGISTRY: ghcr.io

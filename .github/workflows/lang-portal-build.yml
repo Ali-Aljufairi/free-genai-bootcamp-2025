@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'lang-portal/**'
+      - "lang-portal/**"
   pull_request:
     branches: [main]
     paths:
-      - 'lang-portal/**'
+      - "lang-portal/**"
 
 env:
   REGISTRY: ghcr.io

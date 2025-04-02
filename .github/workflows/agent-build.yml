@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'agent/**'
+      - "agent/**"
   pull_request:
     branches: [main]
     paths:
-      - 'agent/**'
+      - "agent/**"
 
 env:
   REGISTRY: ghcr.io

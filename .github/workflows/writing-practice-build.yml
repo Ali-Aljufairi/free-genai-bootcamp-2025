@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'writing-practice/**'
+      - "writing-practice/**"
   pull_request:
     branches: [main]
     paths:
-      - 'writing-practice/**'
+      - "writing-practice/**"
 
 env:
   REGISTRY: ghcr.io

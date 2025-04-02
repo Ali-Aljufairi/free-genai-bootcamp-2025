@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'video-translation/**'
+      - "video-translation/**"
   pull_request:
     branches: [main]
     paths:
-      - 'video-translation/**'
+      - "video-translation/**"
 
 env:
   REGISTRY: ghcr.io
