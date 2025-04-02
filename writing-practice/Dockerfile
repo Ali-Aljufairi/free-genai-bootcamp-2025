@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 # Install the project into `/app`
 WORKDIR /app
 
-# Enable bytecode compilation
+# Enable bytecode compilatio
 ENV UV_COMPILE_BYTECODE=1
 
 # Copy from the cache instead of linking since it's a mounted volume
