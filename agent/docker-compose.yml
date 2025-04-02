@@ -16,7 +16,7 @@ services:
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=streamlit
       - REGISTRY=ghcr.io
-      - OWNER=${GITHUB_REPOSITORY_OWNER,,}  # Force lowercase conversion
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}  # Force lowercase conversion
     # These are optional settings you might want to consider:
     restart: unless-stopped
     # For development, uncomment the 'develop' section below:
@@ -47,7 +47,7 @@ services:
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=fastapi
       - REGISTRY=ghcr.io
-      - OWNER=${GITHUB_REPOSITORY_OWNER,,}  # Force lowercase conversion
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}  # Force lowercase conversion
     # These are optional settings you might want to consider:
     restart: unless-stopped
     develop:
