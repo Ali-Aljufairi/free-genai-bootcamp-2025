@@ -1,5 +1,6 @@
 services:
   translation:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/video-translation:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,6 +13,8 @@ services:
     environment:
       # Add any environment variables your app needs here
       - UV_LINK_MODE=copy
+      - REGISTRY=ghcr.io
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
     # These are optional settings you might want to consider:
     restart: unless-stopped
     # For development, uncomment the 'develop' section below:

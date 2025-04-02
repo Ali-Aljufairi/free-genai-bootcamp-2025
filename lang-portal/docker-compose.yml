@@ -1,5 +1,6 @@
 services:
   app:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/lang-portal-api:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,16 +12,22 @@ services:
       APP_ENV: ${APP_ENV}
       PORT: ${PORT}
       BLUEPRINT_DB_URL: ${BLUEPRINT_DB_URL}
+      REGISTRY: ghcr.io
+      OWNER: $${GITHUB_REPOSITORY_OWNER,,}
     volumes:
       - sqlite_bp:/app/db
       - ./words.db:/app/words.db
   frontend:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/lang-portal-frontend:${TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - 3000:3000
+    environment:
+      REGISTRY: ghcr.io
+      OWNER: $${GITHUB_REPOSITORY_OWNER,,}
     depends_on:
       - app
 volumes:

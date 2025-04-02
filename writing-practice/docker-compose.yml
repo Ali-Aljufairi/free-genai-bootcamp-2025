@@ -1,22 +1,21 @@
 services:
   # Streamlit service
   writing_practice_ui:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/writing-practice-ui:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.streamlit
     ports:
       - "${WRITING_PRACTICE_UI_PORT:-8502}:8502"
     volumes:
-      # Mount data directory for persistence
       - ./data:/app/data
       - ./logs:/app/logs
     environment:
-      # Add any environment variables your app needs here
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=streamlit
-    # These are optional settings you might want to consider:
+      - REGISTRY=ghcr.io
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
     restart: unless-stopped
-    # For development, uncomment the 'develop' section below:
     develop:
       watch:
         - action: sync
@@ -26,22 +25,23 @@ services:
             - .venv/
         - action: rebuild
           path: ./pyproject.toml
+
   # FastAPI service
   writing_practice_api:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/writing-practice-api:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.fastapi
     ports:
       - "${WRITING_PRACTICE_API_PORT:-8001}:8001"
     volumes:
-      # Mount data directory for persistence
       - ./data:/app/data
       - ./logs:/app/logs
     environment:
-      # Add any environment variables your app needs here
       - UV_LINK_MODE=copy
       - SERVICE_TYPE=fastapi
-    # These are optional settings you might want to consider:
+      - REGISTRY=ghcr.io
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
     restart: unless-stopped
     develop:
       watch:
