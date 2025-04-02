@@ -1,6 +1,7 @@
 services:
   # Streamlit service (renamed from voacab_importer)
   shopping_agent_ui:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/shopping-agent-ui:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.streamlit
@@ -29,6 +30,7 @@ services:
 
   # FastAPI service
   shopping_agent_api:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/shopping-agent-api:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.fastapi

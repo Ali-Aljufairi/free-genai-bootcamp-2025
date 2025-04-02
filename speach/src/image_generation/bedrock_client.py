@@ -112,13 +112,14 @@ class BedrockImageGenerator:
             logger.error(f"Error generating image: {str(e)}")
             raise
 
-    def generate_image_from_transcript(self, transcript, style="realistic photo"):
+    def generate_image_from_transcript(self, transcript, style="realistic photo", focus=None):
         """
         Generate an image based on the content of a transcript.
 
         Args:
             transcript (str): Transcript text to visualize
             style (str): Style description for the image
+            focus (str): Specific aspects to focus on in the image generation
 
         Returns:
             tuple: (PIL.Image object, path to saved image)
@@ -127,7 +128,10 @@ class BedrockImageGenerator:
         # For simplicity, we'll use the first 100 characters
         key_content = transcript[:100] if len(transcript) > 100 else transcript
 
+        # Build the prompt with optional focus
         prompt = f"Create a visualization of: '{key_content}'. Style: {style}"
+        if focus:
+            prompt += f". Focus on: {focus}"
         logger.info(f"Generated image prompt from transcript: {prompt[:50]}...")
 
         return self.generate_image(prompt)
