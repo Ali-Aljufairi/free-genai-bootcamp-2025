@@ -44,6 +44,7 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
 
       - name: Build and push lang-portal services
         run: |
@@ -54,7 +55,7 @@ jobs:
           fi
           docker compose build
           docker compose push
-
+          docker system prune -af
 
       - name: Build and push writing-practice services
         run: |
@@ -65,6 +66,7 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
 
       - name: Build and push vocab-importer services
         run: |
@@ -75,6 +77,7 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
 
       - name: Build and push video-translation services
         run: |
@@ -85,6 +88,7 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
 
       - name: Build and push listening-comp services
         run: |
@@ -95,6 +99,7 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
 
       - name: Build and push speech services
         run: |
@@ -105,3 +110,4 @@ jobs:
           fi
           docker compose build
           docker compose push
+          docker system prune -af
