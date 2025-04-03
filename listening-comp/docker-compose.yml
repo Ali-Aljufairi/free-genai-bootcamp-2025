@@ -7,7 +7,6 @@ services:
     ports:
       - "8502:8502"
     volumes:
-      # Mount data directory for persistence
       - ./data:/app/data
       - ./logs:/app/logs
     environment:

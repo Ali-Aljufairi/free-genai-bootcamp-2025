@@ -32,6 +32,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
 
 # Run the FastAPI application by default
-# Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
+# Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs hel
 # Uses `--host 0.0.0.0` to allow accevoacab_importerss from outside the container
 CMD ["streamlit", "run", "main.py"]

@@ -76,7 +76,7 @@ Key components:
    - Semantic search for similar questions
    - Question storage and retrieval
    - Embedding generation using AWS Bedrock
-   - Collection management for different question types
+   - Collection management for different question ypes
 
 3. **Audio Generation (<mcfile name="audio_generator.py" path="/Users/ali/github/free-genai-bootcamp-2025/listening-comp/backend/audio_generator.py"></mcfile>)**:
    - Text-to-speech conversion

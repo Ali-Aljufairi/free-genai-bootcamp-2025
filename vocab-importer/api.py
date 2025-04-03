@@ -107,7 +107,7 @@ def save_vocabulary_to_json(
         # If filepath doesn't include a directory, put it in JSON_FILES_DIR
         filepath = os.path.join(JSON_FILES_DIR, filepath)
 
-    # Convert to JSON
+    # Convert to JON
     words_json = japanesewords.model_dump_json(indent=2)
     with open(filepath, "w") as f:
         f.write(words_json)
