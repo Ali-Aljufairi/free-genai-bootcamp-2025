@@ -20,6 +20,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
-ENV STREAMLIT_SERVER_PORT=8502
 # Run the Streamlit application by default
 CMD ["streamlit", "run", "app.py"]

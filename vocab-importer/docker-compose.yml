@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile.streamlit
-    ports:
-      - "${VOCAB_IMPORT_UI_PORT:-8501}:8501"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data
@@ -34,8 +32,6 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile.fastapi
-    ports:
-      - "${VOCAB_IMPORT_API_PORT:-8000}:8000"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data
