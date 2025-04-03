@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	"fmt"
+	"math/rand"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -145,6 +146,105 @@ func (h *StudySessionHandler) ReviewWord(c *fiber.Ctx) error {
 		"study_session_id": sessionID,
 		"correct":          req.Correct,
 		"created_at":       time.Now(),
+	})
+}
+
+// CreateFlashcardQuiz generates a flashcard with 4 options where one is correct
+func (h *StudySessionHandler) CreateFlashcardQuiz(c *fiber.Ctx) error {
+	// Parse limit parameter (how many flashcards to generate)
+	limit, err := strconv.Atoi(c.Query("limit", "1"))
+	if err != nil || limit < 1 {
+		limit = 1 // Default to 1 if invalid
+	}
+	if limit > 20 {
+		limit = 20 // Cap at 20 to prevent excessive queries
+	}
+
+	// Get random words for the target flashcards
+	var targetWords []models.Word
+	result := h.db.GetDB().Order("RANDOM()").Limit(limit).Find(&targetWords)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve words for flashcards",
+		})
+	}
+
+	if len(targetWords) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "No words found in the database",
+		})
+	}
+
+	// Get a pool of words to use for wrong answers
+	var wordPool []models.Word
+	result = h.db.GetDB().Order("RANDOM()").Limit(limit * 10).Find(&wordPool)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve word pool for options",
+		})
+	}
+
+	// Create flashcards with options
+	flashcards := make([]map[string]interface{}, 0, limit)
+	
+	for _, targetWord := range targetWords {
+		// Get 3 random incorrect options that are different from the target word
+		wrongOptions := make([]map[string]interface{}, 0, 3)
+		for _, word := range wordPool {
+			if word.ID != targetWord.ID && len(wrongOptions) < 3 {
+				wrongOptions = append(wrongOptions, map[string]interface{}{
+					"id":       word.ID,
+					"japanese": word.Japanese,
+					"romaji":   word.Romaji,
+					"english":  word.English,
+					"correct":  false,
+				})
+			}
+		}
+
+		// If we couldn't get enough wrong options, continue
+		if len(wrongOptions) < 3 {
+			continue
+		}
+
+		// Create the correct option
+		correctOption := map[string]interface{}{
+			"id":       targetWord.ID,
+			"japanese": targetWord.Japanese,
+			"romaji":   targetWord.Romaji,
+			"english":  targetWord.English,
+			"correct":  true,
+		}
+
+		// Combine all options and shuffle them
+		allOptions := append(wrongOptions, correctOption)
+		rand.Shuffle(len(allOptions), func(i, j int) {
+			allOptions[i], allOptions[j] = allOptions[j], allOptions[i]
+		})
+
+		// Create the flashcard
+		flashcard := map[string]interface{}{
+			"word": map[string]interface{}{
+				"id":       targetWord.ID,
+				"japanese": targetWord.Japanese,
+				"romaji":   targetWord.Romaji,
+				"english":  targetWord.English,
+			},
+			"options": allOptions,
+		}
+
+		flashcards = append(flashcards, flashcard)
+	}
+
+	if len(flashcards) == 0 {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate flashcards",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"flashcards": flashcards,
+		"count":      len(flashcards),
 	})
 }
 

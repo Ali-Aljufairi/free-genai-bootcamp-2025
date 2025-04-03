@@ -88,7 +88,7 @@ export function StudySessionHub() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-             Sentence Contructor 
+              Sentence Contructor
             </CardTitle>
             <CardDescription>Practice language through conversation</CardDescription>
           </CardHeader>

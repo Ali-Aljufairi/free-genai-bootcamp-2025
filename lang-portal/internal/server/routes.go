@@ -33,6 +33,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/v1/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
 	s.App.Post("/api/v1/study_sessions", studySessionHandler.CreateStudySession)
 	s.App.Post("/api/v1/study_sessions/:id/words/:word_id/review", studySessionHandler.ReviewWord)
+	s.App.Get("/api/v1/flashcards/quiz", studySessionHandler.CreateFlashcardQuiz)
 
 	// Group routes
 	groupHandler := handlers.NewGroupHandler(s.db)
