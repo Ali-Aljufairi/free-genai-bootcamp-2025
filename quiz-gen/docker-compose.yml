@@ -1,0 +1,55 @@
+services:
+  # Streamlit service (renamed from voacab_importer)
+  quiz_gen_ui:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/vocab-importer-ui:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.streamlit
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+      - SERVICE_TYPE=streamlit
+      - REGISTRY=ghcr.io
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml
+
+  # FastAPI service
+  quiz_gen_api:
+    image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/vocab-importer-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.fastapi
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Add any environment variables your app needs here
+      - UV_LINK_MODE=copy
+      - SERVICE_TYPE=fastapi
+      - REGISTRY=ghcr.io
+      - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
+    # These are optional settings you might want to consider:
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./pyproject.toml
