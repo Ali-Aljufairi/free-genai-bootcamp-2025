@@ -1,7 +1,7 @@
 "use client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare, Mic } from "lucide-react"
+import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare, Mic, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
@@ -64,14 +64,14 @@ export function StudySessionHub() {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ScrollText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Quiz
+              <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Grammar Quiz
             </CardTitle>
-            <CardDescription>Test your knowledge</CardDescription>
+            <CardDescription>Test your knowledge with JLPT grammar quizzes</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Take a quiz to test your understanding of vocabulary and track your progress.
+              Challenge yourself with multiple-choice grammar questions based on JLPT levels. Great for exam preparation.
             </p>
           </CardContent>
           <CardFooter>
