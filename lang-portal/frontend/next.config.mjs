@@ -1,11 +1,14 @@
-import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
-let userConfig = undefined;
-try {
-  userConfig = await import('./v0-user-next.config');
-} catch (e) {
-  // ignore error
+async function getUserConfig() {
+  try {
+    return await import('./v0-user-next.config');
+  } catch (e) {
+    return undefined; // Ignore error
+  }
 }
+
+const userConfig = await getUserConfig();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -27,7 +30,7 @@ const nextConfig = {
 };
 
 // Conditionally add rewrites only in development mode
-if (process.env.NEXT_PHASE === PHASE_DEVELOPMENT_SERVER) {
+if (process.env.NODE_ENV === 'development') {
   nextConfig.rewrites = async () => [
     { source: '/api/quiz-gen/:path*', destination: 'http://localhost:8004/:path*' },
     { source: '/api/agent/:path*', destination: 'http://localhost:8002/:path*' },
@@ -37,26 +40,28 @@ if (process.env.NEXT_PHASE === PHASE_DEVELOPMENT_SERVER) {
   ];
 }
 
-mergeConfig(nextConfig, userConfig);
-
 function mergeConfig(nextConfig, userConfig) {
   if (!userConfig) {
-    return;
+    return nextConfig;
   }
+
+  const mergedConfig = { ...nextConfig };
 
   for (const key in userConfig) {
     if (
       typeof nextConfig[key] === 'object' &&
       !Array.isArray(nextConfig[key])
     ) {
-      nextConfig[key] = {
+      mergedConfig[key] = {
         ...nextConfig[key],
         ...userConfig[key],
       };
     } else {
-      nextConfig[key] = userConfig[key];
+      mergedConfig[key] = userConfig[key];
     }
   }
+
+  return mergedConfig;
 }
 
-export default nextConfig;
+export default mergeConfig(nextConfig, userConfig);
