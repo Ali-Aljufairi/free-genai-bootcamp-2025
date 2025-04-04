@@ -7,8 +7,7 @@ Create quiz questions that test understanding of JLPT grammar points appropriate
 Each question should have:
 1. The grammar point being tested
 2. A multiple-choice question in Japanese
-3. Only one correct answer among four choices 
-4. Four answer choices with exactly one correct answer
+4. Four answer choices with exactly only one correct answer
 5. A Japanese explanation of the grammar usage
 6. A specific reasoning for why the correct answer is correct
 7. An English explanation of the grammar point for learners

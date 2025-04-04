@@ -65,7 +65,6 @@ class QuizRequest(BaseModel):
 def get_grammar_questions(level: int, num_questions: int) -> GrammarQuiz:
     """
     Generate JLPT grammar questions for the specified level using Groq API.
-    Makes multiple requests if num_questions > MAX_QUESTIONS_PER_REQUEST.
 
     Args:
         level: JLPT level (1-5)
@@ -74,55 +73,32 @@ def get_grammar_questions(level: int, num_questions: int) -> GrammarQuiz:
     Returns:
         GrammarQuiz: A model containing grammar questions
     """
-    all_questions = []
-
-    # Calculate how many requests we need to make
-    num_requests = (num_questions + MAX_QUESTIONS_PER_REQUEST - 1) // MAX_QUESTIONS_PER_REQUEST
-    
     try:
-        for i in range(num_requests):
-            # Calculate questions for this batch
-            questions_this_batch = min(MAX_QUESTIONS_PER_REQUEST, 
-                                      num_questions - (i * MAX_QUESTIONS_PER_REQUEST))
-            
-            if questions_this_batch <= 0:
-                break
-                
-            chat_completion = groq.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_MESSAGE
-                        +
-                        # Pass the json schema to the model. Pretty printing improves results.
-                        f" The JSON object must use the schema: {json.dumps(GrammarQuiz.model_json_schema(), indent=2)}",
-                    },
-                    {
-                        "role": "user",
-                        "content": USER_MESSAGE_TEMPLATE.format(
-                            level=level, num_questions=questions_this_batch
-                        ),
-                    },
-                ],
-                model="qwen-2.5-32b",
-                temperature=0,
-                # Streaming is not supported in JSON mode
-                stream=False,
-                # Enable JSON mode by setting the response format
-                response_format={"type": "json_object"},
-            )
-            
-            # Parse the response
-            batch_result = GrammarQuiz.model_validate_json(
-                chat_completion.choices[0].message.content
-            )
-            
-            # Add questions from this batch to our collection
-            all_questions.extend(batch_result.questions)
-            
-        # Create a combined GrammarQuiz with all questions
-        return GrammarQuiz(level=f"N{level}", questions=all_questions)
-        
+        chat_completion = groq.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_MESSAGE
+                    + f" The JSON object must use the schema: {json.dumps(GrammarQuiz.model_json_schema(), indent=2)}",
+                },
+                {
+                    "role": "user",
+                    "content": USER_MESSAGE_TEMPLATE.format(
+                        level=level, num_questions=num_questions
+                    ),
+                },
+            ],
+            model="qwen-2.5-32b",
+            temperature=0.7,
+            top_p=0.9,
+            stream=False,
+            response_format={"type": "json_object"},
+        )
+
+        return GrammarQuiz.model_validate_json(
+            chat_completion.choices[0].message.content
+        )
+
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error generating grammar questions: {str(e)}"
@@ -162,7 +138,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@api.post("/api/v1/grammar-quiz")
+@api.post("/quiz/generate")
 async def generate_grammar_quiz(request: QuizRequest = Body(...)):
     """
     Generate JLPT grammar questions for a specified level and quantity.
