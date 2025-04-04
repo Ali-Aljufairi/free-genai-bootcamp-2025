@@ -1,10 +1,12 @@
 services:
   # Streamlit service (renamed from voacab_importer)
-  quiz_gen_ui:
+  quiz-gen:
     image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/vocab-importer-ui:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.streamlit
+    ports:
+      - "${VOCAB_IMPORT_UI_PORT:-8504}:8503"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data
@@ -27,11 +29,13 @@ services:
           path: ./pyproject.toml
 
   # FastAPI service
-  quiz_gen_api:
+  quiz-gen:
     image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/vocab-importer-api:${TAG:-latest}
     build:
       context: .
       dockerfile: .docker/Dockerfile.fastapi
+    ports:
+      - "${VOCAB_IMPORT_API_PORT:-8004}:8004"
     volumes:
       # Mount data directory for persistence
       - ./data:/app/data

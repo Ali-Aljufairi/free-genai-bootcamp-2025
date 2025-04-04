@@ -1,14 +1,14 @@
-name: Build and Push Agent Service
+name: Build and Push quiz-gen Service
 
 on:
   push:
     branches: [main]
     paths:
-      - "agent/**"
+      - "quiz-gen/**"
   pull_request:
     branches: [main]
     paths:
-      - "agent/**"
+      - "quiz-gen/**"
 
 env:
   REGISTRY: ghcr.io
@@ -37,7 +37,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push agent services
+      - name: Build and push quiz-gen services
         run: |
           cd agent
           if [ -f .env.example ]; then
