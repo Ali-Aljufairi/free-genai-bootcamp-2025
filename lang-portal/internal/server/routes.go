@@ -22,38 +22,38 @@ func (s *FiberServer) RegisterFiberRoutes() {
 
 	// Dashboard routes
 	dashboardHandler := handlers.NewDashboardHandler(s.db)
-	s.App.Get("/api/v1/dashboard/last_study_session", dashboardHandler.GetLastStudySession)
-	s.App.Get("/api/v1/dashboard/study_progress", dashboardHandler.GetStudyProgress)
-	s.App.Get("/api/v1/dashboard/quick-stats", dashboardHandler.GetQuickStats)
+	s.App.Get("/api/langportal/dashboard/last_study_session", dashboardHandler.GetLastStudySession)
+	s.App.Get("/api/langportal/dashboard/study_progress", dashboardHandler.GetStudyProgress)
+	s.App.Get("/api/langportal/dashboard/quick-stats", dashboardHandler.GetQuickStats)
 
 	// Study session routes
 	studySessionHandler := handlers.NewStudySessionHandler(s.db)
-	s.App.Get("/api/v1/study_sessions", studySessionHandler.GetStudySessions)
-	s.App.Get("/api/v1/study_sessions/:id", studySessionHandler.GetStudySession)
-	s.App.Get("/api/v1/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
-	s.App.Post("/api/v1/study_sessions", studySessionHandler.CreateStudySession)
-	s.App.Post("/api/v1/study_sessions/:id/words/:word_id/review", studySessionHandler.ReviewWord)
-	s.App.Get("/api/v1/flashcards/quiz", studySessionHandler.CreateFlashcardQuiz)
+	s.App.Get("/api/langportal/study_sessions", studySessionHandler.GetStudySessions)
+	s.App.Get("/api/langportal/study_sessions/:id", studySessionHandler.GetStudySession)
+	s.App.Get("/api/langportal/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
+	s.App.Post("/api/langportal/study_sessions", studySessionHandler.CreateStudySession)
+	s.App.Post("/api/langportal/study_sessions/:id/words/:word_id/review", studySessionHandler.ReviewWord)
+	s.App.Get("/api/langportal/flashcards/quiz", studySessionHandler.CreateFlashcardQuiz)
 
 	// Group routes
 	groupHandler := handlers.NewGroupHandler(s.db)
-	s.App.Get("/api/v1/groups", groupHandler.GetGroups)
-	s.App.Get("/api/v1/groups/:id", groupHandler.GetGroup)
-	s.App.Get("/api/v1/groups/:id/words", groupHandler.GetGroupWords)
-	s.App.Get("/api/v1/groups/:id/study_sessions", groupHandler.GetGroupStudySessions)
+	s.App.Get("/api/langportal/groups", groupHandler.GetGroups)
+	s.App.Get("/api/langportal/groups/:id", groupHandler.GetGroup)
+	s.App.Get("/api/langportal/groups/:id/words", groupHandler.GetGroupWords)
+	s.App.Get("/api/langportal/groups/:id/study_sessions", groupHandler.GetGroupStudySessions)
 
 	// Study activity routes
 	studyActivityHandler := handlers.NewStudyActivityHandler(s.db)
-	s.App.Get("/api/v1/study_activities/:id", studyActivityHandler.GetStudyActivity)
-	s.App.Get("/api/v1/study_activities/:id/sessions", studyActivityHandler.GetStudyActivitySessions)
-	s.App.Post("/api/v1/study_activities", studyActivityHandler.CreateStudyActivity)
+	s.App.Get("/api/langportal/study_activities/:id", studyActivityHandler.GetStudyActivity)
+	s.App.Get("/api/langportal/study_activities/:id/sessions", studyActivityHandler.GetStudyActivitySessions)
+	s.App.Post("/api/langportal/study_activities", studyActivityHandler.CreateStudyActivity)
 
 	// Word routes
 	wordHandler := handlers.NewWordHandler(s.db)
-	s.App.Get("/api/v1/words", wordHandler.GetWords)
-	s.App.Get("/api/v1/words/random", wordHandler.GetRandomWord)
-	s.App.Get("/api/v1/words/:id", wordHandler.GetWord)
-	s.App.Post("/api/v1/words", wordHandler.CreateWord)
+	s.App.Get("/api/langportal/words", wordHandler.GetWords)
+	s.App.Get("/api/langportal/words/random", wordHandler.GetRandomWord)
+	s.App.Get("/api/langportal/words/:id", wordHandler.GetWord)
+	s.App.Post("/api/langportal/words", wordHandler.CreateWord)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {

@@ -35,7 +35,7 @@ export function DrawingStudy() {
 
     const fetchRandomWord = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/words/random`)
+            const response = await fetch(`/api/langportal/words/random`)
             const data = await response.json()
             setWord(data)
         } catch (error) {

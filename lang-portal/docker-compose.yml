@@ -9,9 +9,9 @@ services:
     ports:
       - ${PORT}:${PORT}
     environment:
-      APP_ENV: ${APP_ENV}
-      PORT: ${PORT}
-      BLUEPRINT_DB_URL: ${BLUEPRINT_DB_URL}
+      APP_ENV: Prod
+      PORT: 8080
+      BLUEPRINT_DB_URL: ./words.db
       REGISTRY: ghcr.io
       OWNER: $${GITHUB_REPOSITORY_OWNER,,}
     volumes:
