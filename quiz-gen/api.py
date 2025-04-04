@@ -12,7 +12,7 @@ from messages import SYSTEM_MESSAGE, USER_MESSAGE_TEMPLATE
 dotenv.load_dotenv()
 groq = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-# Define the JSON files directory
+# Define the JSON files directoryff
 JSON_FILES_DIR = "json_files"
 
 # Ensure the directory exists

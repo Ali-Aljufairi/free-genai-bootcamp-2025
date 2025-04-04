@@ -93,7 +93,8 @@ func main() {
 		if port == "" {
 			port = "8080"
 		}
-		err := server.Listen(fmt.Sprintf(":%d", port))
+		// Fix: Use the port string directly instead of trying to format it as an integer
+		err := server.Listen(":" + port)
 		if err != nil {
 			panic(fmt.Sprintf("http server error: %s", err))
 		}
