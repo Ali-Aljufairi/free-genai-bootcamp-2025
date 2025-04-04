@@ -117,7 +117,7 @@ async def get_sentence_feedback(submission: ImageSubmission):
         image_data = base64.b64decode(submission.image)
         image = Image.open(io.BytesIO(image_data))
 
-        # Process the image with the target sentence if provided
+        # Process the image with the target sentence if providd
         result = japanese_app.process_sentence_image(image, submission.target_sentence)
 
         # Check if we're receiving the newer 5-tuple result or the older 4-tuple result

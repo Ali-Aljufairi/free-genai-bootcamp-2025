@@ -39,7 +39,7 @@ jobs:
 
       - name: Build and push quiz-gen services
         run: |
-          cd agent
+          cd quiz-gen
           if [ -f .env.example ]; then
             touch .env
           fi

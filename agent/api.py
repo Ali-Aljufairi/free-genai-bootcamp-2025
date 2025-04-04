@@ -40,7 +40,7 @@ def check_api_keys():
     return missing_keys
 
 
-# Basic email validation function
+# Basic email validation functio
 def is_valid_email(email: str) -> bool:
     """Simple email validation using basic pattern check."""
     import re

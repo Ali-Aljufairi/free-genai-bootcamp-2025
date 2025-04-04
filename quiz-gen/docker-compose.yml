@@ -28,7 +28,7 @@ services:
         - action: rebuild
           path: ./pyproject.toml
 
-  # FastAPI service
+  # FastAPI servic
   quiz-gen-api:
     image: ${REGISTRY:-ghcr.io}/${OWNER:-$GITHUB_REPOSITORY_OWNER}/quiz-gen-api:${TAG:-latest}
     build:

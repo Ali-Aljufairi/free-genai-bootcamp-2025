@@ -46,7 +46,7 @@ services:
       - SERVICE_TYPE=fastapi
       - REGISTRY=ghcr.io
       - OWNER=$${GITHUB_REPOSITORY_OWNER,,}
-    # These are optional settings you might want to consider:
+    # These are optional settings you might want to consider
     restart: unless-stopped
     develop:
       watch:
