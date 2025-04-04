@@ -21,7 +21,6 @@ os.makedirs(JSON_FILES_DIR, exist_ok=True)
 # Create FastAPI application instance
 api = FastAPI(title="Vocab Importer API")
 
-# Add CORS middleware
 api.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins
