@@ -45,7 +45,7 @@ export function DrawingStudy() {
 
     const fetchRandomSentence = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_WRITING_PRAC}/random-sentence`)
+            const response = await fetch(`/random-sentence`)
             const data = await response.json()
             console.log(data)
             setSentence(data)
