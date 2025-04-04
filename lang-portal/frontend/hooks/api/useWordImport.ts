@@ -8,7 +8,7 @@ interface UseWordImportReturn {
   isLoading: boolean;
   error: Error | null;
 }
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = "api/langportal"
 export function useWordImport(): UseWordImportReturn {
   const queryClient = useQueryClient();
   

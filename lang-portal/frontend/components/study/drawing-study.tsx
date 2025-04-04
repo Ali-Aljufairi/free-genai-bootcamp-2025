@@ -45,7 +45,7 @@ export function DrawingStudy() {
 
     const fetchRandomSentence = async () => {
         try {
-            const response = await fetch(`/random-sentence`)
+            const response = await fetch(`api/writing/random-sentence`)
             const data = await response.json()
             console.log(data)
             setSentence(data)
@@ -62,8 +62,8 @@ export function DrawingStudy() {
             const base64Image = await canvas.exportImage('base64')
 
             const endpoint = studyMode === 'word'
-                ? `${process.env.NEXT_PUBLIC_WRITING_PRAC}/feedback-word`
-                : `${process.env.NEXT_PUBLIC_WRITING_PRAC}/feedback-sentence`;
+                ? `/api/writing/feedback-word`
+                : `/api/writing/feedback-sentence`;
 
             // Create appropriate request body based on study mode
             const requestBody = studyMode === 'word'

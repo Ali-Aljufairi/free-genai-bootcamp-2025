@@ -36,7 +36,7 @@ export function useVocabularyImport(): UseVocabularyImportReturn {
         }
 
         // Step 2: Send words directly to the words API
-        const wordResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/words`, {
+        const wordResponse = await fetch(`/api/langportal/words`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
