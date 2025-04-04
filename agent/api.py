@@ -90,7 +90,7 @@ async def root():
     return {"status": "online", "service": "ShopGenie API"}
 
 
-@api.post("/search", response_model=SearchResponse)
+@api.post("/api/agent/search", response_model=SearchResponse)
 async def search(request: SearchRequest, background_tasks: BackgroundTasks):
     """
     Endpoint to search for products and send results via email.
@@ -125,7 +125,7 @@ async def search(request: SearchRequest, background_tasks: BackgroundTasks):
     )
 
 
-@api.post("/search/direct", response_model=DirectSearchResponse)
+@api.post("/api/agent/search/direct", response_model=DirectSearchResponse)
 async def search_direct(request: SearchRequest):
     """
     Endpoint to search for products and return complete results directly in the API response.

@@ -123,7 +123,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@api.post("/api/v1/vocabulary")
+@api.post("/api/vocab-import/vocabulary")
 async def get_vocabulary(request: TopicRequest = Body(...)):
     """
     Generate Japanese vocabulary for a given topic

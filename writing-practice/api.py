@@ -59,7 +59,7 @@ async def root():
     return {"message": "Japanese Writing Practice API"}
 
 
-@api.get("/api/v1/random-sentence", response_model=RandomSentenceResponse)
+@api.get("/api/writing/random-sentence", response_model=RandomSentenceResponse)
 async def get_random_sentence():
     """Generate a random sentence"""
     try:
@@ -86,7 +86,7 @@ async def get_random_sentence():
         )
 
 
-@api.post("/api/v1/feedback-word", response_model=FeedbackResponse)
+@api.post("/api/writing/feedback-word", response_model=FeedbackResponse)
 async def get_word_feedback(submission: ImageSubmission):
     """Get feedback on a word writing submission"""
     try:
@@ -109,7 +109,7 @@ async def get_word_feedback(submission: ImageSubmission):
         )
 
 
-@api.post("/api/v1/feedback-sentence", response_model=FeedbackResponse)
+@api.post("/api/writing/feedback-sentence", response_model=FeedbackResponse)
 async def get_sentence_feedback(submission: ImageSubmission):
     """Get feedback on a sentence writing submission"""
     try:
@@ -145,4 +145,4 @@ async def get_sentence_feedback(submission: ImageSubmission):
 
 # For direct execution
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("api:api", host="0.0.0.0", port=8001, reload=True)

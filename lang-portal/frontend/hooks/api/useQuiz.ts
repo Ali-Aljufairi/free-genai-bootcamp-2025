@@ -34,7 +34,7 @@ interface GenerateQuizParams {
 export function useGenerateQuiz() {
   return useMutation({
     mutationFn: async (params: GenerateQuizParams): Promise<QuizResponse> => {
-      const response = await fetch("http://localhost:8000/quiz/generate", {
+      const response = await fetch("/api/quiz-gen/quiz/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

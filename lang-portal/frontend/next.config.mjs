@@ -29,9 +29,10 @@ const nextConfig = {
 // Conditionally add rewrites only in development mode
 if (process.env.NEXT_PHASE === PHASE_DEVELOPMENT_SERVER) {
   nextConfig.rewrites = async () => [
-    { source: '/api/user/:path*', destination: 'http://localhost:3001/:path*' },
-    { source: '/api/auth/:path*', destination: 'http://localhost:3002/:path*' },
-    { source: '/api/vocab-import/:path*', destination: 'http://localhost:3002/:path*' },
+    { source: '/api/quiz-gen/:path*', destination: 'http://localhost:8004/:path*' },
+    { source: '/api/agent/:path*', destination: 'http://localhost:8002/:path*' },
+    { source: '/api/vocab-import/:path*', destination: 'http://localhost:8000/:path*' },
+    { source: '/api/writing/:path*', destination: 'http://localhost:8001/:path*' },
     { source: '/api/langportal/:path*', destination: 'http://127.0.0.1:8080/api/langportal/:path*' },
   ];
 }
