@@ -15,7 +15,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   PORT: 8080
   APP_ENV: production
-  BLUEPRINT_DB_URL: ./words.db
+  BLUEPRINT_DB_URL: ./app/words.db
 
 jobs:
   build-and-push:
