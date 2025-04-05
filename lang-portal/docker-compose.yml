@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: prod
+      args:
+        BLUEPRINT_DB_URL: ${BLUEPRINT_DB_URL:-./words.db}
     restart: unless-stopped
     ports:
       - ${PORT}:${PORT}

@@ -15,7 +15,7 @@ export function useVocabularyImport(): UseVocabularyImportReturn {
     mutationFn: async (topic: string): Promise<any> => {
       try {
         // Step 1: Fetch vocabulary suggestions from the vocabulary API
-        const vocabResponse = await fetch("/api/vocab-import" , {
+        const vocabResponse = await fetch("/api/vocab-import/vocabulary" , {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

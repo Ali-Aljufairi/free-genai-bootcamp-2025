@@ -15,7 +15,7 @@ env:
   OWNER: ${{ github.repository_owner }}
   PORT: 8080
   APP_ENV: production
-  BLUEPRINT_DB_URL: ./app/words.db
+  BLUEPRINT_DB_URL: ./words.db
 
 jobs:
   build-and-push:
@@ -44,6 +44,6 @@ jobs:
           if [ -f .env.example ]; then
             touch .env
           fi
-          docker compose build
+          docker compose build --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL}
           docker compose push
           docker system prune -af

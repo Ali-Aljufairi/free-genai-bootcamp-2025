@@ -44,7 +44,7 @@ export function StudySessionHub() {
               <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Flashcards
             </CardTitle>
-            <CardDescription>Practice vocabulary with flashcards</CardDescription>
+            <CardDescription>Practice vocabulary with flashcard</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
