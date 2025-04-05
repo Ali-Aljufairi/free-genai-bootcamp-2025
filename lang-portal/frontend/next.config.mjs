@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
   nextConfig.rewrites = async () => [
     { source: '/api/quiz-gen/:path*', destination: 'http://localhost:8004/:path*' },
     { source: '/api/agent/:path*', destination: 'http://localhost:8002/:path*' },
-    { source: '/api/vocab-import/:path*', destination: 'http://localhost:8000/:path*' },
+    { source: '/api/vocab-importer/:path*', destination: 'http://localhost:8000/:path*' },
     { source: '/api/writing/:path*', destination: 'http://localhost:8001/:path*' },
     { source: '/api/langportal/:path*', destination: 'http://127.0.0.1:8080/api/langportal/:path*' },
   ];
