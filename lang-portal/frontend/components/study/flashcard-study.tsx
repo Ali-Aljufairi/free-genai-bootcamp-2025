@@ -41,7 +41,7 @@ export function FlashcardStudy() {
 
     const fetchFlashcards = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/v1/flashcards/quiz?limit=${cardLimit}`)
+            const response = await fetch(`/api/langportal/flashcards/quiz?limit=${cardLimit}`)
             const data: FlashcardResponse = await response.json()
             setFlashcards(data.flashcards)
             setCurrentIndex(0)
