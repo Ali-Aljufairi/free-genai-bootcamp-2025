@@ -41,8 +41,13 @@ jobs:
       - name: Build and push lang-portal services
         run: |
           cd lang-portal
+          # Handle backend .env
           if [ -f .env.example ]; then
-            touch .env
+            cp .env.example .env
+          fi
+          # Handle frontend .env
+          if [ -f frontend/.env.example ]; then
+            cp frontend/.env.example frontend/.env
           fi
           docker compose build --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL}
           docker compose push
