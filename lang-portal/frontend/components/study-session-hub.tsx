@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
 import { toast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 export function StudySessionHub() {
   const router = useRouter()
@@ -38,20 +39,27 @@ export function StudySessionHub() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="glass-card">
-          <CardHeader>
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Flashcards
             </CardTitle>
             <CardDescription>Practice vocabulary with flashcard</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Review words using spaced repetition. Perfect for memorizing vocabulary and their meanings.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/images.png"
+                alt="Flashcards background"
+                width={128}
+                height={128}
+                className="object-contain"
+                priority
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("flashcards")}
@@ -61,20 +69,28 @@ export function StudySessionHub() {
             </Button>
           </CardFooter>
         </Card>
-        <Card className="glass-card">
-          <CardHeader>
+
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Grammar Quiz
             </CardTitle>
             <CardDescription>Test your knowledge with JLPT grammar quizzes</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Challenge yourself with multiple-choice grammar questions based on JLPT levels. Great for exam preparation.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/pen.png"
+                alt="Grammar Quiz background"
+                width={128}
+                height={128}
+                className="object-contain"
+                priority
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("quiz")}
@@ -84,20 +100,27 @@ export function StudySessionHub() {
             </Button>
           </CardFooter>
         </Card>
-        <Card className="glass-card">
-          <CardHeader>
+
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Sentence Contructor
+              Sentence Constructor
             </CardTitle>
             <CardDescription>Practice language through conversation</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Engage in natural conversations with an AI language tutor. Perfect for improving your conversational skills.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/images.png"
+                alt="Sentence Constructor background"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("chat")}
@@ -107,20 +130,27 @@ export function StudySessionHub() {
             </Button>
           </CardFooter>
         </Card>
-        <Card className="glass-card">
-          <CardHeader>
+
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Writing Practice
             </CardTitle>
             <CardDescription>Practice writing characters</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Practice writing Japanese characters and get instant feedback on your strokes.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/images.png"
+                alt="Writing Practice background"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("drawing")}
@@ -130,20 +160,27 @@ export function StudySessionHub() {
             </Button>
           </CardFooter>
         </Card>
-        <Card className="glass-card">
-          <CardHeader>
+
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Learning Resources
             </CardTitle>
             <CardDescription>Find resources to learn Japanese</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              AI-powered agent that helps you find the best books, videos, and resources for learning Japanese.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/images.png"
+                alt="Learning Resources background"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("agent")}
@@ -153,20 +190,27 @@ export function StudySessionHub() {
             </Button>
           </CardFooter>
         </Card>
-        <Card className="glass-card">
-          <CardHeader>
+
+        <Card className="glass-card relative overflow-hidden flex flex-col">
+          <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
               <Mic className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Speech to Image
             </CardTitle>
             <CardDescription>Turn your spoken words into images</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Describe a scene in Japanese or English and watch AI generate an image based on your speech.
-            </p>
+          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
+            <div className="relative w-32 h-32">
+              <Image
+                src="/Study-session/images.png"
+                alt="Speech to Image background"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="z-10">
             <Button
               className="w-full"
               onClick={() => startSession("speech")}
