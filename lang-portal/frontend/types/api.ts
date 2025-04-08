@@ -33,9 +33,10 @@ export interface Group {
 
 // Dashboard Types
 export interface QuickStats {
-  wordsLearned: number;
-  studyTime: string;
-  masteryLevel: string;
+  success_rate: number;
+  total_study_sessions: number;
+  total_active_groups: number;
+  study_streak_days: number;
 }
 
 export interface StudyProgress {
@@ -51,11 +52,13 @@ export interface StudyProgress {
 // Study Activity Types
 export interface StudyActivity {
   id: string;
-  type: string;
-  progress: number;
+  type: 'flashcards' | 'quiz' | 'chat' | 'drawing' | 'agent' | 'speech';
+  name: string;
+  description: string;
+  study_session_id: string;
+  group_id: string;
   created_at: string;
-  completed_at?: string;
-  word_count: number;
+  thumbnail_url?: string;
 }
 
 export interface WordsResponse {

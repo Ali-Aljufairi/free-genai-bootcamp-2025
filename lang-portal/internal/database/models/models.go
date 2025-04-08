@@ -7,6 +7,18 @@ import (
 	"time"
 )
 
+// ActivityType represents the type of study activity
+type ActivityType string
+
+const (
+	ActivityTypeFlashcards ActivityType = "flashcards"
+	ActivityTypeQuiz       ActivityType = "quiz"
+	ActivityTypeChat       ActivityType = "chat"
+	ActivityTypeDrawing    ActivityType = "drawing"
+	ActivityTypeAgent      ActivityType = "agent"
+	ActivityTypeSpeech     ActivityType = "speech"
+)
+
 // Word represents a vocabulary word in the system
 type Word struct {
 	ID       int64         `json:"id" gorm:"primaryKey"`
@@ -73,12 +85,13 @@ type StudySession struct {
 
 // StudyActivity represents a specific learning activity
 type StudyActivity struct {
-	ID             int64     `json:"id"`
-	Name           string    `json:"name"`
-	Description    string    `json:"description"`
-	StudySessionID int64     `json:"study_session_id"`
-	GroupID        int64     `json:"group_id"`
-	CreatedAt      time.Time `json:"created_at"`
+	ID             int64       `json:"id"`
+	Type           ActivityType `json:"type"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	StudySessionID int64       `json:"study_session_id"`
+	GroupID        int64       `json:"group_id"`
+	CreatedAt      time.Time   `json:"created_at"`
 }
 
 // WordReviewItem represents a practice record for a word

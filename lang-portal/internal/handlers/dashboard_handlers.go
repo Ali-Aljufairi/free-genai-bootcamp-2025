@@ -82,18 +82,74 @@ func (h *DashboardHandler) GetQuickStats(c *fiber.Ctx) error {
 	// Get total active groups
 	h.DB.GetDB().Table("study_sessions").Select("COUNT(DISTINCT group_id)").Scan(&stats.TotalActiveGroups)
 
-	// Calculate study streak
-	var dates []time.Time
-	h.DB.GetDB().Table("study_sessions").Select("DATE(created_at) as study_date").Group("DATE(created_at)").Order("study_date desc").Scan(&dates)
+	// Calculate study streak - Check for any activity type
+	type StudyDate struct {
+		Date string `gorm:"column:activity_date"`
+	}
+	var dates []StudyDate
+	
+	// Use Raw SQL to combine dates from both study_sessions and study_activities
+	h.DB.GetDB().Raw(`
+		SELECT activity_date FROM (
+			SELECT DATE(created_at) as activity_date FROM study_sessions
+			UNION
+			SELECT DATE(created_at) as activity_date FROM study_activities
+			UNION
+			SELECT DATE(created_at) as activity_date FROM word_review_items
+		) all_activity
+		GROUP BY activity_date
+		ORDER BY activity_date DESC
+	`).Scan(&dates)
 
 	streak := 0
 	if len(dates) > 0 {
 		streak = 1
-		for i := 0; i < len(dates)-1; i++ {
-			if dates[i].Sub(dates[i+1]).Hours() <= 24 {
+		today := time.Now().Truncate(24 * time.Hour)
+		
+		// Parse the most recent date
+		lastActivity, err := time.Parse("2006-01-02", dates[0].Date)
+		if err != nil {
+			// If parsing fails, default to 1 day streak
+			stats.StudyStreakDays = streak
+			return c.JSON(stats)
+		}
+		
+		// Check if the streak is broken (no activity today or yesterday)
+		lastActivity = lastActivity.Truncate(24 * time.Hour)
+		daysSinceLastActivity := int(today.Sub(lastActivity).Hours() / 24)
+		
+		if daysSinceLastActivity > 1 {
+			// Streak is broken - only count the past consecutive days
+			stats.StudyStreakDays = 0
+			return c.JSON(stats)
+		}
+		
+		// Parse dates manually and count consecutive days
+		var prevDate time.Time
+		for i, dateItem := range dates {
+			currentDate, err := time.Parse("2006-01-02", dateItem.Date)
+			if err != nil {
+				continue
+			}
+			
+			// Initialize on first valid date
+			if i == 0 {
+				prevDate = currentDate
+				continue
+			}
+			
+			// Check for consecutive days
+			daysBetween := int(prevDate.Sub(currentDate).Hours() / 24)
+			if daysBetween == 1 {
+				// Consecutive day found
 				streak++
-			} else {
+				prevDate = currentDate
+			} else if daysBetween > 1 {
+				// Gap found, stop counting
 				break
+			} else {
+				// Same day (should not happen with GROUP BY, but just in case)
+				prevDate = currentDate
 			}
 		}
 	}

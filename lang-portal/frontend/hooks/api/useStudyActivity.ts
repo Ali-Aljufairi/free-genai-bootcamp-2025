@@ -5,6 +5,13 @@ import { studyActivityApi } from "@/services/api";
 import { useState } from "react";
 
 /**
+ * Hook to fetch all study activities with pagination
+ */
+export function useStudyActivities(page = 1, pageSize = 20) {
+  return useFetch(() => studyActivityApi.getStudyActivities(page, pageSize), [page, pageSize]);
+}
+
+/**
  * Hook to fetch a specific study activity
  */
 export function useStudyActivity(id: string) {
@@ -43,6 +50,7 @@ export function useCreateStudyActivity() {
 }
 
 export default {
+  useStudyActivities,
   useStudyActivity,
   useStudyActivitySessions,
   useCreateStudyActivity,

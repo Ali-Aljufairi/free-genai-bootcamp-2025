@@ -44,6 +44,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 
 	// Study activity routes
 	studyActivityHandler := handlers.NewStudyActivityHandler(s.db)
+	s.App.Get("/api/langportal/study_activities", studyActivityHandler.GetStudyActivities)
 	s.App.Get("/api/langportal/study_activities/:id", studyActivityHandler.GetStudyActivity)
 	s.App.Get("/api/langportal/study_activities/:id/sessions", studyActivityHandler.GetStudyActivitySessions)
 	s.App.Post("/api/langportal/study_activities", studyActivityHandler.CreateStudyActivity)

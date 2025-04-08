@@ -29,26 +29,59 @@ func NewStudySessionHandler(db *database.DB) *StudySessionHandler {
 // CreateStudySession creates a new study session
 func (h *StudySessionHandler) CreateStudySession(c *fiber.Ctx) error {
 	var input struct {
-		GroupID         int64 `json:"group_id"`
-		StudyActivityID int64 `json:"study_activity_id"`
+		GroupID     int64  `json:"group_id"`
+		Type        string `json:"type"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}
 
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
+	// Create the activity first
+	activity := models.StudyActivity{
+		Type:        models.ActivityType(input.Type),
+		Name:        input.Name,
+		Description: input.Description,
+		GroupID:     input.GroupID,
+		CreatedAt:   time.Now(),
+	}
+
+	result := h.db.GetDB().Create(&activity)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to create study activity"})
+	}
+
+	// Create the study session linked to the activity
 	session := models.StudySession{
 		GroupID:         input.GroupID,
-		StudyActivityID: input.StudyActivityID,
+		StudyActivityID: activity.ID,
 		CreatedAt:       time.Now(),
 	}
 
-	result := h.db.GetDB().Create(&session)
+	result = h.db.GetDB().Create(&session)
 	if result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to create study session"})
 	}
 
-	return c.JSON(session)
+	// Update the activity with the session ID
+	activity.StudySessionID = session.ID
+	result = h.db.GetDB().Save(&activity)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to update study activity with session ID"})
+	}
+
+	// Return both the session and activity information
+	return c.JSON(fiber.Map{
+		"id":          session.ID,
+		"group_id":    session.GroupID,
+		"created_at":  session.CreatedAt,
+		"activity_id": activity.ID,
+		"type":        activity.Type,
+		"name":        activity.Name,
+		"description": activity.Description,
+	})
 }
 
 // GetStudySessionWords handles retrieving words for a specific study session

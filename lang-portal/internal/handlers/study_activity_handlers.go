@@ -122,3 +122,47 @@ func (h *StudyActivityHandler) CreateStudyActivity(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(activity)
 }
+
+// GetStudyActivities returns all study activities
+func (h *StudyActivityHandler) GetStudyActivities(c *fiber.Ctx) error {
+	// Parse pagination parameters with defaults
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	itemsPerPage, err := strconv.Atoi(c.Query("per_page", "20"))
+	if err != nil || itemsPerPage < 1 {
+		itemsPerPage = 20
+	}
+	offset := (page - 1) * itemsPerPage
+
+	var activities []models.StudyActivity
+	var total int64
+
+	// Count total activities
+	countResult := h.db.GetDB().Model(&models.StudyActivity{}).Count(&total)
+	if countResult.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to count study activities",
+		})
+	}
+
+	// Get activities with pagination
+	result := h.db.GetDB().
+		Order("created_at DESC").
+		Offset(offset).
+		Limit(itemsPerPage).
+		Find(&activities)
+	
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get study activities",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"items": activities,
+		"total": total,
+		"page": page,
+	})
+}

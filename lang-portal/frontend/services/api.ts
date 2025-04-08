@@ -77,6 +77,8 @@ export const groupApi = {
 
 // Study Activity API calls
 export const studyActivityApi = {
+  getStudyActivities: (page: number = 1, pageSize: number = 20) => 
+    fetchData<{ items: StudyActivity[], total: number, page: number }>(`/study_activities?page=${page}&per_page=${pageSize}`),
   getStudyActivity: (id: string) => fetchData<StudyActivity>(`/study_activities/${id}`),
   getStudyActivitySessions: (id: string) => fetchData<StudySession[]>(`/study_activities/${id}/sessions`),
   createStudyActivity: (data: Partial<StudyActivity>) => fetchData<StudyActivity>('/study_activities', {
