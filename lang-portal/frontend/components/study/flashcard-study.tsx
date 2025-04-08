@@ -145,28 +145,28 @@ export function FlashcardStudy() {
                             Question {currentIndex + 1} of {flashcards.length}
                         </p>
                         <p className="text-lg text-muted-foreground">
-                            Cards per round: {cardLimit}
+                            Cards: {cardLimit}
                         </p>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-8">
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <div className="w-full max-w-5xl space-y-8">
-                            <div className="text-center mb-16">
-                                <h2 className="text-6xl font-bold mb-6">{currentFlashcard.word.japanese}</h2>
-                                <p className="text-3xl text-gray-600">{currentFlashcard.word.romaji}</p>
+                <CardContent className="flex-1 p-4 sm:p-8">
+                    <div className="flex flex-col h-full">
+                        <div className="w-full max-w-5xl mx-auto space-y-6 sm:space-y-8">
+                            <div className="text-center mb-8">
+                                <h2 className="text-4xl sm:text-6xl font-bold mb-4">{currentFlashcard.word.japanese}</h2>
+                                <p className="text-2xl sm:text-3xl text-muted-foreground">{currentFlashcard.word.romaji}</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                                 {currentFlashcard.options.map((option) => (
                                     <Button
                                         key={option.id}
-                                        className={`p-10 h-auto text-2xl transition-all duration-200 ${selectedOption !== null && !isCorrect
-                                            ? option.correct
-                                                ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
-                                                : selectedOption === option.id
-                                                    ? "bg-red-400 hover:bg-red-400 text-white"
-                                                    : ""
-                                            : "hover:scale-102 hover:shadow-md"
+                                        className={`p-6 h-auto text-lg sm:text-2xl text-left justify-start transition-all duration-200 ${selectedOption !== null
+                                                ? option.correct
+                                                    ? "bg-green-500 hover:bg-green-600 text-white"
+                                                    : selectedOption === option.id
+                                                        ? "bg-red-400 hover:bg-red-400 text-white"
+                                                        : "opacity-70"
+                                                : "hover:scale-102 hover:shadow-md"
                                             }`}
                                         variant="outline"
                                         onClick={() => handleOptionSelect(option.id, option.correct)}
@@ -177,16 +177,17 @@ export function FlashcardStudy() {
                                 ))}
                             </div>
                             {selectedOption !== null && !isCorrect && (
-                                <div className="mt-10 text-center space-y-4">
-                                    <p className="text-xl text-green-600 font-medium">
-                                        Correct answer: {currentFlashcard.word.english}
-                                    </p>
-                                    <Button
-                                        onClick={handleNext}
-                                        className="bg-blue-600 hover:bg-blue-700 text-xl px-10 py-6 transition-all duration-200 hover:scale-102"
-                                    >
-                                        Next Question
-                                    </Button>
+                                <div className="mt-8 p-6 bg-muted/50 rounded-lg">
+                                    <h3 className="font-bold text-lg mb-2">Correct Answer:</h3>
+                                    <p className="text-xl mb-6">{currentFlashcard.word.english}</p>
+                                    <div className="flex justify-end">
+                                        <Button
+                                            onClick={handleNext}
+                                            className="bg-blue-600 hover:bg-blue-700 px-8 py-2"
+                                        >
+                                            {currentIndex < flashcards.length - 1 ? "Next Question" : "Complete Quiz"}
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
                         </div>

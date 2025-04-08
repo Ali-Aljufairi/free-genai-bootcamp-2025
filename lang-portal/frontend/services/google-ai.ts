@@ -3,24 +3,21 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '' });
 export async function generateImageFromText(text: string): Promise<string> {
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp-image-generation",
-            contents: `Make an Image that descripe the scenario  ${text}`,
-            config: {
-                responseModalities: ["Text", "Image"],
+        const response = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ text }),
         });
 
-        const parts = response?.candidates?.[0]?.content?.parts;
-        if (parts) {
-            for (const part of parts) {
-                if (part.inlineData) {
-                    return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
-                }
-            }
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to generate image');
         }
-        
-        throw new Error('No image generated from the response');
+
+        const data = await response.json();
+        return data.imageUrl;
     } catch (error) {
         console.error('Error generating image:', error);
         throw error;

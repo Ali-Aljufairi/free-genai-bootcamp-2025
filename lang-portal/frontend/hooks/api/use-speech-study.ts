@@ -1,12 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Groq } from 'groq-sdk';
 import { toast } from "@/hooks/use-toast";
 import { generateImageFromText } from '@/services/google-ai';
-
-const groq = new Groq({
-    apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-    dangerouslyAllowBrowser: true
-});
 
 export function useSpeechStudy() {
     const [transcription, setTranscription] = useState<string>('');
@@ -225,17 +219,20 @@ export function useSpeechStudy() {
                 description: "Transcribing your speech...",
             });
 
-            console.log('Sending to Groq for transcription...');
-            const transcriptionResult = await groq.audio.transcriptions.create({
-                file: audioFile,
-                model: "whisper-large-v3",
-                response_format: "verbose_json",
-                timestamp_granularities: ["word", "segment"],
-                language: "ja",
-                temperature: 0.0,
+            const formData = new FormData();
+            formData.append('file', audioFile);
+
+            const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                body: formData,
             });
 
-            setTranscription(transcriptionResult.text);
+            if (!response.ok) {
+                throw new Error('Transcription failed');
+            }
+
+            const data = await response.json();
+            setTranscription(data.text);
 
             toast({
                 title: "Transcription Complete",
@@ -243,7 +240,7 @@ export function useSpeechStudy() {
             });
 
             try {
-                const generatedImageUrl = await generateImageFromText(transcriptionResult.text);
+                const generatedImageUrl = await generateImageFromText(data.text);
                 setGeneratedImage(generatedImageUrl);
                 console.log('Image generated successfully');
                 toast({
