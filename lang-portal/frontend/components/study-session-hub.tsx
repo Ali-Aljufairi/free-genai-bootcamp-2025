@@ -142,7 +142,7 @@ export function StudySessionHub() {
           <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
             <div className="relative w-32 h-32">
               <Image
-                src="/Study-session/images.png"
+                src="/Study-session/drawing.png"
                 alt="Writing Practice background"
                 width={128}
                 height={128}
