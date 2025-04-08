@@ -138,7 +138,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@api.post("/quiz/generate")
+@api.post("/api/quiz-gen/quiz/generate/quiz/generate")
 async def generate_grammar_quiz(request: QuizRequest = Body(...)):
     """
     Generate JLPT grammar questions for a specified level and quantity.
@@ -162,7 +162,7 @@ def run_fastapi():
     """Function to run the FastAPI app with uvicorn"""
     import uvicorn
 
-    uvicorn.run(api, host="0.0.0.0", port=8000)
+    uvicorn.run(api, host="0.0.0.0", port=8004)
 
 
 if __name__ == "__main__":
