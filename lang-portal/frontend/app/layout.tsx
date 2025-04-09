@@ -22,7 +22,13 @@ export default function RootLayout({
       <body
         className={`${inter.className} bg-gradient-to-br from-sky-50/80 via-blue-50/60 to-indigo-50/70 dark:from-slate-900/90 dark:via-blue-950/80 dark:to-indigo-950/90 paper-texture atmospheric-bg`}
       >
-        <ClerkProvider appearance={clerkAppearance}>
+        <ClerkProvider
+          appearance={clerkAppearance}
+          afterSignInUrl="/study"
+          afterSignUpUrl="/study"
+          signInUrl="/sign-in"
+          signUpUrl="/sign-up"
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

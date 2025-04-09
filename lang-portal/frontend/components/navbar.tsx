@@ -20,7 +20,7 @@ export const clerkAppearance = {
     headerSubtitle: "text-blue-200/70",
     formFieldLabel: "text-blue-100/90 font-medium",
     formFieldInput: "bg-[#1A2333] text-white border-blue-900/50 placeholder:text-blue-300/30 focus:border-blue-500/50 focus:ring-blue-500/20",
-    formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-900/20",
+    formButtonPrimary: "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-lg shadow-blue-900/20",
     formButtonReset: "text-blue-200/70 hover:text-blue-100",
     footerActionLink: "text-blue-400 hover:text-blue-300 font-medium",
     footerActionText: "text-blue-200/70",
@@ -28,8 +28,8 @@ export const clerkAppearance = {
     identityPreviewText: "text-white",
     identityPreviewEditButton: "text-blue-200/70 hover:text-blue-100",
     formFieldLabelRow: "text-blue-100/90",
-    socialButtonsBlockButton: "bg-[#1A2333] text-white border-blue-900/50 hover:bg-[#243044]",
-    socialButtonsBlockButtonText: "text-white",
+    socialButtonsBlockButton: "bg-[#1A2333] text-white border-blue-900/50 hover:bg-[#243044] h-12",
+    socialButtonsBlockButtonText: "text-white font-medium text-base",
     socialButtonsBlockButtonArrow: "text-blue-200/70",
     dividerLine: "bg-blue-900/50",
     dividerText: "text-blue-200/70",
@@ -46,11 +46,25 @@ export const clerkAppearance = {
     navbar: "hidden",
     navbarButton: "hidden",
     main: "bg-[#0A1120]",
-    page: "bg-[#0A1120]"
+    page: "bg-[#0A1120]",
+    socialButtonsIconButton: "!text-white filter brightness-100 contrast-100 w-6 h-6",
+    socialButtonsProviderIcon: "!text-white filter brightness-100 contrast-100 w-6 h-6 scale-125",
+    otpCodeFieldInput: "bg-[#1A2333] text-white border-blue-900/50",
+    dividerRow: "my-6",
+    socialButtonsProviderIcon__github: "!text-white w-6 h-6 scale-125",
+    socialButtonsProviderIcon__google: "!text-white w-6 h-6 scale-125",
+    card__signIn: "gap-6",
+    card__signUp: "gap-6",
+    main__signIn: "gap-2",
+    main__signUp: "gap-2",
+    socialButtonsIconButton__github: "w-6 h-6 scale-125",
+    socialButtonsIconButton__google: "w-6 h-6 scale-125",
+    socialButtonsBlockButtonContainer: "gap-3"
   },
   layout: {
-    socialButtonsPlacement: "bottom",
-    showOptionalFields: false
+    socialButtonsPlacement: "top",
+    showOptionalFields: false,
+    shimmer: true
   },
   variables: {
     colorPrimary: "#3B82F6",
@@ -58,7 +72,8 @@ export const clerkAppearance = {
     colorInputBackground: "#1A2333",
     colorInputText: "#FFFFFF",
     colorTextSecondary: "rgba(148, 163, 184, 0.7)",
-    borderRadius: "0.5rem"
+    borderRadius: "0.5rem",
+    spacingUnit: "0.5rem"
   }
 }
 
