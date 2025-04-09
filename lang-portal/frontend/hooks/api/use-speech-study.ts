@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { generateImageFromText } from '@/services/google-ai';
+import { transcribeAudio } from '@/app/actions/transcribe';
 
 export function useSpeechStudy() {
     const [transcription, setTranscription] = useState<string>('');
@@ -211,50 +212,61 @@ export function useSpeechStudy() {
         setIsProcessing(true);
         try {
             console.log('Processing audio file...');
-            const audioFile = new File([blob], 'recording.webm', { type: 'audio/webm' });
-            console.log('Audio file created:', audioFile);
+            
+            // Verify blob is a proper WebM audio file
+            console.log('Raw audio blob details:', {
+                type: blob.type,
+                size: blob.size
+            });
 
             toast({
                 title: "Processing Audio",
                 description: "Transcribing your speech...",
             });
 
+            // Create FormData and append the raw blob directly
             const formData = new FormData();
-            formData.append('file', audioFile);
-
-            const response = await fetch('/api/transcribe', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Transcription failed');
-            }
-
-            const data = await response.json();
-            setTranscription(data.text);
-
-            toast({
-                title: "Transcription Complete",
-                description: "Generating image based on your speech...",
-            });
+            formData.append('file', blob);
 
             try {
-                const generatedImageUrl = await generateImageFromText(data.text);
-                setGeneratedImage(generatedImageUrl);
-                console.log('Image generated successfully');
-                toast({
-                    title: "Success",
-                    description: "Image generated successfully!",
-                    duration: 3000
-                });
-            } catch (error) {
-                console.error('Error generating image:', error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to generate image. Please try again.",
-                });
+                // Use the server action directly
+                const result = await transcribeAudio(formData);
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                if (result.text) {
+                    setTranscription(result.text);
+
+                    toast({
+                        title: "Transcription Complete",
+                        description: "Generating image based on your speech...",
+                    });
+
+                    try {
+                        const generatedImageUrl = await generateImageFromText(result.text);
+                        setGeneratedImage(generatedImageUrl);
+                        console.log('Image generated successfully');
+                        toast({
+                            title: "Success",
+                            description: "Image generated successfully!",
+                            duration: 3000
+                        });
+                    } catch (error) {
+                        console.error('Error generating image:', error);
+                        toast({
+                            variant: "destructive",
+                            title: "Error",
+                            description: "Failed to generate image. Please try again.",
+                        });
+                    }
+                } else {
+                    throw new Error('No transcription text returned');
+                }
+            } catch (transcriptionError) {
+                console.error('Transcription error:', transcriptionError);
+                throw new Error('Failed to transcribe audio');
             }
         } catch (error) {
             console.error('Error processing audio:', error);

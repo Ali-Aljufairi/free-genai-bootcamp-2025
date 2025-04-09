@@ -42,7 +42,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Brain className="h-5 w-5 text-blue-500" />
               Flashcards
             </CardTitle>
             <CardDescription>Practice vocabulary with flashcard</CardDescription>
@@ -73,7 +73,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <CheckCircle className="h-5 w-5 text-green-500" />
               Grammar Quiz
             </CardTitle>
             <CardDescription>Test your knowledge with JLPT grammar quizzes</CardDescription>
@@ -104,7 +104,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <MessageSquare className="h-5 w-5 text-purple-500" />
               Sentence Constructor
             </CardTitle>
             <CardDescription>Practice language through conversation</CardDescription>
@@ -134,7 +134,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Edit className="h-5 w-5 text-orange-500" />
               Writing Practice
             </CardTitle>
             <CardDescription>Practice writing characters</CardDescription>
@@ -164,7 +164,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Search className="h-5 w-5 text-teal-500" />
               Learning Resources
             </CardTitle>
             <CardDescription>Find resources to learn Japanese</CardDescription>
@@ -194,7 +194,7 @@ export function StudySessionHub() {
         <Card className="glass-card relative overflow-hidden flex flex-col">
           <CardHeader className="z-10 pb-0">
             <CardTitle className="flex items-center gap-2">
-              <Mic className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Mic className="h-5 w-5 text-red-500" />
               Speech to Image
             </CardTitle>
             <CardDescription>Turn your spoken words into images</CardDescription>
