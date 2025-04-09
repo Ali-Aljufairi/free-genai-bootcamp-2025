@@ -138,7 +138,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@api.post("/api/quiz-gen/quiz/generate/quiz/generate")
+@api.post("/api/quiz-gen/quiz/generate")
 async def generate_grammar_quiz(request: QuizRequest = Body(...)):
     """
     Generate JLPT grammar questions for a specified level and quantity.
