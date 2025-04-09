@@ -1,15 +1,6 @@
 'use server';
 
-import { Groq } from 'groq-sdk';
-import { promises as fs } from 'node:fs';
-import { resolve } from 'node:path';
 import { revalidatePath } from 'next/cache';
-import crypto from 'crypto';
-
-// Configure the Groq client
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 // Define the server action with proper error handling
 export async function transcribeAudio(formData: FormData) {
@@ -21,33 +12,8 @@ export async function transcribeAudio(formData: FormData) {
       return { error: "No audio file provided" };
     }
 
-    // Log the file details for debugging
-    console.log('File details:', {
-      name: file instanceof File ? file.name : 'Not a File',
-      type: file instanceof File ? file.type : (file instanceof Blob ? file.type : 'Unknown type'),
-      size: file instanceof Blob ? file.size : 'unknown'
-    });
-
-    // Create a temporary file path and save a copy for debugging
-    const uploadsDir = resolve('./uploads');
-    
-    // Ensure the uploads directory exists
-    try {
-      await fs.access(uploadsDir);
-    } catch (error) {
-      await fs.mkdir(uploadsDir, { recursive: true });
-    }
-    
-    // Generate a unique filename for the debug file
-    const debugFilename = `${crypto.randomUUID()}-recording.webm`;
-    const debugFilePath = resolve(uploadsDir, debugFilename);
-    
-    // Save a copy of the audio for debugging
-    if (file instanceof Blob) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await fs.writeFile(debugFilePath, buffer);
-      console.log('Debug copy saved to:', debugFilePath);
-    }
+    // Log basic file details
+    console.log('Processing audio file for transcription');
 
     try {
       // Create a FormData object specifically for Groq API
@@ -72,7 +38,7 @@ export async function transcribeAudio(formData: FormData) {
       formDataForGroq.append('language', 'ja');
       formDataForGroq.append('temperature', '0.0');
 
-      // Instead of passing the file directly to create(), we use fetch to manually construct the request
+      // Send request to Groq API
       const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST',
         headers: {
@@ -95,12 +61,11 @@ export async function transcribeAudio(formData: FormData) {
   
       return { text: transcription.text };
     } catch (groqError) {
-      console.error('Groq API error details:', groqError);
+      console.error('Transcription API error:', groqError);
       return { error: `Transcription API error: ${groqError.message || 'Unknown error'}` };
     }
   } catch (error) {
-    // Log the detailed error for debugging
-    console.error('Transcription error details:', error);
+    console.error('Transcription error:', error);
     return { error: "Failed to transcribe audio" };
   }
 }
