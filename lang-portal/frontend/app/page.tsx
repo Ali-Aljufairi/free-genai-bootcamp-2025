@@ -7,13 +7,46 @@ import { ArrowRight, BookOpen, Brain, CheckCircle, GraduationCap, Sparkles } fro
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { StatsCards } from "@/components/stats-cards"
+import { useRouter } from "next/navigation"
+import { SignUpButton, useUser } from "@clerk/nextjs"
+
+// Common appearance settings for Clerk modals - matching navbar.tsx
+const clerkAppearance = {
+  elements: {
+    rootBox: "",
+    card: "bg-gradient-to-r from-blue-600 to-indigo-600 shadow-xl border-0",
+    modalBackdrop: "backdrop-blur-md",
+    modalContent: "bg-transparent",
+    headerTitle: "text-white font-bold",
+    headerSubtitle: "text-white/80",
+    formFieldLabel: "text-white/90",
+    formFieldInput: "bg-white/20 text-white border-white/30 placeholder:text-white/60",
+    formButtonPrimary: "bg-white hover:bg-white/90 text-blue-600 font-medium",
+    formButtonReset: "text-white hover:text-white/90",
+    footerActionLink: "text-white hover:text-white/90 font-medium",
+    footerActionText: "text-white/80",
+    identityPreview: "bg-white/20 border-white/30",
+    identityPreviewText: "text-white",
+    identityPreviewEditButton: "text-white/80 hover:text-white",
+    formFieldLabelRow: "text-white/90"
+  }
+}
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false)
+  const router = useRouter()
+  const { isSignedIn } = useUser()
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
+
+  const handleGetStarted = () => {
+    if (isSignedIn) {
+      router.push("/study")
+    }
+    // If not signed in, the SignUpButton component will handle it
+  }
 
   return (
     <div className="flex flex-col gap-16 pb-20">
@@ -88,13 +121,26 @@ export default function HomePage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Button
-                size="lg"
-                className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              {isSignedIn ? (
+                <Button
+                  size="lg"
+                  className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
+                  onClick={handleGetStarted}
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <SignUpButton mode="modal" afterSignUpUrl="/study" appearance={clerkAppearance}>
+                  <Button
+                    size="lg"
+                    className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
+                  >
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </SignUpButton>
+              )}
               <Button size="lg" variant="outline" className="px-8">
                 Take a Tour
               </Button>
@@ -186,12 +232,24 @@ export default function HomePage() {
                 Join thousands of learners who have achieved fluency with Sorami's immersive approach.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button
-                  size="lg"
-                  className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
-                >
-                  Get Started Free
-                </Button>
+                {isSignedIn ? (
+                  <Button
+                    size="lg"
+                    className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
+                    onClick={handleGetStarted}
+                  >
+                    Get Started Free
+                  </Button>
+                ) : (
+                  <SignUpButton mode="modal" afterSignUpUrl="/study" appearance={clerkAppearance}>
+                    <Button
+                      size="lg"
+                      className="px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
+                    >
+                      Get Started Free
+                    </Button>
+                  </SignUpButton>
+                )}
                 <Button size="lg" variant="outline" className="px-8">
                   View Pricing
                 </Button>

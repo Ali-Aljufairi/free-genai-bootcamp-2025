@@ -7,10 +7,65 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs"
+
+// Common appearance settings for Clerk modals
+export const clerkAppearance = {
+  elements: {
+    rootBox: "w-full",
+    card: "bg-[#0A1120] border border-blue-900/30 shadow-2xl",
+    modalBackdrop: "backdrop-blur-md bg-black/60",
+    modalContent: "bg-transparent",
+    headerTitle: "text-white font-bold text-2xl",
+    headerSubtitle: "text-blue-200/70",
+    formFieldLabel: "text-blue-100/90 font-medium",
+    formFieldInput: "bg-[#1A2333] text-white border-blue-900/50 placeholder:text-blue-300/30 focus:border-blue-500/50 focus:ring-blue-500/20",
+    formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-900/20",
+    formButtonReset: "text-blue-200/70 hover:text-blue-100",
+    footerActionLink: "text-blue-400 hover:text-blue-300 font-medium",
+    footerActionText: "text-blue-200/70",
+    identityPreview: "bg-[#1A2333] border-blue-900/50",
+    identityPreviewText: "text-white",
+    identityPreviewEditButton: "text-blue-200/70 hover:text-blue-100",
+    formFieldLabelRow: "text-blue-100/90",
+    socialButtonsBlockButton: "bg-[#1A2333] text-white border-blue-900/50 hover:bg-[#243044]",
+    socialButtonsBlockButtonText: "text-white",
+    socialButtonsBlockButtonArrow: "text-blue-200/70",
+    dividerLine: "bg-blue-900/50",
+    dividerText: "text-blue-200/70",
+    formFieldError: "text-red-400",
+    formFieldSuccess: "text-green-400",
+    formFieldWarning: "text-yellow-400",
+    formFieldInfo: "text-blue-400",
+    card__main: "gap-6",
+    footer: "bg-[#0A1120] border-t border-blue-900/30",
+    footerText: "text-blue-200/70",
+    footerActionText: "text-blue-200/70",
+    footerActionLink: "text-blue-400 hover:text-blue-300",
+    alternativeMethodsBlockButton: "bg-[#1A2333] hover:bg-[#243044] border-blue-900/30",
+    navbar: "hidden",
+    navbarButton: "hidden",
+    main: "bg-[#0A1120]",
+    page: "bg-[#0A1120]"
+  },
+  layout: {
+    socialButtonsPlacement: "bottom",
+    showOptionalFields: false
+  },
+  variables: {
+    colorPrimary: "#3B82F6",
+    colorBackground: "#0A1120",
+    colorInputBackground: "#1A2333",
+    colorInputText: "#FFFFFF",
+    colorTextSecondary: "rgba(148, 163, 184, 0.7)",
+    borderRadius: "0.5rem"
+  }
+}
 
 export default function Navbar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const { isSignedIn } = useUser()
 
   // Only show navbar on homepage
   const isHomePage = pathname === "/"
@@ -34,18 +89,32 @@ export default function Navbar() {
           <ThemeToggle />
 
           <div className="hidden md:flex items-center gap-2">
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="mr-2">
-                Dashboard
-              </Button>
-            </Link>
-
-            <Button
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0"
-              size="sm"
-            >
-              Sign Up
-            </Button>
+            {isSignedIn ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm" className="mr-2">
+                    Dashboard
+                  </Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <>
+                <SignInButton mode="modal" afterSignInUrl="/study" appearance={clerkAppearance}>
+                  <Button variant="outline" size="sm" className="mr-2">
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal" afterSignUpUrl="/study" appearance={clerkAppearance}>
+                  <Button
+                    className="bg-[#3B82F6] hover:bg-[#2563EB] text-white border-0 shadow-lg shadow-blue-500/20"
+                    size="sm"
+                  >
+                    Sign Up
+                  </Button>
+                </SignUpButton>
+              </>
+            )}
           </div>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -79,20 +148,42 @@ export default function Navbar() {
                   About
                 </Link>
                 <div className="h-px bg-border my-2" />
-                <Link
-                  href="/dashboard"
-                  className="text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
-                  onClick={() => setOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <Button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 mt-2"
-                  size="sm"
-                  onClick={() => setOpen(false)}
-                >
-                  Sign Up
-                </Button>
+                {isSignedIn ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                      onClick={() => setOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <div className="mt-2">
+                      <UserButton afterSignOutUrl="/" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <SignInButton mode="modal" afterSignInUrl="/study" appearance={clerkAppearance}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setOpen(false)}
+                      >
+                        Sign In
+                      </Button>
+                    </SignInButton>
+                    <SignUpButton mode="modal" afterSignUpUrl="/study" appearance={clerkAppearance}>
+                      <Button
+                        className="bg-[#3B82F6] hover:bg-[#2563EB] text-white border-0 shadow-lg shadow-blue-500/20 w-full mt-2"
+                        size="sm"
+                        onClick={() => setOpen(false)}
+                      >
+                        Sign Up
+                      </Button>
+                    </SignUpButton>
+                  </>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
