@@ -17,17 +17,22 @@ export async function POST(req: Request) {
 
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-exp-image-generation",
-      contents: `Make an Image that describes the scenario: ${text}`,
+      contents: `Transform this Japanese text into a visually stunning scene: "${text}". 
+  Style: Blend traditional Japanese aesthetics with modern digital art. 
+  Key elements: Include symbolic representations of the text's core themes. 
+  Mood: Ethereal and imaginative. 
+  Technical: 8K resolution with ukiyo-e inspired linework and neon accents.`,
       config: {
-        responseModalities: ["Text", "Image"],
+        responseModalities: ["Text","Image"],
       },
     });
+
 
     const parts = response?.candidates?.[0]?.content?.parts;
     if (parts) {
       for (const part of parts) {
         if (part.inlineData) {
-          return new Response(JSON.stringify({ 
+          return new Response(JSON.stringify({
             imageUrl: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`
           }), {
             status: 200,
