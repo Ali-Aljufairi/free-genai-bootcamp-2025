@@ -1,0 +1,319 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+type: Opaque
+data:
+  TAVILY_API_KEY: #your api key
+  YOUTUBE_API_KEY: #your api key
+  GMAIL_USER: #your api key
+  GMAIL_PASS: #your api key
+  GROQ_API_KEY: #your api key
+  GEMINI_API_KEY: #your api key
+  CLERK_SECRET_KEY:
+---
+### agent ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent
+  labels:
+    app: agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+  template:
+    metadata:
+      labels:
+        app: agent
+    spec:
+      containers:
+        - name: agent
+          image: "ghcr.io/ali-aljufairi/shopping-agent-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent
+  labels:
+    app: agent
+spec:
+  selector:
+    app: agent # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 8002 # The port inside the container the service will forward traffic to
+---
+### lang portal api ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lang-portal-api
+  labels:
+    app: lang-portal-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lang-portal-api
+  template:
+    metadata:
+      labels:
+        app: lang-portal-api
+    spec:
+      containers:
+        - name: lang-portal-api
+          image: "ghcr.io/ali-aljufairi/lang-portal-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lang-portal-api
+  labels:
+    app: lang-portal-api
+spec:
+  selector:
+    app: lang-portal-api # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 8080 # The port inside the container the service will forward traffic to
+---
+### lang portal frontend ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lang-portal-frontend
+  labels:
+    app: lang-portal-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lang-portal-frontend
+  template:
+    metadata:
+      labels:
+        app: lang-portal-frontend
+    spec:
+      containers:
+        - name: lang-portal-frontend
+          image: "ghcr.io/ali-aljufairi/lang-portal-frontend:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lang-portal-frontend
+  labels:
+    app: lang-portal-frontend
+spec:
+  selector:
+    app: lang-portal-frontend # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 3000 # The port inside the container the service will forward traffic to
+---
+### vocab importer ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vocab-importer
+  labels:
+    app: vocab-importer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vocab-importer
+  template:
+    metadata:
+      labels:
+        app: vocab-importer
+    spec:
+      containers:
+        - name: vocab-importer
+          image: "ghcr.io/ali-aljufairi/vocab-importer-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vocab-importer
+  labels:
+    app: vocab-importer
+spec:
+  selector:
+    app: vocab-importer # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 8000 # The port inside the container the service will forward traffic to
+---
+### writing practice ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: writing-practice
+  labels:
+    app: writing-practice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: writing-practice
+  template:
+    metadata:
+      labels:
+        app: writing-practice
+    spec:
+      containers:
+        - name: writing-practice
+          image: "ghcr.io/ali-aljufairi/writing-practice-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: writing-practice
+  labels:
+    app: writing-practice
+spec:
+  selector:
+    app: writing-practice # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 8001 # The port inside the container the service will forward traffic to
+---
+### quiz gen ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz-gen
+  labels:
+    app: quiz-gen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz-gen
+  template:
+    metadata:
+      labels:
+        app: quiz-gen
+    spec:
+      containers:
+        - name: quiz-gen
+          image: "ghcr.io/ali-aljufairi/quiz-gen-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8004
+          envFrom:
+            - secretRef:
+                name: secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz-gen
+  labels:
+    app: quiz-gen
+spec:
+  selector:
+    app: quiz-gen # Matches the label in the Deployment
+  ports:
+    - protocol: TCP
+      port: 80 # The port the service exposes
+      targetPort: 8004 # The port inside the container the service will forward traffic to
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  annotations:
+    cert-manager.io/issuer: "lets-encrypt-staging" # Use the ClusterIssuer created earlier
+    nginx.ingress.kubernetes.io/ssl-redirect: "true" # Ensures all HTTP traffic is redirected to HTTPS
+spec:
+  rules:
+    - host: sorami.aljufairi.org # Replace with your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lang-portal-frontend
+                port:
+                  number: 80
+          - path: /api/langportal
+            pathType: Prefix
+            backend:
+              service:
+                name: lang-portal-api
+                port:
+                  number: 80
+          - path: /api/agent
+            pathType: Prefix
+            backend:
+              service:
+                name: agent
+                port:
+                  number: 80
+          - path: /api/vocab-importer
+            pathType: Prefix
+            backend:
+              service:
+                name: vocab-importer
+                port:
+                  number: 80
+          - path: /api/writing
+            pathType: Prefix
+            backend:
+              service:
+                name: writing-practice
+                port:
+                  number: 80
+          - path: /api/quiz-gen
+            pathType: Prefix
+            backend:
+              service:
+                name: quiz-gen
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - # Replace with your domain
+      secretName: # The secret where the TLS certificate is stored
+

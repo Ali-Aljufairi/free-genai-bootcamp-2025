@@ -9,6 +9,12 @@ Here's a breakdown of the projects included:
 ### Agent
 **[agent/](./agent/)**
 
+#### Streamlit UI
+![alt text](images/agent-streamlit.png "Streamlit UI")
+
+#### Integration with Lang-Portal
+![alt text](Videos/agent.mkv "Integration with Lang-Portal")
+
 An AI agent designed for enhanced internet searching and comparison tasks. It leverages graph-based processing and various APIs (including email/web integration) to provide comprehensive results. The agent can:
 - Perform complex web searches and data aggregation
 - Compare results from multiple sources
@@ -21,6 +27,9 @@ An AI agent designed for enhanced internet searching and comparison tasks. It le
 ### American Sign Language (ASL)
 **[ASL/](./ASL/)**
 
+#### DEMO
+[![Watch the video](assets/alipic.png)](https://www.youtube.com/watch?v=1zApPw6uHEI "ASL")
+
 Focuses on American Sign Language (ASL) recognition and learning. This project combines computer vision and machine learning to:
 - Process and analyze sign language from images and videos
 - Train and utilize machine learning classification models for gesture recognition
@@ -28,6 +37,7 @@ Focuses on American Sign Language (ASL) recognition and learning. This project c
 - Potentially integrate with the `agent` project for comprehensive language tasks
 
 ---
+
 
 ### GenAI Architecture
 **[genai-architecting/](./genai-architecting/)**
@@ -76,6 +86,10 @@ A listening comprehension tool, specifically geared towards JLPT preparation. Th
 
 ### Quiz Generator
 **[quiz-gen/](./quiz-gen/)**
+
+# Demo
+
+![alt text](Videos/quiz.mkv"Quiz Generator")
 
 Generates practice questions, particularly for the JLPT and other language proficiency tests. The system:
 - Utilizes LLM APIs to create contextually relevant quiz content
