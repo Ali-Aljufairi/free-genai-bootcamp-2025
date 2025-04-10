@@ -7,6 +7,10 @@ Welcome to the Sorami repository, a collection of interconnected Generative AI p
 Here's a breakdown of the projects included:
 
 ### Agent
+
+https://github.com/user-attachments/assets/9d58e1e2-a703-4c18-93fe-0354dca3b48b
+
+
 **[agent/](./agent/)**
 
 #### Streamlit UI
