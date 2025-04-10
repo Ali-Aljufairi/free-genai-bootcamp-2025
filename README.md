@@ -162,3 +162,5 @@ The Sorami project collection leverages several key technologies:
 - Next.js for interactive frontends
 - Docker and Kubernetes for containerization
 - PostgreSQL and SQLite for data storage
+
+

@@ -112,7 +112,7 @@ export function StudySessionHub() {
           <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
             <div className="relative w-32 h-32">
               <Image
-                src="/Study-session/images.png"
+                src="/Study-session/sen.png"
                 alt="Sentence Constructor background"
                 width={128}
                 height={128}
@@ -172,7 +172,7 @@ export function StudySessionHub() {
           <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
             <div className="relative w-32 h-32">
               <Image
-                src="/Study-session/images.png"
+                src="/Study-session/agent.png"
                 alt="Learning Resources background"
                 width={128}
                 height={128}
@@ -202,7 +202,7 @@ export function StudySessionHub() {
           <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
             <div className="relative w-32 h-32">
               <Image
-                src="/Study-session/images.png"
+                src="/Study-session/mic.png"
                 alt="Speech to Image background"
                 width={128}
                 height={128}
