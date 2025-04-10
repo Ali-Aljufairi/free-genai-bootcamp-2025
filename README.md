@@ -8,16 +8,22 @@ Here's a breakdown of the projects included:
 
 ### Agent
 
+**[agent/](./agent/)**
+
+
+#### DEMO
+
 https://github.com/user-attachments/assets/9d58e1e2-a703-4c18-93fe-0354dca3b48b
 
 
-**[agent/](./agent/)**
+
 
 #### Streamlit UI
-![alt text](images/agent-streamlit.png)
+![image](https://github.com/user-attachments/assets/a28067d1-1d71-4c9c-becf-dd7a22562bb9)
 
-#### Integration with Lang-Portal
-![alt text](Videos/agent.mkv)
+
+
+
 
 An AI agent designed for enhanced internet searching and comparison tasks. It leverages graph-based processing and various APIs (including email/web integration) to provide comprehensive results. The agent can:
 - Perform complex web searches and data aggregation
@@ -68,6 +74,8 @@ Holds Kubernetes deployment configurations for containerizing and orchestrating 
 ### Language Portal
 **[lang-portal/](./lang-portal/)**
 
+[Website Link](https://sorami.aljufairi.org/)
+
 The central portal connecting many Sorami projects. This core application serves as the main user interface and:
 - Features a Go backend for high-performance API handling
 - Implements a Next.js frontend for responsive user interactions
@@ -93,7 +101,10 @@ A listening comprehension tool, specifically geared towards JLPT preparation. Th
 
 # Demo
 
-![alt text](Videos/quiz.mkv"Quiz Generator")
+
+https://github.com/user-attachments/assets/1a503902-f445-4855-b789-ae7b4259fe7c
+
+
 
 Generates practice questions, particularly for the JLPT and other language proficiency tests. The system:
 - Utilizes LLM APIs to create contextually relevant quiz content
@@ -107,6 +118,12 @@ Generates practice questions, particularly for the JLPT and other language profi
 ### Sentence Constructor
 **[sentence-constructor/](./sentence-constructor/)**
 
+#### DEMO
+
+
+https://github.com/user-attachments/assets/0ee5cb30-3a9e-4328-9fc8-5278e932661b
+
+
 A tool aiding in Japanese sentence construction with support for multiple language learning scenarios. Features include:
 - Support for multiple Large Language Models (ChatGPT, Claude, Gemini, Llama)
 - Japanese speech capabilities for pronunciation practice
@@ -118,6 +135,15 @@ A tool aiding in Japanese sentence construction with support for multiple langua
 
 ### Speech Analysis
 **[speach/](./speach/)**
+##### Streamlit ouptput
+
+
+
+https://github.com/user-attachments/assets/c720638b-c8fd-4b3a-970e-01d0cc497b89
+
+
+##### Langportal intergraion
+
 
 Analyzes spoken Japanese to provide feedback on pronunciation, intonation, and fluency. The system:
 - Processes audio input to detect speech patterns
@@ -128,17 +154,7 @@ Analyzes spoken Japanese to provide feedback on pronunciation, intonation, and f
 
 ---
 
-### Video Translation
-**[video-translation/](./video-translation/)**
 
-A tool for translating video content between languages, with special focus on educational materials. This project:
-- Extracts audio from video files for processing
-- Transcribes speech to text in the source language
-- Translates content to target language
-- Generates subtitles or dubbed audio
-- Preserves timing and context across translations
-
----
 
 ### Vocabulary Importer
 **[vocab-importer/](./vocab-importer/)**
@@ -155,12 +171,38 @@ Helps language learners efficiently import and manage vocabulary lists. This too
 ### Writing Practice
 **[writing-practice/](./writing-practice/)**
 
+
+
+#### Langportal integration
+
+https://github.com/user-attachments/assets/c4a56f8c-f099-492d-96ee-239a877ea417
+
+
 An interactive web application for practicing Japanese writing, featuring word and sentence exercises with real-time feedback. Key features include:
 - Word practice mode with random vocabulary generation
 - Sentence practice with AI-generated example sentences
-- Handwriting input and OCR recognition
+- Handwriting input and OCR re
+
+
+cognition
 - AI-powered grading and feedback on writing accuracy
 - Progress tracking across different writing exercises
+
+
+
+### Video Translation
+**[video-translation/](./video-translation/)**
+
+A tool for translating video content between languages, with special focus on educational materials. This project:
+- Extracts audio from video files for processing
+- Transcribes speech to text in the source language
+- Translates content to target language
+- Generates subtitles or dubbed audio
+- Preserves timing and context across translations
+
+---
+
+
 
 ## Getting Started
 
