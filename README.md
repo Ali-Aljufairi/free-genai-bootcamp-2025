@@ -14,10 +14,10 @@ https://github.com/user-attachments/assets/9d58e1e2-a703-4c18-93fe-0354dca3b48b
 **[agent/](./agent/)**
 
 #### Streamlit UI
-![alt text](images/agent-streamlit.png "Streamlit UI")
+![alt text](images/agent-streamlit.png)
 
 #### Integration with Lang-Portal
-![alt text](Videos/agent.mkv "Integration with Lang-Portal")
+![alt text](Videos/agent.mkv)
 
 An AI agent designed for enhanced internet searching and comparison tasks. It leverages graph-based processing and various APIs (including email/web integration) to provide comprehensive results. The agent can:
 - Perform complex web searches and data aggregation
