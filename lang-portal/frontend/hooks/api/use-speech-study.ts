@@ -290,19 +290,29 @@ export function useSpeechStudy() {
                         description: "Analyzing your speech and generating image...",
                     });
 
-                    // Run image generation and speech analysis in parallel
-                    const [generatedImageUrl] = await Promise.all([
-                        generateImageFromText(result.text),
-                        analyzeSpeech(result.text)
-                    ]);
+                    // Run image generation and speech analysis independently
+                    // so they can display as soon as they're ready
+                    generateImageFromText(result.text)
+                        .then(imageUrl => {
+                            setGeneratedImage(imageUrl);
+                            console.log('Image generated successfully');
+                            toast({
+                                title: "Success",
+                                description: "Image generated successfully!",
+                                duration: 3000
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Image generation error:', error);
+                            toast({
+                                variant: "destructive",
+                                title: "Image Error",
+                                description: error instanceof Error ? error.message : "Failed to generate image",
+                            });
+                        });
                     
-                    setGeneratedImage(generatedImageUrl);
-                    console.log('Image generated successfully');
-                    toast({
-                        title: "Success",
-                        description: "Image generated successfully!",
-                        duration: 3000
-                    });
+                    // Run analysis in parallel but independently
+                    analyzeSpeech(result.text);
                 } else {
                     throw new Error('No transcription text returned');
                 }
