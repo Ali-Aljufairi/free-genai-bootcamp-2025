@@ -145,6 +145,10 @@ https://github.com/user-attachments/assets/c720638b-c8fd-4b3a-970e-01d0cc497b89
 ##### Langportal intergraion
 
 
+https://github.com/user-attachments/assets/267c4b5a-7c55-4bf6-baba-16bd51546b59
+
+
+
 Analyzes spoken Japanese to provide feedback on pronunciation, intonation, and fluency. The system:
 - Processes audio input to detect speech patterns
 - Compares user pronunciation with native speech models
@@ -158,6 +162,10 @@ Analyzes spoken Japanese to provide feedback on pronunciation, intonation, and f
 
 ### Vocabulary Importer
 **[vocab-importer/](./vocab-importer/)**
+
+#### Langpotal  Integration
+https://github.com/user-attachments/assets/9b875221-6160-416d-998a-6d62ca5e9a30
+
 
 Helps language learners efficiently import and manage vocabulary lists. This tool:
 - Extracts vocabulary from various source formats (text, PDF, websites)
