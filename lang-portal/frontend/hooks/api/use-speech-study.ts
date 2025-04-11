@@ -6,11 +6,13 @@ import { transcribeAudio } from '@/app/actions/transcribe';
 export function useSpeechStudy() {
     const [transcription, setTranscription] = useState<string>('');
     const [generatedImage, setGeneratedImage] = useState<string>('');
+    const [analysisResult, setAnalysisResult] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioLevel, setAudioLevel] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const recorderRef = useRef<any>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -208,6 +210,50 @@ export function useSpeechStudy() {
         }
     };
 
+    const analyzeSpeech = async (transcript: string) => {
+        if (!transcript) return;
+        
+        setIsAnalyzing(true);
+        try {
+            const response = await fetch('/api/analyze-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ transcript }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to analyze speech: ${response.status}`);
+            }
+
+            // Parse the JSON response
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error('Analysis failed on the server');
+            }
+            
+            // Update the state with the analysis text
+            setAnalysisResult(data.analysis);
+            
+            toast({
+                title: "Analysis Complete",
+                description: "Speech analysis completed successfully!",
+                duration: 3000
+            });
+        } catch (error) {
+            console.error('Error analyzing speech:', error);
+            toast({
+                variant: "destructive",
+                title: "Analysis Error",
+                description: error instanceof Error ? error.message : "Failed to analyze speech",
+            });
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     const handleStop = async (blobUrl: string, blob: Blob) => {
         setIsProcessing(true);
         try {
@@ -241,26 +287,22 @@ export function useSpeechStudy() {
 
                     toast({
                         title: "Transcription Complete",
-                        description: "Generating image based on your speech...",
+                        description: "Analyzing your speech and generating image...",
                     });
 
-                    try {
-                        const generatedImageUrl = await generateImageFromText(result.text);
-                        setGeneratedImage(generatedImageUrl);
-                        console.log('Image generated successfully');
-                        toast({
-                            title: "Success",
-                            description: "Image generated successfully!",
-                            duration: 3000
-                        });
-                    } catch (error) {
-                        console.error('Error generating image:', error);
-                        toast({
-                            variant: "destructive",
-                            title: "Error",
-                            description: "Failed to generate image. Please try again.",
-                        });
-                    }
+                    // Run image generation and speech analysis in parallel
+                    const [generatedImageUrl] = await Promise.all([
+                        generateImageFromText(result.text),
+                        analyzeSpeech(result.text)
+                    ]);
+                    
+                    setGeneratedImage(generatedImageUrl);
+                    console.log('Image generated successfully');
+                    toast({
+                        title: "Success",
+                        description: "Image generated successfully!",
+                        duration: 3000
+                    });
                 } else {
                     throw new Error('No transcription text returned');
                 }
@@ -289,8 +331,10 @@ export function useSpeechStudy() {
     return {
         transcription,
         generatedImage,
+        analysisResult,
         isProcessing,
         isRecording,
+        isAnalyzing,
         recordingTime,
         audioLevel,
         error,

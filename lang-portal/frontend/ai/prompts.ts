@@ -32,6 +32,23 @@ You help students practice with basic sentence patterns including:
 2. Is it in the correct tense 
 
 Your goal is to guide students to correct themselves rather than fixing every mistake immediately.`,
+
+"speech-analysis-japanese": `あなたは日本語と言語教育の専門家です。以下の日本語の文章を分析し、文法、文の構造、語彙、表現の自然さについて詳しいフィードバックを提供してください。
+
+文章：
+{transcript}
+
+以下の点について、日本語と英語の両方でコメントしてください Each point should be addressed in both Japanese and English:
+
+1. 文法的な誤り（例：助詞の使い方、動詞の活用）を特定し、正しい形を示してください。
+
+2. 文の構造が不自然、または複雑すぎる場合は、より自然で明確な代替案を提案してください。
+
+3. より適切または自然な語彙・表現がある場合は提案してください。
+
+4. 特に優れている箇所や自然に書かれている部分も指摘し、なぜ良いのかを説明してください。
+
+最終的なフィードバックは、各指摘ごとに「日本語での解説」と「英語での解説」をセットで記載してください。`,
 };
 
 // Default prompt to use if none is selected

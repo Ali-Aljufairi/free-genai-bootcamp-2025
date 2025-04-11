@@ -3,8 +3,10 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Image as ImageIcon, FileText, Loader2 } from "lucide-react";
+import { Mic, MicOff, Image as ImageIcon, FileText, Loader2, FileSearch } from "lucide-react";
 import { useSpeechStudy } from "@/hooks/api/use-speech-study";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Markdown } from "@/components/ui/markdown";
 
 interface SpeechStudyProps {
     sessionId: string;
@@ -15,8 +17,10 @@ export function SpeechStudy({ sessionId, onComplete }: SpeechStudyProps) {
     const {
         transcription,
         generatedImage,
+        analysisResult,
         isProcessing,
         isRecording,
+        isAnalyzing,
         recordingTime,
         audioLevel,
         error,
@@ -37,7 +41,7 @@ export function SpeechStudy({ sessionId, onComplete }: SpeechStudyProps) {
 
                         <p className="text-sm text-muted-foreground">
                             Speak into your microphone to describe a scenario in Japanese or English.
-                            Our AI will transcribe your speech and generate an image based on your description.
+                            Our AI will transcribe your speech, analyze it, and generate an image based on your description.
                         </p>
 
                         <div className="grid gap-4 pt-4">
@@ -111,6 +115,29 @@ export function SpeechStudy({ sessionId, onComplete }: SpeechStudyProps) {
                             <h3 className="text-xl font-bold">Your Transcription</h3>
                         </div>
                         <p className="text-sm bg-muted p-4 rounded-md">{transcription}</p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {(isAnalyzing || analysisResult) && (
+                <Card className="glass-card w-full">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <FileSearch className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <h3 className="text-xl font-bold">Speech Analysis</h3>
+                            {isAnalyzing && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        </div>
+                        {isAnalyzing && !analysisResult ? (
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-[90%]" />
+                                <Skeleton className="h-4 w-[85%]" />
+                            </div>
+                        ) : (
+                            <div className="text-sm bg-muted p-4 rounded-md">
+                                <Markdown>{analysisResult}</Markdown>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             )}
