@@ -91,9 +91,9 @@ export function FlashcardStudy() {
         const scorePercentage = Math.round((score / flashcards.length) * 100)
         return (
             <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-                <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
-                    <CardContent className={isMobile ? "p-4" : "p-8"}>
-                        <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto">
+                <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm flex items-center justify-center">
+                    <CardContent className={`${isMobile ? "p-4" : "p-8"} w-full max-w-lg`}>
+                        <div className="flex flex-col items-center justify-center">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -158,12 +158,12 @@ export function FlashcardStudy() {
 
     const currentFlashcard = flashcards[currentIndex]
 
-    // Different layouts for mobile and desktop
+    // Mobile layout
     if (isMobile) {
         return (
             <div className="flex flex-col min-h-[calc(100vh-8rem)]">
                 <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
-                    <CardHeader className="border-b py-2 px-3">
+                    <CardHeader className="border-b py-3 px-4">
                         <div className="flex justify-between items-center">
                             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
                                 Question {currentIndex + 1} of {flashcards.length}
@@ -173,20 +173,20 @@ export function FlashcardStudy() {
                             </p>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-3">
+                    <CardContent className="p-4 flex flex-col gap-6">
                         <motion.div
                             key={currentIndex}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.3 }}
-                            className="text-center mb-4"
+                            className="text-center mb-2"
                         >
-                            <h2 className="text-3xl font-bold mb-1">{currentFlashcard.word.japanese}</h2>
+                            <h2 className="text-3xl font-bold mb-2">{currentFlashcard.word.japanese}</h2>
                             <p className="text-xl" style={{ color: "var(--muted-foreground)" }}>{currentFlashcard.word.romaji}</p>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-1 gap-9">
                             {currentFlashcard.options.map((option, index) => (
                                 <motion.div
                                     key={option.id}
@@ -212,6 +212,24 @@ export function FlashcardStudy() {
                                 </motion.div>
                             ))}
                         </div>
+
+                        <AnimatePresence>
+                            {selectedOption !== null && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 20 }}
+                                    className="mt-2"
+                                >
+                                    <Button
+                                        onClick={handleNext}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
+                                    >
+                                        {currentIndex < flashcards.length - 1 ? "Next Question" : "Complete Quiz"}
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </CardContent>
                 </Card>
             </div>
