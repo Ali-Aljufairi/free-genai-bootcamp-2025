@@ -60,13 +60,10 @@ export function FlashcardStudy() {
     const handleOptionSelect = (optionId: number, correct: boolean) => {
         setSelectedOption(optionId)
         setIsCorrect(correct)
+
         if (correct) {
             setScore(prev => prev + 1)
-        }
-
-        // Mobile: Auto advance after a delay
-        // Desktop: Show next button for more control
-        if (isMobile) {
+            // Automatically advance to next question after a brief delay when correct
             setTimeout(() => {
                 if (currentIndex < flashcards.length - 1) {
                     setCurrentIndex(currentIndex + 1)
@@ -75,8 +72,9 @@ export function FlashcardStudy() {
                 } else {
                     setShowLimitSelector(true)
                 }
-            }, 1000)
+            }, 300) // short delay to show feedback
         }
+        // When incorrect, do nothing - let user manually proceed
     }
 
     const handleNext = () => {
@@ -198,12 +196,12 @@ export function FlashcardStudy() {
                                 >
                                     <Button
                                         className={`w-full p-4 h-auto text-lg text-center justify-center transition-all duration-200 active:scale-98 touch-manipulation ${selectedOption !== null
-                                                ? option.correct
-                                                    ? "bg-green-500 hover:bg-green-600 text-white"
-                                                    : selectedOption === option.id
-                                                        ? "bg-red-400 hover:bg-red-400 text-white"
-                                                        : "opacity-70"
-                                                : "hover:bg-accent"
+                                            ? option.correct
+                                                ? "bg-green-500 hover:bg-green-600 text-white"
+                                                : selectedOption === option.id
+                                                    ? "bg-red-400 hover:bg-red-400 text-white"
+                                                    : "opacity-70"
+                                            : "hover:bg-accent"
                                             }`}
                                         variant="outline"
                                         onClick={() => handleOptionSelect(option.id, option.correct)}
@@ -236,7 +234,7 @@ export function FlashcardStudy() {
                 </CardHeader>
                 <CardContent className="p-12">
                     <div className="flex flex-col h-full max-w-6xl mx-auto">
-                        <motion.div 
+                        <motion.div
                             key={currentIndex}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -257,15 +255,14 @@ export function FlashcardStudy() {
                                     transition={{ duration: 0.3, delay: index * 0.1 }}
                                 >
                                     <Button
-                                        className={`w-full p-8 h-auto text-2xl text-center justify-center transition-all duration-200 ${
-                                            selectedOption !== null
-                                                ? option.correct
-                                                    ? "bg-green-500 hover:bg-green-600 text-white"
-                                                    : selectedOption === option.id
-                                                        ? "bg-red-400 hover:bg-red-400 text-white"
-                                                        : "opacity-70"
-                                                : "hover:bg-accent hover:scale-102"
-                                        }`}
+                                        className={`w-full p-8 h-auto text-2xl text-center justify-center transition-all duration-200 ${selectedOption !== null
+                                            ? option.correct
+                                                ? "bg-green-500 hover:bg-green-600 text-white"
+                                                : selectedOption === option.id
+                                                    ? "bg-red-400 hover:bg-red-400 text-white"
+                                                    : "opacity-70"
+                                            : "hover:bg-accent hover:scale-102"
+                                            }`}
                                         variant="outline"
                                         onClick={() => handleOptionSelect(option.id, option.correct)}
                                         disabled={selectedOption !== null}
