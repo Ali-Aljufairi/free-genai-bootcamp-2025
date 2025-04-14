@@ -7,11 +7,13 @@ import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
 import { toast } from "@/hooks/use-toast"
 import Image from "next/image"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function StudySessionHub() {
   const router = useRouter()
   const { createSession, isLoading } = useCreateStudySession()
   const { data: groups } = useGroups()
+  const isMobile = useIsMobile()
 
   const startSession = async (type: string) => {
     try {
@@ -36,190 +38,109 @@ export function StudySessionHub() {
     }
   }
 
+  const StudyCard = ({
+    title,
+    description,
+    icon,
+    image,
+    type
+  }: {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    image: string;
+    type: string;
+  }) => (
+    <Card className="glass-card relative overflow-hidden flex flex-col h-full transition-transform hover:scale-[1.02]">
+      <CardHeader className="z-10 pb-0">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          {icon}
+          {title}
+        </CardTitle>
+        <CardDescription className="text-xs sm:text-sm line-clamp-2">{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow flex justify-center items-center py-2 sm:py-4 z-10">
+        <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32">
+          <Image
+            src={image}
+            alt={`${title} background`}
+            fill
+            className="object-contain"
+            sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
+            priority
+          />
+        </div>
+      </CardContent>
+      <CardFooter className="z-10 pt-0 pb-4">
+        <Button
+          className="w-full text-sm sm:text-base"
+          onClick={() => startSession(type)}
+          disabled={isLoading}
+        >
+          {isMobile ? `Start ${title.split(' ')[0]}` : `Start ${title}`}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  const studyOptions = [
+    {
+      title: "Flashcards",
+      description: "Practice vocabulary with flashcards",
+      icon: <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />,
+      image: "/Study-session/images.png",
+      type: "flashcards"
+    },
+    {
+      title: "Grammar Quiz",
+      description: "Test your knowledge with JLPT grammar quizzes",
+      icon: <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />,
+      image: "/Study-session/pen.png",
+      type: "quiz"
+    },
+    {
+      title: "Sentence Constructor",
+      description: "Practice language through conversation",
+      icon: <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />,
+      image: "/Study-session/sen.png",
+      type: "chat"
+    },
+    {
+      title: "Writing Practice",
+      description: "Practice writing characters",
+      icon: <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />,
+      image: "/Study-session/drawing.png",
+      type: "drawing"
+    },
+    {
+      title: "Learning Resources",
+      description: "Find resources to learn Japanese",
+      icon: <Search className="h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />,
+      image: "/Study-session/agent.png",
+      type: "agent"
+    },
+    {
+      title: "Speech to Image",
+      description: "Turn your spoken words into images",
+      icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
+      image: "/Study-session/mic.png",
+      type: "speech"
+    }
+  ];
+
   return (
-    <div className="space-y-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-blue-500" />
-              Flashcards
-            </CardTitle>
-            <CardDescription>Practice vocabulary with flashcard</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/images.png"
-                alt="Flashcards background"
-                width={128}
-                height={128}
-                className="object-contain"
-                priority
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("flashcards")}
-              disabled={isLoading}
-            >
-              Start Flashcards
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              Grammar Quiz
-            </CardTitle>
-            <CardDescription>Test your knowledge with JLPT grammar quizzes</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/pen.png"
-                alt="Grammar Quiz background"
-                width={128}
-                height={128}
-                className="object-contain"
-                priority
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("quiz")}
-              disabled={isLoading}
-            >
-              Start Quiz
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-purple-500" />
-              Sentence Constructor
-            </CardTitle>
-            <CardDescription>Practice language through conversation</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/sen.png"
-                alt="Sentence Constructor background"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("chat")}
-              disabled={isLoading}
-            >
-              Start Chat
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5 text-orange-500" />
-              Writing Practice
-            </CardTitle>
-            <CardDescription>Practice writing characters</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/drawing.png"
-                alt="Writing Practice background"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("drawing")}
-              disabled={isLoading}
-            >
-              Start Drawing
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-teal-500" />
-              Learning Resources
-            </CardTitle>
-            <CardDescription>Find resources to learn Japanese</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/agent.png"
-                alt="Learning Resources background"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("agent")}
-              disabled={isLoading}
-            >
-              Find Resources
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="glass-card relative overflow-hidden flex flex-col">
-          <CardHeader className="z-10 pb-0">
-            <CardTitle className="flex items-center gap-2">
-              <Mic className="h-5 w-5 text-red-500" />
-              Speech to Image
-            </CardTitle>
-            <CardDescription>Turn your spoken words into images</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow flex justify-center items-center py-4 z-10">
-            <div className="relative w-32 h-32">
-              <Image
-                src="/Study-session/mic.png"
-                alt="Speech to Image background"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="z-10">
-            <Button
-              className="w-full"
-              onClick={() => startSession("speech")}
-              disabled={isLoading}
-            >
-              Start Speaking
-            </Button>
-          </CardFooter>
-        </Card>
+    <div className="space-y-4 sm:space-y-8 px-2 sm:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        {studyOptions.map((option, index) => (
+          <StudyCard
+            key={index}
+            title={option.title}
+            description={option.description}
+            icon={option.icon}
+            image={option.image}
+            type={option.type}
+          />
+        ))}
       </div>
     </div>
   )

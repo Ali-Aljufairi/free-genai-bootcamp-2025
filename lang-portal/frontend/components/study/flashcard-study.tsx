@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { motion, AnimatePresence } from "framer-motion"
+import { useIsMobile } from "@/components/ui/use-mobile"
 
 interface FlashcardOption {
     id: number
@@ -31,6 +33,7 @@ interface FlashcardResponse {
 }
 
 export function FlashcardStudy() {
+    const isMobile = useIsMobile()
     const [flashcards, setFlashcards] = useState<Flashcard[]>([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [selectedOption, setSelectedOption] = useState<number | null>(null)
@@ -61,17 +64,18 @@ export function FlashcardStudy() {
             setScore(prev => prev + 1)
         }
 
-        // If correct, automatically move to next question
-        if (correct && currentIndex < flashcards.length - 1) {
+        // Mobile: Auto advance after a delay
+        // Desktop: Show next button for more control
+        if (isMobile) {
             setTimeout(() => {
-                setCurrentIndex(currentIndex + 1)
-                setSelectedOption(null)
-                setIsCorrect(null)
-            }, 500)
-        } else if (correct && currentIndex === flashcards.length - 1) {
-            setTimeout(() => {
-                setShowLimitSelector(true)
-            }, 500)
+                if (currentIndex < flashcards.length - 1) {
+                    setCurrentIndex(currentIndex + 1)
+                    setSelectedOption(null)
+                    setIsCorrect(null)
+                } else {
+                    setShowLimitSelector(true)
+                }
+            }, 1000)
         }
     }
 
@@ -88,22 +92,41 @@ export function FlashcardStudy() {
     if (showLimitSelector) {
         const scorePercentage = Math.round((score / flashcards.length) * 100)
         return (
-            <div className="flex flex-col h-[calc(100vh-8rem)]">
-                <Card className="flex-1 glass-card flex flex-col h-full overflow-hidden border-0 shadow-lg bg-background/60 backdrop-blur-sm">
-                    <CardContent className="flex-1 p-8">
-                        <div className="flex flex-col items-center justify-center h-full space-y-8">
-                            <h2 className="text-3xl font-bold">Great job! Want to continue?</h2>
-                            <div className="text-center mb-6">
-                                <p className="text-2xl font-semibold">Your Score: {score}/{flashcards.length}</p>
-                                <p className="text-xl text-muted-foreground">{scorePercentage}% Correct</p>
-                            </div>
-                            <div className="space-y-4 w-full max-w-md">
-                                <p className="text-center text-muted-foreground">Choose how many flashcards for the next round:</p>
+            <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+                <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
+                    <CardContent className={isMobile ? "p-4" : "p-8"}>
+                        <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-center mb-6"
+                            >
+                                <h2 className={isMobile ? "text-2xl font-bold mb-3" : "text-4xl font-bold mb-4"}>
+                                    Great job! Want to continue?
+                                </h2>
+                                <p className={isMobile ? "text-xl font-semibold mb-1" : "text-3xl font-semibold mb-2"}>
+                                    Your Score: {score}/{flashcards.length}
+                                </p>
+                                <p className={isMobile ? "text-lg" : "text-2xl"} style={{ color: "var(--muted-foreground)" }}>
+                                    {scorePercentage}% Correct
+                                </p>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="w-full space-y-3"
+                            >
+                                <p className={`text-center ${isMobile ? "text-base" : "text-lg"}`} style={{ color: "var(--muted-foreground)" }}>
+                                    Choose cards for next round:
+                                </p>
                                 <Select
                                     value={cardLimit.toString()}
                                     onValueChange={(value) => setCardLimit(parseInt(value))}
                                 >
-                                    <SelectTrigger className="w-full text-lg py-6">
+                                    <SelectTrigger className={`w-full ${isMobile ? "text-base p-4" : "text-lg p-6"}`}>
                                         <SelectValue placeholder="Number of cards" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -116,11 +139,12 @@ export function FlashcardStudy() {
                                 </Select>
                                 <Button
                                     onClick={fetchFlashcards}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${isMobile ? "text-lg h-12" : "text-xl h-14"
+                                        }`}
                                 >
                                     Start New Quiz
                                 </Button>
-                            </div>
+                            </motion.div>
                         </div>
                     </CardContent>
                 </Card>
@@ -136,61 +160,139 @@ export function FlashcardStudy() {
 
     const currentFlashcard = flashcards[currentIndex]
 
-    return (
-        <div className="flex flex-col h-[calc(100vh-8rem)]">
-            <Card className="flex-1 glass-card flex flex-col h-full overflow-hidden border-0 shadow-lg bg-background/60 backdrop-blur-sm">
-                <CardHeader className="border-b">
-                    <div className="flex justify-between items-center px-4">
-                        <p className="text-lg text-muted-foreground">
-                            Question {currentIndex + 1} of {flashcards.length}
-                        </p>
-                        <p className="text-lg text-muted-foreground">
-                            Cards: {cardLimit}
-                        </p>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex-1 p-4 sm:p-8">
-                    <div className="flex flex-col h-full">
-                        <div className="w-full max-w-5xl mx-auto space-y-6 sm:space-y-8">
-                            <div className="text-center mb-8">
-                                <h2 className="text-4xl sm:text-6xl font-bold mb-4">{currentFlashcard.word.japanese}</h2>
-                                <p className="text-2xl sm:text-3xl text-muted-foreground">{currentFlashcard.word.romaji}</p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
-                                {currentFlashcard.options.map((option) => (
+    // Different layouts for mobile and desktop
+    if (isMobile) {
+        return (
+            <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+                <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
+                    <CardHeader className="border-b py-2 px-3">
+                        <div className="flex justify-between items-center">
+                            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
+                                Question {currentIndex + 1} of {flashcards.length}
+                            </p>
+                            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
+                                Score: {score}
+                            </p>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-3">
+                        <motion.div
+                            key={currentIndex}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="text-center mb-4"
+                        >
+                            <h2 className="text-3xl font-bold mb-1">{currentFlashcard.word.japanese}</h2>
+                            <p className="text-xl" style={{ color: "var(--muted-foreground)" }}>{currentFlashcard.word.romaji}</p>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 gap-2">
+                            {currentFlashcard.options.map((option, index) => (
+                                <motion.div
+                                    key={option.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                >
                                     <Button
-                                        key={option.id}
-                                        className={`p-6 h-auto text-lg sm:text-2xl text-left justify-start transition-all duration-200 ${selectedOption !== null
+                                        className={`w-full p-4 h-auto text-lg text-center justify-center transition-all duration-200 active:scale-98 touch-manipulation ${selectedOption !== null
                                                 ? option.correct
                                                     ? "bg-green-500 hover:bg-green-600 text-white"
                                                     : selectedOption === option.id
                                                         ? "bg-red-400 hover:bg-red-400 text-white"
                                                         : "opacity-70"
-                                                : "hover:scale-102 hover:shadow-md"
+                                                : "hover:bg-accent"
                                             }`}
                                         variant="outline"
                                         onClick={() => handleOptionSelect(option.id, option.correct)}
-                                        disabled={selectedOption !== null && !option.correct}
+                                        disabled={selectedOption !== null}
                                     >
                                         {option.english}
                                     </Button>
-                                ))}
-                            </div>
-                            {selectedOption !== null && !isCorrect && (
-                                <div className="mt-8 p-6 bg-muted/50 rounded-lg">
-                                    <h3 className="font-bold text-lg mb-2">Correct Answer:</h3>
-                                    <p className="text-xl mb-6">{currentFlashcard.word.english}</p>
-                                    <div className="flex justify-end">
-                                        <Button
-                                            onClick={handleNext}
-                                            className="bg-blue-600 hover:bg-blue-700 px-8 py-2"
-                                        >
-                                            {currentIndex < flashcards.length - 1 ? "Next Question" : "Complete Quiz"}
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                                </motion.div>
+                            ))}
                         </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
+    // Desktop layout
+    return (
+        <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+            <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
+                <CardHeader className="border-b py-4 px-8">
+                    <div className="flex justify-between items-center">
+                        <p className="text-lg" style={{ color: "var(--muted-foreground)" }}>
+                            Question {currentIndex + 1} of {flashcards.length}
+                        </p>
+                        <p className="text-lg" style={{ color: "var(--muted-foreground)" }}>
+                            Score: {score}
+                        </p>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-12">
+                    <div className="flex flex-col h-full max-w-6xl mx-auto">
+                        <motion.div 
+                            key={currentIndex}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="text-center mb-12"
+                        >
+                            <h2 className="text-7xl font-bold mb-4">{currentFlashcard.word.japanese}</h2>
+                            <p className="text-3xl" style={{ color: "var(--muted-foreground)" }}>{currentFlashcard.word.romaji}</p>
+                        </motion.div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            {currentFlashcard.options.map((option, index) => (
+                                <motion.div
+                                    key={option.id}
+                                    initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                >
+                                    <Button
+                                        className={`w-full p-8 h-auto text-2xl text-center justify-center transition-all duration-200 ${
+                                            selectedOption !== null
+                                                ? option.correct
+                                                    ? "bg-green-500 hover:bg-green-600 text-white"
+                                                    : selectedOption === option.id
+                                                        ? "bg-red-400 hover:bg-red-400 text-white"
+                                                        : "opacity-70"
+                                                : "hover:bg-accent hover:scale-102"
+                                        }`}
+                                        variant="outline"
+                                        onClick={() => handleOptionSelect(option.id, option.correct)}
+                                        disabled={selectedOption !== null}
+                                    >
+                                        {option.english}
+                                    </Button>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <AnimatePresence>
+                            {selectedOption !== null && !isMobile && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 20 }}
+                                    className="mt-12 flex justify-center"
+                                >
+                                    <Button
+                                        onClick={handleNext}
+                                        className="bg-blue-600 hover:bg-blue-700 text-2xl font-medium px-24 h-20 min-w-[300px]"
+                                    >
+                                        {currentIndex < flashcards.length - 1 ? "Next Question" : "Complete Quiz"}
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </CardContent>
             </Card>
