@@ -236,9 +236,6 @@
 }
 
 /* Add these at the end of the file */
-.min-h-[90vh] {
-  min-height: 90vh;
-}
 
 @media (min-width: 768px) {
   .md\:p-16 {
