@@ -15,7 +15,7 @@ COPY --from=base /usr/src/app/node_modules node_modules
 
 COPY . .
 
-RUN bun --bun run build --turbopack
+RUN bun --bun run build 
 
 CMD bun --bun run start
 
