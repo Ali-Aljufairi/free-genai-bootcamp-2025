@@ -88,7 +88,7 @@ def get_grammar_questions(level: int, num_questions: int) -> GrammarQuiz:
                     ),
                 },
             ],
-            model="qwen-2.5-32b",
+            model="qwen-qwq-32b",
             temperature=0.7,
             top_p=0.9,
             stream=False,
