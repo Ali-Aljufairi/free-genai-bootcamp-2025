@@ -8,7 +8,7 @@ import { useGroups } from "@/hooks/api/useGroup"
 import { toast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useEffect } from 'react'
 
 // Image dimensions constants
 const CARD_IMAGE_DIMENSIONS = {
@@ -68,6 +68,13 @@ export function StudySessionHub() {
   const { data: groups } = useGroups()
   const isMobile = useIsMobile()
 
+  // Move prefetching to useEffect to ensure it only runs on client
+  useEffect(() => {
+    studyOptions.forEach(option => {
+      router.prefetch(`/study/${option.type}`)
+    })
+  }, [router])
+
   // Memoize the startSession callback
   const startSession = useCallback(async (type: string) => {
     try {
@@ -90,13 +97,6 @@ export function StudySessionHub() {
       })
     }
   }, [createSession, groups, router])
-
-  // Prefetch study routes
-  useMemo(() => {
-    studyOptions.forEach(option => {
-      router.prefetch(`/study/${option.type}`)
-    })
-  }, [router])
 
   // Memoize StudyCard component
   const StudyCard = useMemo(() => ({
