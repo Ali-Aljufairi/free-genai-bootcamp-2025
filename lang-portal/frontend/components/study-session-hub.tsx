@@ -8,6 +8,59 @@ import { useGroups } from "@/hooks/api/useGroup"
 import { toast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useMemo, useCallback } from 'react'
+
+// Image dimensions constants
+const CARD_IMAGE_DIMENSIONS = {
+  small: { width: 80, height: 80 },
+  medium: { width: 112, height: 112 },
+  large: { width: 128, height: 128 }
+};
+
+const studyOptions = [
+  {
+    title: "Flashcards",
+    description: "Practice vocabulary with flashcards",
+    icon: <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />,
+    image: "/Study-session/images.png",
+    type: "flashcards"
+  },
+  {
+    title: "Grammar Quiz",
+    description: "Test your knowledge with JLPT grammar quizzes",
+    icon: <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />,
+    image: "/Study-session/pen.png",
+    type: "quiz"
+  },
+  {
+    title: "Sentence Constructor",
+    description: "Practice language through conversation",
+    icon: <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />,
+    image: "/Study-session/sen.png",
+    type: "chat"
+  },
+  {
+    title: "Writing Practice",
+    description: "Practice writing characters",
+    icon: <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />,
+    image: "/Study-session/drawing.png",
+    type: "drawing"
+  },
+  {
+    title: "Learning Resources",
+    description: "Find resources to learn Japanese",
+    icon: <Search className="h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />,
+    image: "/Study-session/agent.png",
+    type: "agent"
+  },
+  {
+    title: "Speech to Image",
+    description: "Turn your spoken words into images",
+    icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
+    image: "/Study-session/mic.png",
+    type: "speech"
+  }
+] as const;
 
 export function StudySessionHub() {
   const router = useRouter()
@@ -15,11 +68,12 @@ export function StudySessionHub() {
   const { data: groups } = useGroups()
   const isMobile = useIsMobile()
 
-  const startSession = async (type: string) => {
+  // Memoize the startSession callback
+  const startSession = useCallback(async (type: string) => {
     try {
       const session = await createSession({
         type,
-        groupId: groups?.[0]?.id, // Default to first group if available
+        groupId: groups?.[0]?.id,
         name: `${type} Session`,
         description: `New ${type} study session`,
       })
@@ -27,7 +81,6 @@ export function StudySessionHub() {
         title: "Study session created",
         description: "Redirecting to session...",
       })
-      // Redirect to the appropriate study interface based on type
       router.push(`/study/${type}/${session.id}`)
     } catch (error) {
       toast({
@@ -36,9 +89,17 @@ export function StudySessionHub() {
         description: error instanceof Error ? error.message : "Please try again",
       })
     }
-  }
+  }, [createSession, groups, router])
 
-  const StudyCard = ({
+  // Prefetch study routes
+  useMemo(() => {
+    studyOptions.forEach(option => {
+      router.prefetch(`/study/${option.type}`)
+    })
+  }, [router])
+
+  // Memoize StudyCard component
+  const StudyCard = useMemo(() => ({
     title,
     description,
     icon,
@@ -51,7 +112,10 @@ export function StudySessionHub() {
     image: string;
     type: string;
   }) => (
-    <Card className="glass-card relative overflow-hidden flex flex-col h-full transition-transform hover:scale-[1.02]">
+    <Card
+      className="glass-card relative overflow-hidden flex flex-col h-full transition-transform hover:scale-[1.02] cursor-pointer"
+      onClick={() => startSession(type)}
+    >
       <CardHeader className="z-10 pb-0">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           {icon}
@@ -64,7 +128,8 @@ export function StudySessionHub() {
           <Image
             src={image}
             alt={`${title} background`}
-            fill
+            width={CARD_IMAGE_DIMENSIONS.large.width}
+            height={CARD_IMAGE_DIMENSIONS.large.height}
             className="object-contain"
             sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
             priority
@@ -74,59 +139,13 @@ export function StudySessionHub() {
       <CardFooter className="z-10 pt-0 pb-4">
         <Button
           className="w-full text-sm sm:text-base"
-          onClick={() => startSession(type)}
           disabled={isLoading}
         >
           {isMobile ? `Start ${title.split(' ')[0]}` : `Start ${title}`}
         </Button>
       </CardFooter>
     </Card>
-  );
-
-  const studyOptions = [
-    {
-      title: "Flashcards",
-      description: "Practice vocabulary with flashcards",
-      icon: <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />,
-      image: "/Study-session/images.png",
-      type: "flashcards"
-    },
-    {
-      title: "Grammar Quiz",
-      description: "Test your knowledge with JLPT grammar quizzes",
-      icon: <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />,
-      image: "/Study-session/pen.png",
-      type: "quiz"
-    },
-    {
-      title: "Sentence Constructor",
-      description: "Practice language through conversation",
-      icon: <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />,
-      image: "/Study-session/sen.png",
-      type: "chat"
-    },
-    {
-      title: "Writing Practice",
-      description: "Practice writing characters",
-      icon: <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />,
-      image: "/Study-session/drawing.png",
-      type: "drawing"
-    },
-    {
-      title: "Learning Resources",
-      description: "Find resources to learn Japanese",
-      icon: <Search className="h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />,
-      image: "/Study-session/agent.png",
-      type: "agent"
-    },
-    {
-      title: "Speech to Image",
-      description: "Turn your spoken words into images",
-      icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
-      image: "/Study-session/mic.png",
-      type: "speech"
-    }
-  ];
+  ), [isLoading, isMobile, startSession]);
 
   return (
     <div className="space-y-4 sm:space-y-8 px-2 sm:px-0">

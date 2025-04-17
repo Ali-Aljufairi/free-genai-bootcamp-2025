@@ -150,7 +150,6 @@ async def generate_grammar_quiz(request: QuizRequest = Body(...)):
     # Save to JSON file
     filepath = save_quiz_to_json(grammar_quiz)
 
-    # Return the grammar quiz
     return {
         "level": f"N{request.level}",
         "num_questions": request.num_questions,
