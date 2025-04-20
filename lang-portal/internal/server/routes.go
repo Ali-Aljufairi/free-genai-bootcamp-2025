@@ -21,13 +21,13 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/health", s.healthHandler)
 
 	// Dashboard routes
-	dashboardHandler := handlers.NewDashboardHandler(s.db)
+	dashboardHandler := handlers.NewDashboardHandler(s.sqlDB)
 	s.App.Get("/api/langportal/dashboard/last_study_session", dashboardHandler.GetLastStudySession)
 	s.App.Get("/api/langportal/dashboard/study_progress", dashboardHandler.GetStudyProgress)
 	s.App.Get("/api/langportal/dashboard/quick-stats", dashboardHandler.GetQuickStats)
 
 	// Study session routes
-	studySessionHandler := handlers.NewStudySessionHandler(s.db)
+	studySessionHandler := handlers.NewStudySessionHandler(s.sqlDB)
 	s.App.Get("/api/langportal/study_sessions", studySessionHandler.GetStudySessions)
 	s.App.Get("/api/langportal/study_sessions/:id", studySessionHandler.GetStudySession)
 	s.App.Get("/api/langportal/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
@@ -36,25 +36,29 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/langportal/flashcards/quiz", studySessionHandler.CreateFlashcardQuiz)
 
 	// Group routes
-	groupHandler := handlers.NewGroupHandler(s.db)
+	groupHandler := handlers.NewGroupHandler(s.sqlDB)
 	s.App.Get("/api/langportal/groups", groupHandler.GetGroups)
 	s.App.Get("/api/langportal/groups/:id", groupHandler.GetGroup)
 	s.App.Get("/api/langportal/groups/:id/words", groupHandler.GetGroupWords)
 	s.App.Get("/api/langportal/groups/:id/study_sessions", groupHandler.GetGroupStudySessions)
 
 	// Study activity routes
-	studyActivityHandler := handlers.NewStudyActivityHandler(s.db)
+	studyActivityHandler := handlers.NewStudyActivityHandler(s.sqlDB)
 	s.App.Get("/api/langportal/study_activities", studyActivityHandler.GetStudyActivities)
 	s.App.Get("/api/langportal/study_activities/:id", studyActivityHandler.GetStudyActivity)
 	s.App.Get("/api/langportal/study_activities/:id/sessions", studyActivityHandler.GetStudyActivitySessions)
 	s.App.Post("/api/langportal/study_activities", studyActivityHandler.CreateStudyActivity)
 
 	// Word routes
-	wordHandler := handlers.NewWordHandler(s.db)
+	wordHandler := handlers.NewWordHandler(s.sqlDB)
 	s.App.Get("/api/langportal/words", wordHandler.GetWords)
 	s.App.Get("/api/langportal/words/random", wordHandler.GetRandomWord)
 	s.App.Get("/api/langportal/words/:id", wordHandler.GetWord)
 	s.App.Post("/api/langportal/words", wordHandler.CreateWord)
+
+	// JLPT routes
+	jlptHandler := handlers.NewJLPTHandler(s.neo4j)
+	s.App.Post("/api/langportal/jlpt/import", jlptHandler.ImportJLPTLevel)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
@@ -66,5 +70,5 @@ func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
 }
 
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
-	return c.JSON(s.db.Health())
+	return c.JSON(s.Health())
 }
