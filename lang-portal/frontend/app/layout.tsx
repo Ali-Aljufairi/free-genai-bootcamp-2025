@@ -6,7 +6,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import ClientLayout from "./ClientLayout";
-import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { clerkAppearance } from "@/components/navbar";
 
@@ -36,7 +35,6 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ClientLayout>{children}</ClientLayout>
-            <Toaster richColors position="top-right" />
           </ThemeProvider>
         </ClerkProvider>
       </body>

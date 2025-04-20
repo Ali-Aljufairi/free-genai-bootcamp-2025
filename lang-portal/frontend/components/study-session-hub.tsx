@@ -5,7 +5,7 @@ import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare, Mic, CheckCir
 import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import Image from "next/image"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useMemo, useCallback, useEffect } from 'react'

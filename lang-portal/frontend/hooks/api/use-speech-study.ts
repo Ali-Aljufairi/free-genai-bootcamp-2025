@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { generateImageFromText } from '@/services/google-ai';
 import { transcribeAudio } from '@/app/actions/transcribe';
 

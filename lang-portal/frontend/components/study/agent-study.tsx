@@ -1,9 +1,10 @@
 "use client"
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useState } from 'react'
+import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/hooks/use-toast"
+import { Card, CardContent } from "@/components/ui/card"
+import { toast } from "sonner"
 import { Search, BookOpen, BookText, Video, GraduationCap, Zap, Copy, Check } from "lucide-react"
 
 interface AgentStudyProps {
