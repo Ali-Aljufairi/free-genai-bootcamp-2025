@@ -84,17 +84,9 @@ export function StudySessionHub() {
         name: `${type} Session`,
         description: `New ${type} study session`,
       })
-      toast({
-        title: "Study session created",
-        description: "Redirecting to session...",
-      })
       router.push(`/study/${type}/${session.id}`)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to create session",
-        description: error instanceof Error ? error.message : "Please try again",
-      })
+      console.error('Failed to create session:', error)
     }
   }, [createSession, groups, router])
 

@@ -53,11 +53,11 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
   const handleOptionSelect = (option: string, correct: boolean) => {
     setSelectedOption(option)
     setIsCorrect(correct)
-    
+
     if (correct) {
       setScore(prev => prev + 1)
     }
-    
+
     setShowExplanation(true)
   }
 
@@ -70,7 +70,7 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
     } else {
       // Quiz completed
       setShowConfig(true)
-      
+
       if (onComplete) {
         onComplete()
       }
@@ -94,12 +94,12 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
               ) : (
                 <h2 className="text-3xl font-bold">Japanese Grammar Quiz</h2>
               )}
-              
+
               <div className="space-y-4 w-full max-w-md">
                 <div className="space-y-2">
                   <p className="text-muted-foreground">JLPT Level:</p>
-                  <Select 
-                    value={level.toString()} 
+                  <Select
+                    value={level.toString()}
                     onValueChange={(value) => setLevel(parseInt(value))}
                   >
                     <SelectTrigger>
@@ -117,8 +117,8 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
 
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Number of Questions:</p>
-                  <Select 
-                    value={numQuestions.toString()} 
+                  <Select
+                    value={numQuestions.toString()}
                     onValueChange={(value) => setNumQuestions(parseInt(value))}
                   >
                     <SelectTrigger>
@@ -141,7 +141,7 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
                 >
                   {isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Generating Quiz...
                     </>
                   ) : (
@@ -186,20 +186,19 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold whitespace-pre-wrap">{currentQuestion.question}</h2>
               </div>
-              
+
               <div className="grid grid-cols-1 gap-4">
                 {currentQuestion.choices.map((choice, idx) => (
                   <Button
                     key={idx}
-                    className={`p-6 h-auto text-lg text-left justify-start transition-all duration-200 ${
-                      selectedOption !== null
+                    className={`p-6 h-auto text-lg text-left justify-start transition-all duration-200 ${selectedOption !== null
                         ? choice.is_correct
                           ? "bg-green-500 hover:bg-green-600 text-white"
                           : selectedOption === choice.text
-                          ? "bg-red-400 hover:bg-red-400 text-white"
-                          : "opacity-70"
+                            ? "bg-red-400 hover:bg-red-400 text-white"
+                            : "opacity-70"
                         : "hover:scale-102 hover:shadow-md"
-                    }`}
+                      }`}
                     variant="outline"
                     onClick={() => handleOptionSelect(choice.text, choice.is_correct)}
                     disabled={selectedOption !== null}
@@ -208,12 +207,12 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
                   </Button>
                 ))}
               </div>
-              
+
               {showExplanation && (
                 <div className="mt-8 p-6 bg-muted/50 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">Explanation:</h3>
                   <p>{currentQuestion.explanation}</p>
-                  
+
                   <div className="mt-6 flex justify-end">
                     <Button
                       onClick={handleNext}

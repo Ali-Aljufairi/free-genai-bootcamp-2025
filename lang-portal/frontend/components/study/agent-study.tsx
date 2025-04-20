@@ -60,7 +60,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
             const data = await response.json()
             if (response.ok) {
                 // Use environment variable for toast duration instead of hardcoding
-                const toastDuration = parseInt( "5000")
+                const toastDuration = parseInt("5000")
 
                 toast({
                     title: "Search request submitted",
