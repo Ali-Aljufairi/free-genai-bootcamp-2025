@@ -12,20 +12,57 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, X } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { useVocabularyImport } from "@/hooks/api/useVocabularyImport"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const JLPT_LEVELS = {
+  N5: {
+    description: "Basic vocabulary and kanji. Ability to understand some basic Japanese.",
+    words: "800 words",
+    kanji: "100 kanji",
+    example: "日本語 (にほんご) - Japanese language"
+  },
+  N4: {
+    description: "Basic vocabulary and kanji to understand basic conversations.",
+    words: "1,500 words",
+    kanji: "300 kanji",
+    example: "図書館 (としょかん) - Library"
+  },
+  N3: {
+    description: "Intermediate vocabulary and kanji for everyday situations.",
+    words: "3,000 words",
+    kanji: "650 kanji",
+    example: "携帯電話 (けいたいでんわ) - Mobile phone"
+  },
+  N2: {
+    description: "Advanced vocabulary and kanji for most everyday situations.",
+    words: "6,000 words",
+    kanji: "1,000 kanji",
+    example: "環境保護 (かんきょうほご) - Environmental protection"
+  },
+  N1: {
+    description: "Advanced vocabulary and kanji to understand Japanese in most circumstances.",
+    words: "10,000+ words",
+    kanji: "2,000+ kanji",
+    example: "持続可能 (じぞくかのう) - Sustainable"
+  }
+} as const
 
 export function VocabularyBrowser() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showImport, setShowImport] = useState(false)
   const [topic, setTopic] = useState("")
+  const [selectedLevel, setSelectedLevel] = useState<keyof typeof JLPT_LEVELS>("N5")
+  const [importType, setImportType] = useState<"topic" | "jlpt">("topic")
   const { importVocabularyByTopic, isLoading: importLoading } = useVocabularyImport()
   const { data: groups, isLoading: groupsLoading } = useGroups()
-  const { 
-    data, 
-    isLoading: wordsLoading, 
-    loadMore, 
-    hasMore 
+  const {
+    data,
+    isLoading: wordsLoading,
+    loadMore,
+    hasMore
   } = useWords()
-  
+
   const words = data?.items || []
   const loader = useRef(null)
 
@@ -41,7 +78,7 @@ export function VocabularyBrowser() {
       (entries) => {
         const first = entries[0]
         if (first.isIntersecting && hasMore && !wordsLoading) {
-          loadMore(data?.page ? data.page + 1 : 1)
+          loadMore()
         }
       },
       { threshold: 1.0 }
@@ -70,12 +107,12 @@ export function VocabularyBrowser() {
 
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!topic.trim()) {
       toast.error("Please enter a topic")
       return
     }
-    
+
     try {
       await importVocabularyByTopic(topic.trim())
       toast.success("Vocabulary imported successfully!", {
@@ -88,6 +125,27 @@ export function VocabularyBrowser() {
       })
     }
   }
+
+  const handleJLPTImport = async () => {
+    try {
+      const response = await fetch(`/api/langportal/jlpt/import?level=${selectedLevel}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to import JLPT vocabulary');
+      }
+
+      toast.success("JLPT vocabulary imported successfully!", {
+        description: `Imported ${data.kanji_count} kanji and ${data.compound_count} compound words for ${selectedLevel}`
+      });
+    } catch (error) {
+      toast.error("Failed to import JLPT vocabulary", {
+        description: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  };
 
   if (wordsLoading && !words.length) {
     return (
@@ -118,7 +176,8 @@ export function VocabularyBrowser() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
+
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <Input
           type="search"
@@ -127,9 +186,9 @@ export function VocabularyBrowser() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setShowImport(!showImport)}
         >
           {showImport ? (
@@ -147,48 +206,104 @@ export function VocabularyBrowser() {
       </div>
 
       {showImport && (
-        <Card className="w-full mb-6">
-          <CardHeader>
-            <CardTitle>Import Vocabulary by Topic</CardTitle>
+        <Card className="w-full">
+          <CardHeader className="pb-2">
+            <CardTitle>Import Vocabulary</CardTitle>
             <CardDescription>
-              Instantly add words related to a specific topic to your study list
+              Add words to your study list by topic or JLPT level
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleImport} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="topic">Topic</Label>
-                <Input
-                  id="topic"
-                  name="topic"
-                  placeholder="e.g. Sea animals, Kitchen utensils, Travel phrases"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                />
-                <p className="text-sm text-muted-foreground">
-                  Enter a specific topic to automatically generate related vocabulary words
-                </p>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <Button
+                  variant={importType === "topic" ? "default" : "outline"}
+                  onClick={() => setImportType("topic")}
+                >
+                  By Topic
+                </Button>
+                <Button
+                  variant={importType === "jlpt" ? "default" : "outline"}
+                  onClick={() => setImportType("jlpt")}
+                >
+                  By JLPT Level
+                </Button>
               </div>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={importLoading || !topic.trim()}
-              >
-                {importLoading ? "Importing..." : "Import Vocabulary"}
-              </Button>
-            </form>
+
+              {importType === "topic" ? (
+                <form onSubmit={handleImport} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="topic">Topic</Label>
+                    <Input
+                      id="topic"
+                      name="topic"
+                      placeholder="e.g. Sea animals, Kitchen utensils, Travel phrases"
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value)}
+                      required
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Enter a specific topic to automatically generate related vocabulary words
+                    </p>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={importLoading || !topic.trim()}
+                  >
+                    {importLoading ? "Importing..." : "Import Vocabulary"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select JLPT Level</Label>
+                    <Select
+                      value={selectedLevel}
+                      onValueChange={(value: string) => setSelectedLevel(value as keyof typeof JLPT_LEVELS)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(JLPT_LEVELS).map(([level, info]) => (
+                          <SelectItem key={level} value={level}>
+                            JLPT {level} - {info.kanji}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground text-left">
+                      {JLPT_LEVELS[selectedLevel].description}
+                    </p>
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    onClick={handleJLPTImport}
+                    disabled={importLoading}
+                  >
+                    {importLoading ? "Importing..." : `Import ${selectedLevel} Vocabulary`}
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardContent>
-          <CardFooter className="flex justify-between border-t p-4 text-xs text-muted-foreground">
+          <CardFooter className="text-xs text-muted-foreground border-t p-3">
             <p>Words will be added to your vocabulary for study sessions.</p>
           </CardFooter>
         </Card>
       )}
 
       {filteredWords.length === 0 ? (
-        <p className="text-center py-8 text-muted-foreground">
-          {searchTerm ? "No words found matching your search." : "No vocabulary words available."}
-        </p>
+        <div className="flex flex-col items-center justify-center py-8 space-y-4">
+          <div className="text-center space-y-2">
+            <p className="text-lg font-medium">No vocabulary words found</p>
+            <p className="text-sm text-muted-foreground">
+              {searchTerm ? "Try adjusting your search terms." : "Import some words to get started."}
+            </p>
+          </div>
+        </div>
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
