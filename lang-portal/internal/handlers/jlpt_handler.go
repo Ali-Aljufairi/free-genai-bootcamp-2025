@@ -109,7 +109,8 @@ func (h *JLPTHandler) storeKanjiInNeo4j(ctx context.Context, kanjiList []string,
 			// Create or merge Kanji node with JLPT level
 			_, err := tx.Run(ctx,
 				`MERGE (k:Kanji {char: $char})
-				 SET k.jlptLevel = $level
+				 SET k.jlptLevel = $level,
+				     k.label = $char
 				 RETURN k`,
 				map[string]any{
 					"char":  kanji,
@@ -133,21 +134,30 @@ func (h *JLPTHandler) storeCompoundWords(ctx context.Context, compounds []servic
 
 	_, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		for _, compound := range compounds {
-			// Create compound word node
+			// Create compound word node with kanji order information
 			_, err := tx.Run(ctx,
 				`MERGE (w:Word {text: $text})
 				 SET w.reading = $reading,
 				     w.meaning = $meaning
 				 WITH w
-				 UNWIND $kanji as k
-				 MATCH (kn:Kanji {char: k})
-				 MERGE (kn)-[r:PART_OF]->(w)
+				 UNWIND $kanjiWithIndex as ki
+				 MATCH (kn:Kanji {char: ki.kanji})
+				 MERGE (kn)-[r:PART_OF {order: ki.index, kanji: ki.kanji}]->(w)
 				 RETURN w`,
 				map[string]any{
 					"text":    compound.Word,
 					"reading": compound.Reading,
 					"meaning": compound.Meaning,
-					"kanji":   compound.Kanji,
+					"kanjiWithIndex": func() []map[string]any {
+						result := make([]map[string]any, len(compound.Kanji))
+						for i, k := range compound.Kanji {
+							result[i] = map[string]any{
+								"kanji": k,
+								"index": i,
+							}
+						}
+						return result
+					}(),
 				},
 			)
 			if err != nil {
