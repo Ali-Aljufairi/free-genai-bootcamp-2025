@@ -57,8 +57,17 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Post("/api/langportal/words", wordHandler.CreateWord)
 
 	// JLPT routes
-	jlptHandler := handlers.NewJLPTHandler(s.neo4j)
+	jlptHandler := handlers.NewJLPTHandler(s.sqlDB.GetDB(), s.neo4j)
+	jlptSQLiteHandler := handlers.NewJLPTSQLiteHandler(s.sqlDB)
 	s.App.Post("/api/langportal/jlpt/import", jlptHandler.ImportJLPTLevel)
+	setupJLPTRoutes(s.App, jlptHandler, jlptSQLiteHandler)
+}
+
+func setupJLPTRoutes(app *fiber.App, h *handlers.JLPTHandler, sqlh *handlers.JLPTSQLiteHandler) {
+	app.Get("/api/langportal/jlpt/:level/random-kanji", sqlh.GetRandomKanji)
+	app.Get("/api/langportal/kanji/:kanji/compounds", h.GetKanjiCompounds)
+	app.Get("/api/langportal/kanji/validate-compound", h.ValidateKanjiCompound)
+	app.Post("/api/langportal/neo4j/cleanup", h.CleanupNeo4j)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {

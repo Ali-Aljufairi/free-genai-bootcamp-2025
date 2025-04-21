@@ -98,12 +98,28 @@ export const wordApi = {
   }),
 };
 
+// JLPT API calls
+export const jlptApi = {
+  getRandomKanji: (level: string) => 
+    fetchData<{
+      kanji: string;
+      similar_kanji: { kanji: string; correct: boolean; }[];
+      compound_options: { word: string; reading: string; meaning: string; position: number; correct: boolean; }[];
+    }>(`/jlpt/${level}/random-kanji`),
+  
+  getKanjiCompounds: (kanji: string) =>
+    fetchData<{
+      compounds: { word: string; reading: string; meaning: string; position: number }[];
+    }>(`/kanji/${kanji}/compounds`),
+};
+
 export const api = {
   dashboard: dashboardApi,
   studySession: studySessionApi,
   group: groupApi,
   studyActivity: studyActivityApi,
   word: wordApi,
+  jlpt: jlptApi,
 };
 
 export default api;
