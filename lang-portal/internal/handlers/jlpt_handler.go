@@ -547,3 +547,304 @@ func (h *JLPTHandler) CleanupNeo4j(c *fiber.Ctx) error {
 		"message": "Successfully cleaned up Neo4j database",
 	})
 }
+
+// StartKanjiCompoundGame starts a new kanji compound game session
+func (h *JLPTHandler) StartKanjiCompoundGame(c *fiber.Ctx) error {
+	level := c.Params("level")
+	if level == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "JLPT level is required",
+		})
+	}
+
+	// Get random kanji from SQLite
+	var targetKanji struct {
+		Character string `db:"character"`
+		Level     string `db:"level"`
+	}
+	err := h.db.Raw("SELECT character, level FROM kanji WHERE level = ? ORDER BY RANDOM() LIMIT 1", level).Scan(&targetKanji).Error
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch random kanji",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"kanji": targetKanji.Character,
+		"level": targetKanji.Level,
+	})
+}
+
+// GetGameCompounds returns compounds for a kanji in the game context
+func (h *JLPTHandler) GetGameCompounds(c *fiber.Ctx) error {
+	kanji := c.Params("kanji")
+	level := c.Params("level")
+	if kanji == "" || level == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Kanji and level parameters are required",
+		})
+	}
+
+	// URL decode the kanji parameter
+	decodedKanji, err := url.QueryUnescape(kanji)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid kanji parameter",
+		})
+	}
+
+	// Get compounds from Neo4j
+	session := h.neo4j.NewSession(context.Background(), neo4j.SessionConfig{})
+	defer session.Close(context.Background())
+
+	result, err := session.Run(context.Background(),
+		`MATCH (k:Kanji {char: $kanji})-[r:FORMS]->(w:Word)
+         WITH w, r.position as pos
+         MATCH (k2:Kanji)-[r2:FORMS]->(w)
+         WHERE k2.char <> $kanji AND k2.jlptLevel = $level
+         WITH w, pos, collect({kanji: k2.char, position: r2.position}) as otherKanji
+         RETURN w.text as word,
+                w.reading as reading,
+                w.meaning as meaning,
+                w.length as length,
+                pos as position,
+                otherKanji
+         ORDER BY w.text`,
+		map[string]any{
+			"kanji": decodedKanji,
+			"level": level,
+		},
+	)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch compounds",
+		})
+	}
+
+	var allCompounds []map[string]interface{}
+	for result.Next(context.Background()) {
+		record := result.Record()
+		word, _ := record.Get("word")
+		reading, _ := record.Get("reading")
+		meaning, _ := record.Get("meaning")
+		length, _ := record.Get("length")
+		position, _ := record.Get("position")
+		otherKanji, _ := record.Get("otherKanji")
+
+		// Ensure all fields have default values if nil
+		wordStr := ""
+		if word != nil {
+			wordStr = word.(string)
+		}
+		readingStr := ""
+		if reading != nil {
+			readingStr = reading.(string)
+		}
+		meaningStr := ""
+		if meaning != nil {
+			meaningStr = meaning.(string)
+		}
+
+		allCompounds = append(allCompounds, map[string]interface{}{
+			"word":       wordStr,
+			"reading":    readingStr,
+			"meaning":    meaningStr,
+			"length":     length,
+			"position":   position,
+			"otherKanji": otherKanji,
+		})
+	}
+
+	// If no compounds found, return empty array
+	if len(allCompounds) == 0 {
+		return c.JSON(fiber.Map{
+			"kanji":     decodedKanji,
+			"level":     level,
+			"compounds": []map[string]interface{}{},
+		})
+	}
+
+	// Randomly select 1-3 compounds
+	numCompounds := rand.Intn(3) + 1 // Random number between 1 and 3
+	if numCompounds > len(allCompounds) {
+		numCompounds = len(allCompounds)
+	}
+
+	// Shuffle the compounds
+	rand.Shuffle(len(allCompounds), func(i, j int) {
+		allCompounds[i], allCompounds[j] = allCompounds[j], allCompounds[i]
+	})
+
+	// Select the first numCompounds compounds
+	selectedCompounds := allCompounds[:numCompounds]
+
+	return c.JSON(fiber.Map{
+		"kanji":     decodedKanji,
+		"level":     level,
+		"compounds": selectedCompounds,
+	})
+}
+
+// ValidateGameCompound validates a compound in the game context
+func (h *JLPTHandler) ValidateGameCompound(c *fiber.Ctx) error {
+	type ValidateRequest struct {
+		Kanji    string `json:"kanji"`
+		Compound string `json:"compound"`
+		Level    string `json:"level"`
+		Position int    `json:"position"`
+	}
+
+	var req ValidateRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Validate compound in Neo4j
+	session := h.neo4j.NewSession(context.Background(), neo4j.SessionConfig{})
+	defer session.Close(context.Background())
+
+	result, err := session.Run(context.Background(),
+		`MATCH (k:Kanji {char: $kanji})-[r:FORMS]->(w:Word {text: $compound})
+         WHERE r.position = $position
+         RETURN w.text as word,
+                w.reading as reading,
+                w.meaning as meaning,
+                w.length as length,
+                EXISTS((k)-[r:FORMS]->(w)) as isValid`,
+		map[string]any{
+			"kanji":    req.Kanji,
+			"compound": req.Compound,
+			"position": req.Position,
+		},
+	)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to validate compound",
+		})
+	}
+
+	if result.Next(context.Background()) {
+		record := result.Record()
+		isValid, _ := record.Get("isValid")
+		word, _ := record.Get("word")
+		reading, _ := record.Get("reading")
+		meaning, _ := record.Get("meaning")
+		length, _ := record.Get("length")
+
+		return c.JSON(fiber.Map{
+			"isValid": isValid,
+			"word":    word,
+			"reading": reading,
+			"meaning": meaning,
+			"length":  length,
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"isValid": false,
+	})
+}
+
+// GetKanjiChoices returns kanji choices for the game
+func (h *JLPTHandler) GetKanjiChoices(c *fiber.Ctx) error {
+	kanji := c.Params("kanji")
+	level := c.Params("level")
+	if kanji == "" || level == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Kanji and level parameters are required",
+		})
+	}
+
+	// URL decode the kanji parameter
+	decodedKanji, err := url.QueryUnescape(kanji)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid kanji parameter",
+		})
+	}
+
+	// Get kanji choices from SQLite - get more than we need to ensure we have invalid options
+	var allKanji []string
+	err = h.db.Raw("SELECT character FROM kanji WHERE level = ? ORDER BY RANDOM() LIMIT 20",
+		level).Scan(&allKanji).Error
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch kanji choices",
+		})
+	}
+
+	// Remove the target kanji from the list
+	var choices []string
+	for _, k := range allKanji {
+		if k != decodedKanji {
+			choices = append(choices, k)
+		}
+	}
+
+	// Take 3 random choices
+	if len(choices) > 3 {
+		rand.Shuffle(len(choices), func(i, j int) {
+			choices[i], choices[j] = choices[j], choices[i]
+		})
+		choices = choices[:3]
+	}
+
+	// Add target kanji to choices
+	choices = append(choices, decodedKanji)
+
+	// Shuffle the choices
+	rand.Shuffle(len(choices), func(i, j int) {
+		choices[i], choices[j] = choices[j], choices[i]
+	})
+
+	// Create a more detailed response with positions and validity
+	detailedChoices := make([]map[string]interface{}, len(choices))
+	for i, choice := range choices {
+		// Get all valid positions for this kanji
+		session := h.neo4j.NewSession(context.Background(), neo4j.SessionConfig{})
+		defer session.Close(context.Background())
+
+		result, err := session.Run(context.Background(),
+			`MATCH (k:Kanji {char: $kanji})-[r:FORMS]->(w:Word)
+             RETURN DISTINCT r.position as position`,
+			map[string]any{
+				"kanji": choice,
+			},
+		)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to fetch kanji positions",
+			})
+		}
+
+		var positions []int
+		for result.Next(context.Background()) {
+			record := result.Record()
+			if pos, ok := record.Get("position"); ok {
+				if posInt, ok := pos.(int64); ok {
+					positions = append(positions, int(posInt))
+				}
+			}
+		}
+
+		// For non-target kanji, randomly make some of them invalid
+		isValid := true
+		if choice != decodedKanji && rand.Float32() < 0.5 {
+			isValid = false
+			positions = []int{} // Clear positions for invalid choices
+		}
+
+		detailedChoices[i] = map[string]interface{}{
+			"kanji":     choice,
+			"isTarget":  choice == decodedKanji,
+			"positions": positions,
+			"isValid":   isValid,
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"choices": detailedChoices,
+	})
+}
