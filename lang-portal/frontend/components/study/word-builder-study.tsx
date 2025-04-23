@@ -1,136 +1,125 @@
 "use client"
 
-// Core drag and drop components
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-// Drag and drop types
-import type {
-    DropResult,
-    DroppableProvided,
-    DraggableProvided,
-    DroppableStateSnapshot,
-    DraggableStateSnapshot
-} from '@hello-pangea/dnd'
+import { useEffect, useRef } from 'react';
+import { Swapy, createSwapy, type SwapEvent } from 'swapy'; // Import Swapy
 
-import { useState, useEffect } from "react"
+import { useWordBuilder } from "@/hooks/api/useWordBuilder"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { motion, AnimatePresence } from "framer-motion"
-import { RefreshCw, Loader2, X } from "lucide-react"
-import { toast } from "sonner"
+import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion"
+import { RefreshCw, Loader2, X, SkipForward } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
 
-interface WordBuilderStudyProps {
-    sessionId?: string;
-    onComplete?: () => void;
-}
-
-interface Compound {
+interface CompoundWord {
     word: string;
     reading: string;
     meaning: string;
-    targetPosition: number;
+    length: number;
+    position: number;
     otherKanji: Array<{
         kanji: string;
         position: number;
     }>;
 }
 
+interface WordBuilderStudyProps {
+    sessionId?: string;
+    onComplete?: () => void;
+}
+
+// Custom motion div component that doesn't conflict with DnD
+const MotionDiv = motion.div as any;
+
 export function WordBuilderStudy({ sessionId, onComplete }: WordBuilderStudyProps) {
-    const [level, setLevel] = useState("N5")
-    const [isLoading, setIsLoading] = useState(false)
-    const [targetKanji, setTargetKanji] = useState<string>("")
-    const [compounds, setCompounds] = useState<Compound[]>([])
-    const [validKanji, setValidKanji] = useState<string[]>([])
-    const [currentWord, setCurrentWord] = useState<string[]>([])
-    const [discoveredWords, setDiscoveredWords] = useState<Set<string>>(new Set())
-    const [availablePositions, setAvailablePositions] = useState<number[]>([])
+    const {
+        gameData,
+        isLoading,
+        currentWord,
+        discoveredWords,
+        currentTargetPosition,
+        activeCompoundLength,
+        handleSwap,
+        clearPosition,
+        handleNewKanji,
+        skipCurrentCompound,
+        totalCompoundsFound,
+        remainingCompounds
+    } = useWordBuilder("N5");
 
-    const fetchRandomKanji = async () => {
-        setIsLoading(true)
-        try {
-            const response = await fetch(`/api/langportal/jlpt/${level}/random-kanji`)
-            if (!response.ok) throw new Error("Failed to fetch kanji")
-
-            const data = await response.json()
-            setTargetKanji(data.kanji)
-            setCompounds(data.compounds)
-            setValidKanji(data.validKanji)
-            setCurrentWord(new Array(2).fill("")) // Reset current word
-            setDiscoveredWords(new Set())
-
-            // Find all possible positions for the target kanji
-            const positions = data.compounds.map((c: Compound) => c.targetPosition)
-            setAvailablePositions(Array.from(new Set(positions)).map(p => Number(p)))
-
-            // Place target kanji in first position initially
-            const newWord = new Array(2).fill("")
-            newWord[0] = data.kanji
-            setCurrentWord(newWord)
-
-        } catch (error) {
-            toast.error("Failed to fetch kanji", {
-                description: error instanceof Error ? error.message : "Please try again"
-            })
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const swapyRef = useRef<Swapy | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        fetchRandomKanji()
-    }, [level])
+        if (containerRef.current) {
+            swapyRef.current = createSwapy(containerRef.current, {
+                animation: 'none', // Disable animation to prevent box movement
+                swapMode: 'drop',
+                enabled: true,
+                dragOnHold: false,
+                autoScrollOnDrag: false,
+                dragAxis: 'both'
+            });
 
-    const handleDragEnd = (result: DropResult) => {
-        if (!result.destination) return
+            swapyRef.current.onSwapStart((event) => {
+                console.log('Starting drag:', event.draggingItem);
+            });
 
-        const { source, destination } = result
-        const newWord = [...currentWord]
+            swapyRef.current.onBeforeSwap((event) => {
+                const { toSlot, draggingItem } = event;
+                
+                // Don't allow swaps between choice slots
+                if (toSlot.startsWith('choice-')) {
+                    return false;
+                }
 
-        if (source.droppableId === "kanji-list") {
-            // Dragging from kanji list to word builder
-            const sourceIndex = source.index
-            const destIndex = parseInt(destination.droppableId.split("-")[1])
-            newWord[destIndex] = validKanji[sourceIndex]
-        } else if (source.droppableId.startsWith("position-")) {
-            // Moving within word builder
-            const sourceIndex = parseInt(source.droppableId.split("-")[1])
-            const destIndex = parseInt(destination.droppableId.split("-")[1])
-            newWord[destIndex] = currentWord[sourceIndex]
-            newWord[sourceIndex] = ""
+                const targetIndex = parseInt(toSlot.split('-')[1]);
+                if (targetIndex >= activeCompoundLength || targetIndex === currentTargetPosition) {
+                    toast.error("Can't place kanji here!");
+                    return false;
+                }
+
+                return true;
+            });
+
+            swapyRef.current.onSwap((event) => {
+                handleSwap(event);
+            });
+
+            swapyRef.current.onSwapEnd((event) => {
+                // Always update to ensure kanji return to their positions
+                swapyRef.current?.update();
+            });
         }
 
-        setCurrentWord(newWord)
+        return () => {
+            swapyRef.current?.destroy();
+        };
+    }, [activeCompoundLength, currentTargetPosition, handleSwap, gameData, discoveredWords]);
 
-        // Check if we formed a valid word
-        const wordToCheck = newWord.join("")
-        const isValid = compounds.some(c => c.word === wordToCheck)
+    // Calculate progress
+    const progress = gameData
+        ? (discoveredWords.size / gameData.compounds.length) * 100
+        : 0;
 
-        if (isValid && !discoveredWords.has(wordToCheck)) {
-            const newDiscovered = new Set(discoveredWords)
-            newDiscovered.add(wordToCheck)
-            setDiscoveredWords(newDiscovered)
-
-            const compound = compounds.find(c => c.word === wordToCheck)
-            toast.success("Found a new compound!", {
-                description: `${wordToCheck} (${compound?.reading}) - ${compound?.meaning}`
-            })
-        }
-    }
-
-    const clearPosition = (index: number) => {
-        const newWord = [...currentWord]
-        newWord[index] = ""
-        setCurrentWord(newWord)
-    }
+    const currentCompound = gameData?.compounds.find(c => !discoveredWords.has(c.word));
 
     return (
-        <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-            <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
+        <div className="flex flex-col min-h-[calc(100vh-8rem)] gap-6">
+            <Card className="glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
                 <CardHeader className="border-b">
                     <div className="flex justify-between items-center px-8">
-                        <CardTitle className="text-lg font-medium">Kanji Word Builder</CardTitle>
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-4">
+                                <CardTitle className="text-lg font-medium">Kanji Word Builder</CardTitle>
+                                <span className="text-sm text-muted-foreground">
+                                    {remainingCompounds} compounds remaining
+                                </span>
+                            </div>
+                            <Progress value={progress} className="w-[200px]" />
+                        </div>
                         <div className="flex items-center gap-4">
-                            <Select value={level} onValueChange={setLevel}>
+                            <Select defaultValue="N5" onValueChange={(value) => handleNewKanji()}>
                                 <SelectTrigger className="w-[120px]">
                                     <SelectValue placeholder="Select level" />
                                 </SelectTrigger>
@@ -145,7 +134,7 @@ export function WordBuilderStudy({ sessionId, onComplete }: WordBuilderStudyProp
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => fetchRandomKanji()}
+                                onClick={handleNewKanji}
                                 disabled={isLoading}
                             >
                                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -153,6 +142,9 @@ export function WordBuilderStudy({ sessionId, onComplete }: WordBuilderStudyProp
                         </div>
                     </div>
                 </CardHeader>
+            </Card>
+
+            <Card className="flex-1 glass-card border-0 shadow-lg bg-background/60 backdrop-blur-sm">
                 <CardContent className="p-8">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-[400px]">
@@ -160,103 +152,121 @@ export function WordBuilderStudy({ sessionId, onComplete }: WordBuilderStudyProp
                             <p className="mt-4 text-muted-foreground">Loading kanji...</p>
                         </div>
                     ) : (
-                        <DragDropContext onDragEnd={handleDragEnd}>
-                            <div className="flex flex-col items-center gap-8 max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center gap-8 max-w-4xl mx-auto" ref={containerRef}>
+                            {/* Target Kanji Display */}
+                            {gameData && (
+                                <div className="text-center space-y-4">
+                                    <h3 className="text-lg font-medium">Target Kanji</h3>
+                                    <div className="text-6xl font-bold p-4 bg-primary/10 rounded-lg">
+                                        {gameData.kanji}
+                                    </div>
+                                    {currentCompound && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Find a {currentCompound.length}-character compound ({totalCompoundsFound}/10 found)
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Main game container with Swapy */}
+                            <div className="flex flex-col gap-8 w-full">
                                 {/* Word Building Area */}
                                 <div className="flex gap-4 items-center justify-center">
                                     {currentWord.map((kanji, index) => (
-                                        <Droppable key={`position-${index}`} droppableId={`position-${index}`}>
-                                            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+                                        <div
+                                            key={`slot-${index}`}
+                                            data-swapy-slot={`position-${index}`}
+                                            className={`w-24 h-24 border-2 rounded-lg flex items-center justify-center relative transition-colors duration-200
+                                                ${index >= activeCompoundLength ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'}
+                                                ${index === currentTargetPosition ? 'border-solid border-primary bg-primary/5' : ''}`}
+                                        >
+                                            {kanji && (
                                                 <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.droppableProps}
-                                                    className={`w-24 h-24 border-2 rounded-lg flex items-center justify-center relative
-                                                        ${snapshot.isDraggingOver ? 'border-blue-500 bg-blue-50' : 'border-dashed border-gray-300'}`}
+                                                    data-swapy-item={`kanji-${index}-${kanji}`}
+                                                    className={`text-4xl font-bold relative group select-none
+                                                        ${index === currentTargetPosition ? 'text-primary cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
                                                 >
-                                                    {kanji ? (
-                                                        <Draggable draggableId={`word-${index}`} index={index}>
-                                                            {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-                                                                <div
-                                                                    ref={provided.innerRef}
-                                                                    {...provided.draggableProps}
-                                                                    {...provided.dragHandleProps}
-                                                                    className="text-4xl font-bold relative"
-                                                                >
-                                                                    {kanji}
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="absolute -top-2 -right-2 h-6 w-6"
-                                                                        onClick={() => clearPosition(index)}
-                                                                    >
-                                                                        <X className="h-4 w-4" />
-                                                                    </Button>
-                                                                </div>
-                                                            )}
-                                                        </Draggable>
-                                                    ) : null}
-                                                    {provided.placeholder}
+                                                    {kanji}
+                                                    {index !== currentTargetPosition && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            onClick={() => clearPosition(index)}
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             )}
-                                        </Droppable>
+                                        </div>
                                     ))}
                                 </div>
 
-                                {/* Available Kanji Options */}
-                                {discoveredWords.size > 0 && (
-                                    <Droppable droppableId="kanji-list" direction="horizontal">
-                                        {(provided: DroppableProvided) => (
+                                {/* Available Kanji Choices */}
+                                <div className="flex gap-4 flex-wrap justify-center p-4 border border-dashed rounded-lg mt-4 min-h-[120px] bg-gray-800/10 dark:bg-gray-800/30">
+                                    {gameData?.choices.map((choice, index) => (
+                                        <div
+                                            key={`choice-${index}`}
+                                            data-swapy-slot={`choice-${index}`}
+                                            className="w-20 h-20 border-2 rounded-lg flex items-center justify-center relative"
+                                        >
                                             <div
-                                                ref={provided.innerRef}
-                                                {...provided.droppableProps}
-                                                className="flex gap-4 flex-wrap justify-center"
+                                                data-swapy-item={`kanji-choice-${index}-${choice.kanji}`}
+                                                className={`text-3xl font-bold select-none
+                                                    ${choice.isValid ? 'cursor-grab active:cursor-grabbing' : 'opacity-80 cursor-not-allowed'}
+                                                    ${choice.isTarget ? 'text-primary' : ''}`}
                                             >
-                                                {validKanji.map((kanji, index) => (
-                                                    <Draggable
-                                                        key={kanji}
-                                                        draggableId={`kanji-${kanji}`}
-                                                        index={index}
-                                                    >
-                                                        {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                className={`w-16 h-16 border rounded-lg flex items-center justify-center text-2xl
-                                                                    ${snapshot.isDragging ? 'bg-blue-100' : 'bg-white'}`}
-                                                            >
-                                                                {kanji}
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                ))}
-                                                {provided.placeholder}
+                                                {choice.kanji}
                                             </div>
-                                        )}
-                                    </Droppable>
-                                )}
-
-                                {/* Discovered Words */}
-                                <div className="w-full">
-                                    <h3 className="text-lg font-medium mb-4">Discovered Compounds ({discoveredWords.size})</h3>
-                                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                                        {Array.from(discoveredWords).map(word => {
-                                            const compound = compounds.find(c => c.word === word)
-                                            return compound && (
-                                                <Card key={word} className="p-4">
-                                                    <p className="text-xl font-bold mb-1">{word}</p>
-                                                    <p className="text-sm opacity-90">{compound.reading}</p>
-                                                    <p className="text-sm text-muted-foreground">{compound.meaning}</p>
-                                                </Card>
-                                            )
-                                        })}
-                                    </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </DragDropContext>
+
+                            {/* Skip Button */}
+                            <Button
+                                variant="ghost"
+                                className="text-muted-foreground hover:text-foreground"
+                                onClick={skipCurrentCompound}
+                            >
+                                <SkipForward className="h-4 w-4 mr-2" />
+                                Skip this compound
+                            </Button>
+
+                            {/* Discovered Words - Only show in one place */}
+                            {discoveredWords.size > 0 && (
+                                <div className="w-full mt-8">
+                                    <h3 className="text-lg font-medium mb-4">
+                                        Discovered Compounds ({discoveredWords.size}/10)
+                                    </h3>
+                                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                        <AnimatePresence>
+                                            {Array.from(discoveredWords).map(word => {
+                                                const compound = gameData?.compounds.find(c => c.word === word);
+                                                return compound && (
+                                                    <MotionDiv
+                                                        key={word}
+                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        exit={{ opacity: 0, scale: 0.9 }}
+                                                    >
+                                                        <Card className="p-4 hover:shadow-md transition-shadow">
+                                                            <p className="text-xl font-bold mb-1">{word}</p>
+                                                            <p className="text-sm opacity-90">{compound.reading}</p>
+                                                            <p className="text-sm text-muted-foreground">{compound.meaning}</p>
+                                                        </Card>
+                                                    </MotionDiv>
+                                                );
+                                            })}
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }
