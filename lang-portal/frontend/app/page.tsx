@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { StatsCards } from "@/components/stats-cards"
 import { useRouter } from "next/navigation"
 import { SignUpButton, useUser } from "@clerk/nextjs"
+import TourGuide from "@/components/tour-guide"
 
 // Common appearance settings for Clerk modals - matching navbar.tsx
 const clerkAppearance = {
@@ -51,7 +52,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-16 pb-20">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center py-20 overflow-hidden">
+      <section id="hero-section" className="relative min-h-[90vh] flex items-center py-20 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 -z-10">
           <motion.div
@@ -141,9 +142,7 @@ export default function HomePage() {
                   </Button>
                 </SignUpButton>
               )}
-              <Button size="lg" variant="outline" className="px-8">
-                Take a Tour
-              </Button>
+              <TourGuide />
             </motion.div>
           </div>
 
@@ -161,7 +160,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4">
+      <section id="features-section" className="container mx-auto px-4">
         <div className="text-center mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -204,7 +203,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="container mx-auto px-4">
+      <section id="stats-section" className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
@@ -215,7 +214,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section id="cta-section" className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
