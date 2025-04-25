@@ -56,16 +56,31 @@ class JapaneseApp:
     def get_random_word(self):
         """Get a random word from API"""
         try:
-            url = f"{self.api_base_url}{self.api_v1_path}{self.words_random_endpoint}"
+            # Use the /api/langportal/words/random endpoint directly
+            url = f"{self.api_base_url}/api/langportal/words/random"
+            logger.debug(f"Fetching random word from: {url}")
+            
             response = requests.get(url)
             if response.status_code == 200:
-                self.current_word = response.json()
+                word_data = response.json()
+                logger.debug(f"Received word data: {word_data}")
+                
+                # Store the full response
+                self.current_word = {
+                    "japanese": word_data.get("japanese", ""),
+                    "english": word_data.get("english", ""),
+                    "romaji": word_data.get("romaji", ""),
+                    "parts": word_data.get("parts", {"type": "noun"}),
+                    "id": word_data.get("id", 0)
+                }
+                
                 return (
                     self.current_word.get("japanese", ""),
                     self.current_word.get("english", ""),
                     self.current_word.get("romaji", ""),
                     "Write this word in Japanese characters",
                 )
+            
             logger.error(f"Error fetching random word: {response.status_code}")
             return "", "", "", "Error fetching word. Please try again."
         except Exception as e:
@@ -168,9 +183,22 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def get_random_word_and_sentence(self):
         """Get a random word and generate a sentence"""
         logger.debug("Getting random word and generating sentence")
+        
+        # Try to get a random word
         kanji, english, reading, _ = self.get_random_word()
+        
+        # If we couldn't get a word from the API, create a default one to ensure functionality
         if not kanji:
-            return "No word available", "", "", "Please try again."
+            logger.warning("Failed to get random word from API, using fallback word")
+            # Use a fallback word so we can still generate a sentence
+            self.current_word = {
+                "japanese": "日本語",
+                "english": "Japanese language",
+                "romaji": "nihongo"
+            }
+            kanji = self.current_word["japanese"]
+            english = self.current_word["english"]
+            reading = self.current_word["romaji"]
 
         # Generate sentence using JSON mode
         self.current_sentence = self.generate_sentence(self.current_word)

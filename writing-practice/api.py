@@ -61,28 +61,83 @@ async def root():
 
 @api.get("/api/writing/random-sentence", response_model=RandomSentenceResponse)
 async def get_random_sentence():
-    """Generate a random sentence"""
+    """Generate a random sentence using a random Japanese word"""
     try:
-        sentence, english, kanji, romaji = japanese_app.get_random_word_and_sentence()
-
-        # Clean up the returned values
-        english = english.replace("English: ", "")
-        romaji = romaji.replace("Reading: ", "")
-
-        # Get the word that was used to generate the sentence
-        source_word = (
-            japanese_app.current_word.get("japanese", "")
-            if japanese_app.current_word
-            else ""
-        )
-
-        return RandomSentenceResponse(
-            sentence=sentence, english=english, romaji=romaji, word=source_word
-        )
+        # First get a random word
+        japanese, english, romaji, _ = japanese_app.get_random_word()
+        
+        if not japanese:
+            logger.error("Failed to get random word")
+            raise HTTPException(
+                status_code=500, detail="Failed to get a random word"
+            )
+        
+        # Generate a sentence using this word
+        word_data = japanese_app.current_word  # The word is stored in japanese_app.current_word
+        sentence = japanese_app.generate_sentence(word_data)
+        
+        # Format response data
+        sentence_data = japanese_app.current_sentence_data if hasattr(japanese_app, "current_sentence_data") else None
+        
+        if sentence_data:
+            return RandomSentenceResponse(
+                sentence=sentence_data.sentence,
+                english=sentence_data.english,
+                romaji=sentence_data.romaji,
+                word=japanese
+            )
+        else:
+            return RandomSentenceResponse(
+                sentence=sentence,
+                english=f"Sentence with {english}",
+                romaji=romaji,
+                word=japanese
+            )
     except Exception as e:
         logger.error(f"Error generating random sentence: {str(e)}")
         raise HTTPException(
             status_code=500, detail=f"Error generating random sentence: {str(e)}"
+        )
+
+
+@api.get("/api/writing/random-word-sentence", response_model=RandomSentenceResponse)
+async def get_random_word_sentence():
+    """Get a random word and generate a sentence using that word"""
+    try:
+        # First get a random word
+        japanese, english, romaji, _ = japanese_app.get_random_word()
+        
+        if not japanese:
+            logger.error("Failed to get random word")
+            raise HTTPException(
+                status_code=500, detail="Failed to get a random word"
+            )
+        
+        # Generate a sentence using this word
+        word_data = japanese_app.current_word  # The word is stored in japanese_app.current_word
+        sentence = japanese_app.generate_sentence(word_data)
+        
+        # Format response data
+        sentence_data = japanese_app.current_sentence_data if hasattr(japanese_app, "current_sentence_data") else None
+        
+        if sentence_data:
+            return RandomSentenceResponse(
+                sentence=sentence_data.sentence,
+                english=sentence_data.english,
+                romaji=sentence_data.romaji,
+                word=japanese
+            )
+        else:
+            return RandomSentenceResponse(
+                sentence=sentence,
+                english=f"Sentence with {english}",
+                romaji=romaji,
+                word=japanese
+            )
+    except Exception as e:
+        logger.error(f"Error generating word and sentence: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error generating word and sentence: {str(e)}"
         )
 
 
