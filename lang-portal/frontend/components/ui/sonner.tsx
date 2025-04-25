@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Toaster as Sonner } from "sonner"
+import { type ToastT, Toaster as Sonner, toast as sonnerToast } from "sonner"
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
@@ -14,6 +14,25 @@ const icons = {
   warning: <AlertCircle className={`${iconClasses} text-yellow-500`} />,
   info: <AlertCircle className={`${iconClasses} text-blue-500`} />
 }
+
+export interface ToastProps extends Partial<ToastT> {
+  title?: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  duration?: number;
+}
+
+// Export toast with correct types
+export const toast = (props: ToastProps) => {
+  if (props.variant === "destructive") {
+    return sonnerToast.error(props.description, {
+      ...props,
+    });
+  }
+  return sonnerToast(props.description, {
+    ...props,
+  });
+};
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()

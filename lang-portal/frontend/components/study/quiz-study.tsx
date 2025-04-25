@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useGenerateQuiz, type QuizQuestion } from "@/hooks/api/useQuiz"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/sonner"
 import { Loader2 } from "lucide-react"
 
 interface QuizStudyProps {
@@ -43,7 +43,7 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
           toast({
             variant: "destructive",
             title: "Failed to generate quiz",
-            description: error instanceof Error ? error.message : "Please try again",
+            description: error instanceof Error ? error.message : "Please try again"
           })
         }
       }
@@ -171,27 +171,27 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <Card className="flex-1 glass-card flex flex-col h-full overflow-hidden border-0 shadow-lg bg-background/60 backdrop-blur-sm">
         <CardHeader className="border-b">
-          <div className="flex justify-between items-center px-4">
-            <p className="text-lg text-muted-foreground">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 px-4">
+            <p className="text-sm sm:text-lg text-muted-foreground">
               Question {currentIndex + 1} of {questions.length}
             </p>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-sm sm:text-lg text-muted-foreground">
               Grammar Point: {currentQuestion.grammar_point}
             </p>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 p-8">
+        <CardContent className="flex-1 p-4 sm:p-8 overflow-y-auto">
           <div className="flex flex-col h-full">
-            <div className="w-full max-w-5xl mx-auto space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold whitespace-pre-wrap">{currentQuestion.question}</h2>
+            <div className="w-full max-w-5xl mx-auto space-y-4 sm:space-y-8">
+              <div className="text-center mb-4 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold whitespace-pre-wrap">{currentQuestion.question}</h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {currentQuestion.choices.map((choice, idx) => (
                   <Button
                     key={idx}
-                    className={`p-6 h-auto text-lg text-left justify-start transition-all duration-200 ${selectedOption !== null
+                    className={`p-4 sm:p-6 h-auto text-base sm:text-lg text-left justify-start transition-all duration-200 ${selectedOption !== null
                         ? choice.is_correct
                           ? "bg-green-500 hover:bg-green-600 text-white"
                           : selectedOption === choice.text
@@ -209,14 +209,14 @@ export function QuizStudy({ sessionId, onComplete }: QuizStudyProps) {
               </div>
 
               {showExplanation && (
-                <div className="mt-8 p-6 bg-muted/50 rounded-lg">
-                  <h3 className="font-bold text-lg mb-2">Explanation:</h3>
-                  <p>{currentQuestion.explanation}</p>
+                <div className="mt-4 sm:mt-8 p-4 sm:p-6 bg-muted/50 rounded-lg">
+                  <h3 className="font-bold text-base sm:text-lg mb-2">Explanation:</h3>
+                  <p className="text-sm sm:text-base">{currentQuestion.explanation}</p>
 
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-4 sm:mt-6 flex justify-end">
                     <Button
                       onClick={handleNext}
-                      className="bg-blue-600 hover:bg-blue-700 px-8 py-2"
+                      className="bg-blue-600 hover:bg-blue-700 px-4 sm:px-8 py-2 w-full sm:w-auto"
                     >
                       {currentIndex < questions.length - 1 ? "Next Question" : "Complete Quiz"}
                     </Button>

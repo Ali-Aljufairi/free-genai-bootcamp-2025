@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { generateImageFromText } from '@/services/google-ai';
 import { transcribeAudio } from '@/app/actions/transcribe';
 
@@ -80,7 +80,6 @@ export function useSpeechStudy() {
 
                 setError(errorMessage);
                 toast({
-                    variant: "destructive",
                     title: "Microphone Error",
                     description: errorMessage,
                 });
@@ -99,7 +98,6 @@ export function useSpeechStudy() {
                 console.error('Error setting up audio context:', audioError);
                 setError('Failed to set up audio processing. Please try again.');
                 toast({
-                    variant: "destructive",
                     title: "Audio Setup Error",
                     description: "Failed to set up audio processing. Please try again.",
                 });

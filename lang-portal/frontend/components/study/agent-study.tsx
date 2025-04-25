@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/sonner"
 import { Search, BookOpen, BookText, Video, GraduationCap, Zap, Copy, Check } from "lucide-react"
 
 interface AgentStudyProps {
@@ -121,8 +121,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
             if (response.ok) {
                 toast({
                     title: "Direct Search Results",
-                    description: "Results retrieved successfully",
-                    duration: 3000
+                    description: "Results retrieved successfully"
                 })
 
                 // Filter out tavily_search data before displaying
@@ -161,8 +160,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
 
                 toast({
                     title: "Search Complete",
-                    description: "Direct search results are available",
-                    duration: 5000
+                    description: "Direct search results are available"
                 })
             } else {
                 throw new Error(data.message || "Failed to get direct search results")
@@ -184,9 +182,8 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
                 .then(() => {
                     setIsCopied(true)
                     toast({
-                        title: "Copied to clipboard",
-                        description: "Search results copied to clipboard",
-                        duration: 2000
+                        title: "Copied",
+                        description: "Search results copied to clipboard"
                     })
 
                     setTimeout(() => {
@@ -195,7 +192,7 @@ export function AgentStudy({ sessionId, onComplete }: AgentStudyProps) {
                 })
                 .catch(err => {
                     toast({
-                        variant: "destructive",
+                        variant: "destructive", 
                         title: "Copy failed",
                         description: "Could not copy text to clipboard"
                     })

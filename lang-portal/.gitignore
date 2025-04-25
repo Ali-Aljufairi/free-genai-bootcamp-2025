@@ -19,6 +19,8 @@
 go.work
 tmp/
 
+*.tmp
+
 # IDE specific files
 .vscode
 .idea
