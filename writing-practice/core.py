@@ -59,28 +59,28 @@ class JapaneseApp:
             # Use the /api/langportal/words/random endpoint directly
             url = f"{self.api_base_url}/api/langportal/words/random"
             logger.debug(f"Fetching random word from: {url}")
-            
+
             response = requests.get(url)
             if response.status_code == 200:
                 word_data = response.json()
                 logger.debug(f"Received word data: {word_data}")
-                
+
                 # Store the full response
                 self.current_word = {
                     "japanese": word_data.get("japanese", ""),
                     "english": word_data.get("english", ""),
                     "romaji": word_data.get("romaji", ""),
                     "parts": word_data.get("parts", {"type": "noun"}),
-                    "id": word_data.get("id", 0)
+                    "id": word_data.get("id", 0),
                 }
-                
+
                 return (
                     self.current_word.get("japanese", ""),
                     self.current_word.get("english", ""),
                     self.current_word.get("romaji", ""),
                     "Write this word in Japanese characters",
                 )
-            
+
             logger.error(f"Error fetching random word: {response.status_code}")
             return "", "", "", "Error fetching word. Please try again."
         except Exception as e:
@@ -183,10 +183,10 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def get_random_word_and_sentence(self):
         """Get a random word and generate a sentence"""
         logger.debug("Getting random word and generating sentence")
-        
+
         # Try to get a random word
         kanji, english, reading, _ = self.get_random_word()
-        
+
         # If we couldn't get a word from the API, create a default one to ensure functionality
         if not kanji:
             logger.warning("Failed to get random word from API, using fallback word")
@@ -194,7 +194,7 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
             self.current_word = {
                 "japanese": "日本語",
                 "english": "Japanese language",
-                "romaji": "nihongo"
+                "romaji": "nihongo",
             }
             kanji = self.current_word["japanese"]
             english = self.current_word["english"]
@@ -420,15 +420,15 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     self.mocr = MangaOcr()
-            
+
             logger.info(f"Processing image type: {type(image)}")
             logger.info(
                 f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}"
             )
-            
+
             transcription = self.mocr(image)
             logger.info(f"OCR Transcription result: {transcription}")
-            
+
             # Use provided target_word if available, otherwise fall back to current_word
             if target_word:
                 logger.info(f"Using provided target word: {target_word}")
@@ -439,15 +439,19 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
             else:
                 logger.warning("No target word available")
                 japanese_target = "No target word available"
-            
+
             # Compare with target word
             grade = "C"
             feedback = ""
-            
+
             if transcription == japanese_target:
                 grade = "S"
                 feedback = "Perfect match! Excellent writing."
-            elif transcription and japanese_target and (transcription.lower() == japanese_target.lower()):
+            elif (
+                transcription
+                and japanese_target
+                and (transcription.lower() == japanese_target.lower())
+            ):
                 grade = "A"
                 feedback = "Very good! The characters are clear and correct."
             else:
@@ -469,13 +473,16 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
                 )
                 feedback = response.choices[0].message.content.strip()
                 grade = "B" if "good" in feedback.lower() else "C"
-                
+
             return transcription, japanese_target, grade, feedback
         except Exception as e:
-            logger.error(f"Error in grade_submission_with_target: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error in grade_submission_with_target: {str(e)}", exc_info=True
+            )
             return (
                 f"Error processing submission: {str(e)}",
-                target_word or self.current_word.get("japanese", "Error getting target word"),
+                target_word
+                or self.current_word.get("japanese", "Error getting target word"),
                 "C",
                 f"An error occurred during OCR processing: {str(e)}",
             )
@@ -561,5 +568,7 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
                 "Error processing submission",
                 "C",
                 f"An error occurred: {str(e)}",
-                target_sentence or self.current_sentence or "Error getting target sentence"
+                target_sentence
+                or self.current_sentence
+                or "Error getting target sentence",
             )

@@ -65,33 +65,37 @@ async def get_random_sentence():
     try:
         # First get a random word
         japanese, english, romaji, _ = japanese_app.get_random_word()
-        
+
         if not japanese:
             logger.error("Failed to get random word")
-            raise HTTPException(
-                status_code=500, detail="Failed to get a random word"
-            )
-        
+            raise HTTPException(status_code=500, detail="Failed to get a random word")
+
         # Generate a sentence using this word
-        word_data = japanese_app.current_word  # The word is stored in japanese_app.current_word
+        word_data = (
+            japanese_app.current_word
+        )  # The word is stored in japanese_app.current_word
         sentence = japanese_app.generate_sentence(word_data)
-        
+
         # Format response data
-        sentence_data = japanese_app.current_sentence_data if hasattr(japanese_app, "current_sentence_data") else None
-        
+        sentence_data = (
+            japanese_app.current_sentence_data
+            if hasattr(japanese_app, "current_sentence_data")
+            else None
+        )
+
         if sentence_data:
             return RandomSentenceResponse(
                 sentence=sentence_data.sentence,
                 english=sentence_data.english,
                 romaji=sentence_data.romaji,
-                word=japanese
+                word=japanese,
             )
         else:
             return RandomSentenceResponse(
                 sentence=sentence,
                 english=f"Sentence with {english}",
                 romaji=romaji,
-                word=japanese
+                word=japanese,
             )
     except Exception as e:
         logger.error(f"Error generating random sentence: {str(e)}")
@@ -106,33 +110,37 @@ async def get_random_word_sentence():
     try:
         # First get a random word
         japanese, english, romaji, _ = japanese_app.get_random_word()
-        
+
         if not japanese:
             logger.error("Failed to get random word")
-            raise HTTPException(
-                status_code=500, detail="Failed to get a random word"
-            )
-        
+            raise HTTPException(status_code=500, detail="Failed to get a random word")
+
         # Generate a sentence using this word
-        word_data = japanese_app.current_word  # The word is stored in japanese_app.current_word
+        word_data = (
+            japanese_app.current_word
+        )  # The word is stored in japanese_app.current_word
         sentence = japanese_app.generate_sentence(word_data)
-        
+
         # Format response data
-        sentence_data = japanese_app.current_sentence_data if hasattr(japanese_app, "current_sentence_data") else None
-        
+        sentence_data = (
+            japanese_app.current_sentence_data
+            if hasattr(japanese_app, "current_sentence_data")
+            else None
+        )
+
         if sentence_data:
             return RandomSentenceResponse(
                 sentence=sentence_data.sentence,
                 english=sentence_data.english,
                 romaji=sentence_data.romaji,
-                word=japanese
+                word=japanese,
             )
         else:
             return RandomSentenceResponse(
                 sentence=sentence,
                 english=f"Sentence with {english}",
                 romaji=romaji,
-                word=japanese
+                word=japanese,
             )
     except Exception as e:
         logger.error(f"Error generating word and sentence: {str(e)}")
