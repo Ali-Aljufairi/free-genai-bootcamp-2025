@@ -73,7 +73,7 @@ def get_japanese(topic: str) -> JapaneseWords:
                     "content": USER_MESSAGE_TEMPLATE.format(topic=topic),
                 },
             ],
-            model="qwen-2.5-32b",
+            model="qwen-qwq-32b",
             temperature=0,
             # Streaming is not supported in JSON mode
             stream=False,

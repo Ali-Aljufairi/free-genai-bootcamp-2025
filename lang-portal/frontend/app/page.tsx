@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, BookOpen, Brain, CheckCircle, GraduationCap, Sparkles } from "lucide-react"
+import { ArrowRight, BookOpen, Brain, CheckCircle, GraduationCap, Sparkles, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { StatsCards } from "@/components/stats-cards"
@@ -305,7 +305,7 @@ const features = [
   {
     title: "Community Support",
     description: "Connect with fellow learners to practice and share your language journey.",
-    icon: <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
+    icon: <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />,
   },
 ]
 
