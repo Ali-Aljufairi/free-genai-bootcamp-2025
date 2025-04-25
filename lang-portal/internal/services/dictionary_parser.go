@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 )
 
 // JMdict represents the root element of the JMdict XML
@@ -39,10 +38,12 @@ type Sense struct {
 type DictionaryParser struct {
 	filePath   string
 	validKanji map[string]bool
+	jlptLevel  string
+	allKanji   map[string]string // maps kanji to its JLPT level
 }
 
 // NewDictionaryParser creates a new dictionary parser
-func NewDictionaryParser(filePath string, validKanji []string) *DictionaryParser {
+func NewDictionaryParser(filePath string, validKanji []string, jlptLevel string, allKanji map[string]string) *DictionaryParser {
 	// Create a map for O(1) lookup of valid kanji
 	kanjiMap := make(map[string]bool)
 	for _, k := range validKanji {
@@ -52,6 +53,8 @@ func NewDictionaryParser(filePath string, validKanji []string) *DictionaryParser
 	return &DictionaryParser{
 		filePath:   filePath,
 		validKanji: kanjiMap,
+		jlptLevel:  jlptLevel,
+		allKanji:   allKanji,
 	}
 }
 
@@ -71,6 +74,18 @@ func (p *DictionaryParser) ParseDictionary() ([]CompoundWord, error) {
 	var inEntry bool
 	var currentEntry Entry
 
+	// Add counters for skipped entries
+	var skippedDecoding int
+	var skippedInvalidCompound int
+	var skippedNoKanji int
+	var totalEntries int
+
+	// Add counters for rejection reasons
+	var skippedLength int
+	var skippedLevelMismatch int
+	var skippedMissingKanji int
+	var skippedNoCurrentLevelKanji int
+
 	for {
 		token, err := decoder.Token()
 		if err == io.EOF {
@@ -85,23 +100,27 @@ func (p *DictionaryParser) ParseDictionary() ([]CompoundWord, error) {
 			if t.Name.Local == "entry" {
 				inEntry = true
 				currentEntry = Entry{}
+				totalEntries++
 			} else if inEntry {
 				switch t.Name.Local {
 				case "k_ele":
 					var kele KEle
 					if err := decoder.DecodeElement(&kele, &t); err != nil {
+						skippedDecoding++
 						continue // Skip this element if there's an error
 					}
 					currentEntry.Kanji = append(currentEntry.Kanji, kele)
 				case "r_ele":
 					var rele REle
 					if err := decoder.DecodeElement(&rele, &t); err != nil {
+						skippedDecoding++
 						continue
 					}
 					currentEntry.Readings = append(currentEntry.Readings, rele)
 				case "sense":
 					var sense Sense
 					if err := decoder.DecodeElement(&sense, &t); err != nil {
+						skippedDecoding++
 						continue
 					}
 					currentEntry.Senses = append(currentEntry.Senses, sense)
@@ -109,17 +128,24 @@ func (p *DictionaryParser) ParseDictionary() ([]CompoundWord, error) {
 			}
 		case xml.EndElement:
 			if t.Name.Local == "entry" && inEntry {
-				// Process the entry
+				// Process each kanji element in the entry
 				for _, kele := range currentEntry.Kanji {
 					word := kele.Keb
-					if p.isValidCompound(word) {
-						compound := CompoundWord{
-							Word:    word,
-							Reading: getFirstReading(currentEntry.Readings),
-							Meaning: getFirstMeaning(currentEntry.Senses),
-							Kanji:   strings.Split(word, ""),
+					if p.isValidCompound(word, &skippedLength, &skippedLevelMismatch, &skippedMissingKanji, &skippedNoCurrentLevelKanji) {
+						kanjiList := p.extractKanji(word)
+						if len(kanjiList) > 0 {
+							compound := CompoundWord{
+								Word:    word,
+								Reading: getFirstReading(currentEntry.Readings),
+								Meaning: getFirstMeaning(currentEntry.Senses),
+								Kanji:   kanjiList,
+							}
+							compounds = append(compounds, compound)
+						} else {
+							skippedNoKanji++
 						}
-						compounds = append(compounds, compound)
+					} else {
+						skippedInvalidCompound++
 					}
 				}
 				inEntry = false
@@ -132,26 +158,120 @@ func (p *DictionaryParser) ParseDictionary() ([]CompoundWord, error) {
 
 // CompoundWord represents a valid compound word found in the dictionary
 type CompoundWord struct {
-	Word    string
-	Reading string
-	Meaning string
-	Kanji   []string
+	Word    string   `json:"word"`
+	Reading string   `json:"reading"`
+	Meaning string   `json:"meaning"`
+	Kanji   []string `json:"kanji"`
 }
 
-// isValidCompound checks if a word is a valid compound (1-4 kanji, all kanji in valid list)
-func (p *DictionaryParser) isValidCompound(word string) bool {
-	runes := []rune(word)
-	if len(runes) < 1 || len(runes) > 4 {
-		return false
+// isValidLevel checks if a JLPT level is valid for current context
+func (p *DictionaryParser) isValidLevel(level string) bool {
+	levelMap := map[string]int{
+		"N5": 5,
+		"N4": 4,
+		"N3": 3,
+		"N2": 2,
+		"N1": 1,
 	}
+	currentLevel := levelMap[p.jlptLevel]
+	targetLevel := levelMap[level]
+	return targetLevel >= currentLevel
+}
 
-	for _, r := range runes {
-		if !p.validKanji[string(r)] {
+// isValidCompound checks if a word is appropriate for the JLPT level
+func (p *DictionaryParser) isValidCompound(word string, skippedLength, skippedLevelMismatch, skippedMissingKanji, skippedNoCurrentLevelKanji *int) bool {
+	runes := []rune(word)
+
+	// Length restrictions based on JLPT level
+	switch p.jlptLevel {
+	case "N5":
+		// N5 compounds should be mostly 2 kanji
+		if len(runes) < 2 || len(runes) > 3 {
+			*skippedLength++
+			return false
+		}
+	case "N4":
+		if len(runes) > 3 {
+			*skippedLength++
+			return false
+		}
+	case "N3", "N2", "N1":
+		if len(runes) > 4 {
+			*skippedLength++
 			return false
 		}
 	}
 
+	// Count kanji and validate each one
+	var kanjiCount int
+	for _, r := range runes {
+		char := string(r)
+		// Skip if it's not kanji (hiragana/katakana)
+		if !isKanji(char) {
+			continue
+		}
+		kanjiCount++
+
+		// Check if this kanji exists in our level mapping
+		if level, exists := p.allKanji[char]; exists {
+			// If the kanji's level is higher than current level, reject
+			if !p.isValidLevel(level) {
+				*skippedLevelMismatch++
+				return false
+			}
+		} else {
+			// If we don't have level info, reject the kanji
+			*skippedMissingKanji++
+			return false
+		}
+	}
+
+	// N5 compounds should have exactly 2 kanji (most common case)
+	if p.jlptLevel == "N5" && kanjiCount != 2 {
+		*skippedLength++
+		return false
+	}
+
+	// Make sure we have at least one kanji from current level
+	hasCurrentLevelKanji := false
+	for _, r := range runes {
+		char := string(r)
+		if p.validKanji[char] {
+			hasCurrentLevelKanji = true
+			break
+		}
+	}
+
+	if !hasCurrentLevelKanji {
+		*skippedNoCurrentLevelKanji++
+		return false
+	}
+
 	return true
+}
+
+// isKanji checks if a character is a kanji
+func isKanji(char string) bool {
+	for _, r := range char {
+		if (r >= '\u4E00' && r <= '\u9FFF') || // CJK Unified Ideographs
+			(r >= '\u3400' && r <= '\u4DBF') || // CJK Unified Ideographs Extension A
+			(r >= '\uF900' && r <= '\uFAFF') { // CJK Compatibility Ideographs
+			return true
+		}
+	}
+	return false
+}
+
+// extractKanji extracts valid kanji from a word in order
+func (p *DictionaryParser) extractKanji(word string) []string {
+	var kanji []string
+	for _, r := range word {
+		char := string(r)
+		if isKanji(char) && p.validKanji[char] {
+			kanji = append(kanji, char)
+		}
+	}
+	return kanji
 }
 
 // getFirstReading returns the first reading of the word
