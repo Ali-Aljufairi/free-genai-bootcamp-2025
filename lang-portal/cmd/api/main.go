@@ -43,7 +43,7 @@ func run() error {
 	go func() {
 		port := os.Getenv("PORT")
 		if port == "" {
-			port = "3000"
+			port = "8080"
 		}
 		if err := fiberServer.Start(port); err != nil {
 			log.Printf("Server error: %v", err)
