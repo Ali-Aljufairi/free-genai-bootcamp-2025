@@ -51,7 +51,7 @@ func (db *DB) Close() error {
 // GetStudySessionWords retrieves words for a specific study session
 func (db *DB) GetStudySessionWords(sessionID int64) ([]models.Word, error) {
 	var words []models.Word
-	err := db.db.Where("study_session_id = ?", sessionID).Find(&words).Error
+	err := db.db.Joins("JOIN word_review_items ON words.id = word_review_items.word_id").Where("word_review_items.study_session_id = ?", sessionID).Find(&words).Error
 	return words, err
 }
 
@@ -71,13 +71,42 @@ func (db *DB) GetStudySession(sessionID int64) (*models.StudySession, error) {
 
 // CreateWordReview creates a new word review entry
 func (db *DB) CreateWordReview(sessionID, wordID int64, correct bool) error {
+	// First verify the session exists
+	var session models.StudySession
+	if err := db.db.First(&session, sessionID).Error; err != nil {
+		return fmt.Errorf("study session not found: %v", err)
+	}
+
+	// Then verify the word exists and is in the same group as the session
+	var count int64
+	err := db.db.Raw(`
+		SELECT COUNT(*) 
+		FROM words w 
+		JOIN words_groups wg ON w.id = wg.word_id 
+		JOIN study_sessions s ON wg.group_id = s.group_id 
+		WHERE w.id = ? AND s.id = ?`, wordID, sessionID).Count(&count).Error
+
+	if err != nil {
+		return fmt.Errorf("error checking word and session relationship: %v", err)
+	}
+
+	if count == 0 {
+		return fmt.Errorf("word %d is not part of study session %d's group", wordID, sessionID)
+	}
+
+	// All validations passed, create the review
 	review := models.WordReviewItem{
 		WordID:         wordID,
 		StudySessionID: sessionID,
 		Correct:        correct,
 		CreatedAt:      time.Now(),
 	}
-	return db.db.Create(&review).Error
+
+	if err := db.db.Create(&review).Error; err != nil {
+		return fmt.Errorf("failed to create review: %v", err)
+	}
+
+	return nil
 }
 
 // ResetStudyHistory resets all study history

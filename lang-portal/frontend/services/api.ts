@@ -111,53 +111,6 @@ export const jlptApi = {
     fetchData<{
       compounds: { word: string; reading: string; meaning: string; position: number }[];
     }>(`/kanji/${kanji}/compounds`),
-
-  getGameCompounds: async (kanji: string, level: string) => {
-    const response = await fetch(`/api/langportal/game/kanji-compound/compounds/${kanji}/${level}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch compounds');
-    }
-    return response.json();
-  },
-
-  getGameChoices: async (kanji: string, level: string) => {
-    const response = await fetch(`/api/langportal/game/kanji-compound/choices/${kanji}/${level}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch kanji choices');
-    }
-    return response.json();
-  },
-
-  validateGameCompound: async ({ 
-    kanji, 
-    compound, 
-    level, 
-    position 
-  }: {
-    kanji: string;
-    compound: string;
-    level: string;
-    position: number;
-  }) => {
-    const response = await fetch('/api/langportal/game/kanji-compound/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        kanji,
-        compound,
-        level,
-        position
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to validate compound');
-    }
-
-    return response.json();
-  }
 };
 
 export const api = {
