@@ -2,6 +2,7 @@ package server
 
 import (
 	"lang-portal/internal/handlers"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -56,20 +57,26 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/langportal/words/:id", wordHandler.GetWord)
 	s.App.Post("/api/langportal/words", wordHandler.CreateWord)
 
-	// JLPT routes
-	jlptHandler := handlers.NewJLPTHandler(s.sqlDB.GetDB(), s.neo4j)
+	// JLPT SQLite-based routes that don't require Neo4j
 	jlptSQLiteHandler := handlers.NewJLPTSQLiteHandler(s.sqlDB)
-	s.App.Post("/api/langportal/jlpt/import", jlptHandler.ImportJLPTLevel)
-	setupJLPTRoutes(s.App, jlptHandler, jlptSQLiteHandler)
+	s.App.Get("/api/langportal/jlpt/:level/random-kanji", jlptSQLiteHandler.GetRandomKanji)
+
+	// Add Neo4j-dependent routes only if Neo4j is available
+	if s.neo4j != nil {
+		jlptHandler := handlers.NewJLPTHandler(s.sqlDB.GetDB(), s.neo4j)
+		s.App.Post("/api/langportal/jlpt/import", jlptHandler.ImportJLPTLevel)
+		setupNeo4jDependentRoutes(s.App, jlptHandler)
+	} else {
+		log.Printf("Neo4j connection not available, skipping Neo4j-dependent routes")
+	}
 }
 
-func setupJLPTRoutes(app *fiber.App, h *handlers.JLPTHandler, sqlh *handlers.JLPTSQLiteHandler) {
-	app.Get("/api/langportal/jlpt/:level/random-kanji", sqlh.GetRandomKanji)
+func setupNeo4jDependentRoutes(app *fiber.App, h *handlers.JLPTHandler) {
 	app.Get("/api/langportal/kanji/:kanji/compounds", h.GetKanjiCompounds)
 	app.Get("/api/langportal/kanji/validate-compound", h.ValidateKanjiCompound)
 	app.Post("/api/langportal/neo4j/cleanup", h.CleanupNeo4j)
 
-	// New game endpoints
+	// Game endpoints
 	app.Get("/api/langportal/game/kanji-compound/start/:level", h.StartKanjiCompoundGame)
 	app.Get("/api/langportal/game/kanji-compound/compounds/:kanji/:level", h.GetGameCompounds)
 	app.Post("/api/langportal/game/kanji-compound/validate", h.ValidateGameCompound)

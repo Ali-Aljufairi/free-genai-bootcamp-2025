@@ -20,12 +20,18 @@ type FiberServer struct {
 }
 
 func NewFiberServer(gormDB *gorm.DB) (*FiberServer, error) {
-	// Initialize Neo4j connection
+	// Initialize Neo4j connection with better error handling
 	neo4jConfig := config.DefaultNeo4jConfig()
 	ctx := context.Background()
-	neo4jDriver, err := neo4jConfig.Connect(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Neo4j driver: %w", err)
+	var neo4jDriver neo4j.DriverWithContext
+	
+	neo4jDriver, neo4jErr := neo4jConfig.Connect(ctx)
+	if neo4jErr != nil {
+		log.Printf("Warning: Neo4j connection failed: %v. Neo4j-dependent routes will be skipped.", neo4jErr)
+		// Continue without Neo4j
+		neo4jDriver = nil
+	} else {
+		log.Println("Neo4j connection established successfully")
 	}
 
 	// Initialize SQLite database
@@ -35,7 +41,9 @@ func NewFiberServer(gormDB *gorm.DB) (*FiberServer, error) {
 	}
 
 	server := &FiberServer{
-		App:    fiber.New(),
+		App:    fiber.New(fiber.Config{
+			DisableStartupMessage: false,
+		}),
 		sqlDB:  sqlDB,
 		gormDB: gormDB,
 		neo4j:  neo4jDriver,
@@ -52,16 +60,25 @@ func (s *FiberServer) Start(port string) error {
 
 func (s *FiberServer) Shutdown() error {
 	ctx := context.Background()
-	if err := s.neo4j.Close(ctx); err != nil {
-		log.Printf("Error closing Neo4j connection: %v", err)
+	if s.neo4j != nil {
+		if err := s.neo4j.Close(ctx); err != nil {
+			log.Printf("Error closing Neo4j connection: %v", err)
+		}
 	}
 	return s.App.Shutdown()
 }
 
 func (s *FiberServer) Health() map[string]interface{} {
-	return map[string]interface{}{
+	health := map[string]interface{}{
 		"status": "healthy",
 		"sqlite": s.sqlDB.Health(),
-		"neo4j":  "connected",
 	}
+	
+	if s.neo4j != nil {
+		health["neo4j"] = "connected"
+	} else {
+		health["neo4j"] = "not connected"
+	}
+	
+	return health
 }
