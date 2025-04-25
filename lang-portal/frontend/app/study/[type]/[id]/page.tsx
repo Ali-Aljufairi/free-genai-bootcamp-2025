@@ -7,7 +7,6 @@ import { DrawingStudy } from "@/components/study/drawing-study"
 import { AgentStudy } from "@/components/study/agent-study"
 import { Chat } from "@/components/study/chat-study"
 import { SpeechStudy } from "@/components/study/speech-study"
-import { WordBuilderStudy } from "@/components/study/word-builder-study"
 import React from "react"
 
 export default function StudySessionPage({
@@ -52,10 +51,6 @@ export default function StudySessionPage({
 
             {type === "speech" && (
                 <SpeechStudy sessionId={id} onComplete={handleComplete} />
-            )}
-
-            {type === "word-builder" && (
-                <WordBuilderStudy sessionId={id} onComplete={handleComplete} />
             )}
         </div>
     )

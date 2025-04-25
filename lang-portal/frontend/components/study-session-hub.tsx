@@ -59,13 +59,6 @@ const studyOptions = [
     icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
     image: "/Study-session/mic.png",
     type: "speech"
-  },
-  {
-    title: "Word Builder",
-    description: "Build words from JLPT kanji characters",
-    icon: <ScrollText className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />,
-    image: "/Study-session/word-builder.png",
-    type: "word-builder"
   }
 ] as const;
 
