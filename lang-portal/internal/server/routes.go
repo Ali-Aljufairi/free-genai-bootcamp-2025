@@ -68,12 +68,6 @@ func setupJLPTRoutes(app *fiber.App, h *handlers.JLPTHandler, sqlh *handlers.JLP
 	app.Get("/api/langportal/kanji/:kanji/compounds", h.GetKanjiCompounds)
 	app.Get("/api/langportal/kanji/validate-compound", h.ValidateKanjiCompound)
 	app.Post("/api/langportal/neo4j/cleanup", h.CleanupNeo4j)
-
-	// New game endpoints
-	app.Get("/api/langportal/game/kanji-compound/start/:level", h.StartKanjiCompoundGame)
-	app.Get("/api/langportal/game/kanji-compound/compounds/:kanji/:level", h.GetGameCompounds)
-	app.Post("/api/langportal/game/kanji-compound/validate", h.ValidateGameCompound)
-	app.Get("/api/langportal/game/kanji-compound/choices/:kanji/:level", h.GetKanjiChoices)
 }
 
 func (s *FiberServer) HelloWorldHandler(c *fiber.Ctx) error {
