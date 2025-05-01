@@ -21,11 +21,13 @@ const (
 
 // Word represents a vocabulary word in the system
 type Word struct {
-	ID       int64         `json:"id" gorm:"primaryKey"`
-	Japanese string        `json:"japanese" gorm:"not null"`
-	Romaji   string        `json:"romaji" gorm:"not null"`
-	English  string        `json:"english" gorm:"not null"`
-	Parts    WordPartsJSON `json:"parts" gorm:"type:text"`
+	ID           int64         `json:"id" gorm:"primaryKey"`
+	Japanese     string        `json:"japanese" gorm:"not null"`
+	Romaji       string        `json:"romaji" gorm:"not null"`
+	English      string        `json:"english" gorm:"not null"`
+	Parts        WordPartsJSON `json:"parts" gorm:"type:text"`
+	Level        int           `json:"level" gorm:"default:5"`
+	CorrectCount int           `json:"correct_count" gorm:"default:0"`
 }
 
 type WordPartsJSON struct {

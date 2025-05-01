@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS words (
     japanese TEXT NOT NULL,
     romaji TEXT NOT NULL,
     english TEXT NOT NULL,
-    parts JSON
+    parts JSON,
+    level INTEGER DEFAULT 5,
+    correct_count INTEGER DEFAULT 0
 );

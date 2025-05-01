@@ -34,7 +34,13 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	s.App.Get("/api/langportal/study_sessions/:id/words", studySessionHandler.GetStudySessionWords)
 	s.App.Post("/api/langportal/study_sessions", studySessionHandler.CreateStudySession)
 	s.App.Post("/api/langportal/study_sessions/:id/words/:word_id/review", studySessionHandler.ReviewWord)
-	s.App.Get("/api/langportal/flashcards/quiz", studySessionHandler.CreateFlashcardQuiz)
+
+	// Flashcard routes
+	flashcardHandler := handlers.NewFlashcardHandler(s.sqlDB)
+	s.App.Get("/api/langportal/flashcards/quiz", flashcardHandler.GetQuizWords)
+	s.App.Post("/api/langportal/flashcards/submit-quiz", flashcardHandler.SubmitQuizAnswers)
+	s.App.Get("/api/langportal/flashcards/learned", flashcardHandler.GetLearnedWords)
+	s.App.Post("/api/langportal/flashcards/reset-progress", flashcardHandler.ResetProgress)
 
 	// Group routes
 	groupHandler := handlers.NewGroupHandler(s.sqlDB)

@@ -135,6 +135,11 @@ func (h *WordHandler) createSingleWord(c *fiber.Ctx) error {
 		})
 	}
 
+	// Set default level if not provided
+	if word.Level == 0 {
+		word.Level = 5
+	}
+
 	// Create the word in the database
 	result := h.db.GetDB().Create(&word)
 	if result.Error != nil {
@@ -154,6 +159,11 @@ func (h *WordHandler) createWordWithGroups(c *fiber.Ctx, req WordWithGroups) err
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Japanese, romaji, and English fields are required",
 		})
+	}
+
+	// Set default level if not provided
+	if req.Word.Level == 0 {
+		req.Word.Level = 5
 	}
 
 	// Begin transaction
