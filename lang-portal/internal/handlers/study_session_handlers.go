@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"lang-portal/internal/database"
 	"lang-portal/internal/database/models"
+	"math/rand"
 	"strconv"
 	"time"
-	"fmt"
-	"math/rand"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -184,18 +184,21 @@ func (h *StudySessionHandler) ReviewWord(c *fiber.Ctx) error {
 
 // CreateFlashcardQuiz generates a flashcard with 4 options where one is correct
 func (h *StudySessionHandler) CreateFlashcardQuiz(c *fiber.Ctx) error {
-	// Parse limit parameter (how many flashcards to generate)
-	limit, err := strconv.Atoi(c.Query("limit", "1"))
-	if err != nil || limit < 1 {
-		limit = 1 // Default to 1 if invalid
-	}
-	if limit > 500 {
-		limit = 500 // Increased cap to 500 to match flashcard handler
+	// Parse limit parameter - if not specified or invalid, get all words
+	var limit int
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
 	}
 
-	// Get random words for the target flashcards
+	// Get words for target flashcards
 	var targetWords []models.Word
-	result := h.db.GetDB().Order("RANDOM()").Limit(limit).Find(&targetWords)
+	query := h.db.GetDB().Order("RANDOM()")
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+	result := query.Find(&targetWords)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to retrieve words for flashcards",
@@ -219,7 +222,7 @@ func (h *StudySessionHandler) CreateFlashcardQuiz(c *fiber.Ctx) error {
 
 	// Create flashcards with options
 	flashcards := make([]map[string]interface{}, 0, limit)
-	
+
 	for _, targetWord := range targetWords {
 		// Get 3 random incorrect options that are different from the target word
 		wrongOptions := make([]map[string]interface{}, 0, 3)

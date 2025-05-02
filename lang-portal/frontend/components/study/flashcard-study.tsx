@@ -44,7 +44,7 @@ export function FlashcardStudy() {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [selectedOption, setSelectedOption] = useState<number | null>(null)
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
-    const [cardLimit, setCardLimit] = useState<number>(3)
+    const [cardLimit, setCardLimit] = useState<number>(-1) // -1 represents "All Words"
     const [level, setLevel] = useState<number>(5)
     const [showRomaji, setShowRomaji] = useState(true)
     const [showIncorrectRomaji, setShowIncorrectRomaji] = useState(false)
@@ -77,11 +77,11 @@ export function FlashcardStudy() {
                 },
                 body: JSON.stringify({ answers }),
             })
-            
+
             if (!response.ok) {
                 throw new Error('Failed to submit quiz answers')
             }
-            
+
             setShowConfig(true)
         } catch (error) {
             console.error("Failed to submit quiz answers:", error)
@@ -183,12 +183,12 @@ export function FlashcardStudy() {
                                             <SelectValue placeholder="Number of cards" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                            <SelectItem value="-1">All Words</SelectItem>
                                             <SelectItem value="3">3 cards</SelectItem>
                                             <SelectItem value="5">5 cards</SelectItem>
                                             <SelectItem value="10">10 cards</SelectItem>
                                             <SelectItem value="15">15 cards</SelectItem>
                                             <SelectItem value="20">20 cards</SelectItem>
-                                            <SelectItem value="500">500 cards</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
