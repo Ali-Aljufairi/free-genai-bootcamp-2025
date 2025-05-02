@@ -47,6 +47,7 @@ export function FlashcardStudy() {
     const [cardLimit, setCardLimit] = useState<number>(3)
     const [level, setLevel] = useState<number>(5)
     const [showRomaji, setShowRomaji] = useState(true)
+    const [showIncorrectRomaji, setShowIncorrectRomaji] = useState(false)
     const [showConfig, setShowConfig] = useState(true)
     const [score, setScore] = useState(0)
     const [answers, setAnswers] = useState<Answer[]>([])
@@ -90,6 +91,9 @@ export function FlashcardStudy() {
     const handleOptionSelect = (optionId: number, correct: boolean) => {
         setSelectedOption(optionId)
         setIsCorrect(correct)
+        if (!correct) {
+            setShowIncorrectRomaji(true)
+        }
 
         setAnswers(prev => [...prev, {
             wordId: flashcards[currentIndex].word.id,
@@ -103,6 +107,7 @@ export function FlashcardStudy() {
                     setCurrentIndex(currentIndex + 1)
                     setSelectedOption(null)
                     setIsCorrect(null)
+                    setShowIncorrectRomaji(false)
                 } else {
                     submitQuizAnswers()
                 }
@@ -115,6 +120,7 @@ export function FlashcardStudy() {
             setCurrentIndex(currentIndex + 1)
             setSelectedOption(null)
             setIsCorrect(null)
+            setShowIncorrectRomaji(false)
         } else {
             submitQuizAnswers()
         }
@@ -182,6 +188,7 @@ export function FlashcardStudy() {
                                             <SelectItem value="10">10 cards</SelectItem>
                                             <SelectItem value="15">15 cards</SelectItem>
                                             <SelectItem value="20">20 cards</SelectItem>
+                                            <SelectItem value="500">500 cards</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -242,7 +249,7 @@ export function FlashcardStudy() {
                             className="text-center mb-2"
                         >
                             <h2 className="text-3xl font-bold mb-2">{currentFlashcard.word.japanese}</h2>
-                            {showRomaji && (
+                            {(showRomaji || showIncorrectRomaji) && (
                                 <p className="text-xl" style={{ color: "var(--muted-foreground)" }}>{currentFlashcard.word.romaji}</p>
                             )}
                         </motion.div>
@@ -322,7 +329,7 @@ export function FlashcardStudy() {
                             className="text-center mb-12"
                         >
                             <h2 className="text-7xl font-bold mb-4">{currentFlashcard.word.japanese}</h2>
-                            {showRomaji && (
+                            {(showRomaji || showIncorrectRomaji) && (
                                 <p className="text-3xl" style={{ color: "var(--muted-foreground)" }}>
                                     {currentFlashcard.word.romaji}
                                 </p>
