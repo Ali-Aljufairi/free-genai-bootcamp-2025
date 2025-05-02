@@ -17,47 +17,57 @@ const CARD_IMAGE_DIMENSIONS = {
   large: { width: 128, height: 128 }
 };
 
+// Preload image paths to improve performance
+const studyImages = {
+  flashcards: "/Study-session/images.png",
+  quiz: "/Study-session/pen.png",
+  chat: "/Study-session/sen.png",
+  drawing: "/Study-session/drawing.png",
+  agent: "/Study-session/agent.png",
+  speech: "/Study-session/mic.png",
+} as const;
+
 const studyOptions = [
   {
     title: "Flashcards",
     description: "Practice vocabulary with flashcards",
     icon: <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />,
-    image: "/Study-session/images.png",
+    image: studyImages.flashcards,
     type: "flashcards"
   },
   {
     title: "Grammar Quiz",
     description: "Test your knowledge with JLPT grammar quizzes",
     icon: <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />,
-    image: "/Study-session/pen.png",
+    image: studyImages.quiz,
     type: "quiz"
   },
   {
     title: "Sentence Constructor",
     description: "Practice language through conversation",
     icon: <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />,
-    image: "/Study-session/sen.png",
+    image: studyImages.chat,
     type: "chat"
   },
   {
     title: "Writing Practice",
     description: "Practice writing characters",
     icon: <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />,
-    image: "/Study-session/drawing.png",
+    image: studyImages.drawing,
     type: "drawing"
   },
   {
     title: "Learning Resources",
     description: "Find resources to learn Japanese",
     icon: <Search className="h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />,
-    image: "/Study-session/agent.png",
+    image: studyImages.agent,
     type: "agent"
   },
   {
     title: "Speech to Image",
     description: "Turn your spoken words into images",
     icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
-    image: "/Study-session/mic.png",
+    image: studyImages.speech,
     type: "speech"
   }
 ] as const;
@@ -74,6 +84,16 @@ export function StudySessionHub() {
       router.prefetch(`/study/${option.type}`)
     })
   }, [router])
+
+  // Preload study images using the window.Image constructor
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      Object.values(studyImages).forEach((src) => {
+        const img = new window.Image();
+        img.src = src;
+      });
+    }
+  }, []);
 
   // Memoize the startSession callback
   const startSession = useCallback(async (type: string) => {
@@ -124,7 +144,10 @@ export function StudySessionHub() {
             height={CARD_IMAGE_DIMENSIONS.large.height}
             className="object-contain"
             sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
-            priority
+            priority={true}
+            loading="eager"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E"
           />
         </div>
       </CardContent>
