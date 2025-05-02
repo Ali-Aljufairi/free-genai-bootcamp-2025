@@ -25,8 +25,8 @@ func (h *FlashcardHandler) GetQuizWords(c *fiber.Ctx) error {
     if err != nil || limit < 1 {
         limit = 1
     }
-    if limit > 20 {
-        limit = 20
+    if limit > 500 {
+        limit = 500 // Increased cap to 500 cards
     }
 
     // Parse level parameter

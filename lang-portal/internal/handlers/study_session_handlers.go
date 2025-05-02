@@ -189,8 +189,8 @@ func (h *StudySessionHandler) CreateFlashcardQuiz(c *fiber.Ctx) error {
 	if err != nil || limit < 1 {
 		limit = 1 // Default to 1 if invalid
 	}
-	if limit > 20 {
-		limit = 20 // Cap at 20 to prevent excessive queries
+	if limit > 500 {
+		limit = 500 // Increased cap to 500 to match flashcard handler
 	}
 
 	// Get random words for the target flashcards
