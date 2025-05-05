@@ -5,12 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Mic, PhoneOff, PhoneCall, Volume2, X } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Get Vapi public key from environment variable
 const VAPI_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
 
-// Use the existing assistant ID from Vapi dashboard
-const VAPI_ASSISTANT_ID = "815decc2-cab8-4907-9472-cbd6f882f232";
+// Assistant configurations
+const ASSISTANTS = {
+    casual: {
+        id: "815decc2-cab8-4907-9472-cbd6f882f232",
+        name: "Casual Talk",
+        description: "Practice casual conversation"
+    },
+    interview: {
+        id: "709d3490-2dbd-414b-9855-84060073fce9",
+        name: "Job Interview",
+        description: "Practice job interview scenarios"
+    }
+};
 
 interface CompanionStudyProps {
     sessionId: string;
@@ -174,6 +186,7 @@ export function CompanionStudy({ sessionId, onComplete }: CompanionStudyProps) {
     const [callStatus, setCallStatus] = useState<CallStatus>("idle");
     const [isVapiInitialized, setIsVapiInitialized] = useState(false);
     const [assistantIsSpeaking, setAssistantIsSpeaking] = useState(false);
+    const [selectedAssistant, setSelectedAssistant] = useState<string>(ASSISTANTS.casual.id);
     const vapiRef = useRef<any>(null);
 
     const cleanup = () => {
@@ -245,7 +258,7 @@ export function CompanionStudy({ sessionId, onComplete }: CompanionStudyProps) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 stream.getTracks().forEach(track => track.stop());
-                vapiRef.current.start(VAPI_ASSISTANT_ID);
+                vapiRef.current.start(selectedAssistant);
             } catch (error) {
                 toast.error("Call Start Failed", { description: "Could not start the call. Please ensure microphone access is granted." });
                 setCallStatus("ended");
@@ -256,6 +269,7 @@ export function CompanionStudy({ sessionId, onComplete }: CompanionStudyProps) {
 
     const endCall = () => {
         cleanup();
+        setCallStatus("idle");
     };
 
     if (!VAPI_PUBLIC_KEY) {
@@ -288,13 +302,30 @@ export function CompanionStudy({ sessionId, onComplete }: CompanionStudyProps) {
                 <CardContent className="flex-1 flex flex-col items-center justify-center gap-6 p-8">
                     <div className="w-full flex flex-col items-center gap-4">
                         {(callStatus === "idle" || callStatus === "ended") && (
-                            <Button
-                                onClick={startCall}
-                                className="flex items-center gap-2"
-                                size="lg"
-                            >
-                                <PhoneCall className="h-5 w-5" /> Start Call
-                            </Button>
+                            <div className="flex flex-col items-center gap-4 w-full max-w-md">
+                                <Select
+                                    value={selectedAssistant}
+                                    onValueChange={setSelectedAssistant}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select an assistant" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(ASSISTANTS).map(([key, assistant]) => (
+                                            <SelectItem key={key} value={assistant.id}>
+                                                {assistant.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Button
+                                    onClick={startCall}
+                                    className="flex items-center gap-2 w-full"
+                                    size="lg"
+                                >
+                                    <PhoneCall className="h-5 w-5" /> Start Call
+                                </Button>
+                            </div>
                         )}
                         {(callStatus !== "idle" && callStatus !== "ended") && (
                             <>
@@ -311,14 +342,16 @@ export function CompanionStudy({ sessionId, onComplete }: CompanionStudyProps) {
                                     {callStatus === "listening" && "Listening..."}
                                     {callStatus === "speaking" && "Speaking..."}
                                 </div>
-                                <Button
-                                    onClick={endCall}
-                                    variant="destructive"
-                                    className="flex items-center gap-2"
-                                    size="lg"
-                                >
-                                    <PhoneOff className="h-5 w-5" /> End Call
-                                </Button>
+                                <div className="mt-8">
+                                    <Button
+                                        onClick={endCall}
+                                        variant="destructive"
+                                        className="flex items-center gap-2"
+                                        size="lg"
+                                    >
+                                        <PhoneOff className="h-5 w-5" /> End Call
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </div>
