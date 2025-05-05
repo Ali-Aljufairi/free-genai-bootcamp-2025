@@ -9,7 +9,13 @@ import ClientLayout from "./ClientLayout";
 import { ClerkProvider } from "@clerk/nextjs";
 import { clerkAppearance } from "@/components/navbar";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  preload: true,
+  display: 'swap',
+  adjustFontFallback: true,
+  fallback: ['system-ui', 'arial']
+});
 
 export default function RootLayout({
   children,

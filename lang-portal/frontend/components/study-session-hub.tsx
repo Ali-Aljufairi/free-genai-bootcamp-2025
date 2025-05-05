@@ -69,6 +69,13 @@ const studyOptions = [
     icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />,
     image: studyImages.speech,
     type: "speech"
+  },
+  {
+    title: "Companion",
+    description: "Talk with an AI agent by voice (call mode)",
+    icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-pink-500" />,
+    image: studyImages.agent,
+    type: "companion-study"
   }
 ] as const;
 
@@ -104,7 +111,12 @@ export function StudySessionHub() {
         name: `${type} Session`,
         description: `New ${type} study session`,
       })
-      router.push(`/study/${type}/${session.id}`)
+      // Special route for companion-study
+      if (type === "companion-study") {
+        router.push(`/study/companion-study/${session.id}`)
+      } else {
+        router.push(`/study/${type}/${session.id}`)
+      }
     } catch (error) {
       console.error('Failed to create session:', error)
     }
