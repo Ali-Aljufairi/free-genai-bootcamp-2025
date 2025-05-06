@@ -21,6 +21,11 @@ const ASSISTANTS = {
         id: "709d3490-2dbd-414b-9855-84060073fce9",
         name: "Job Interview",
         description: "Practice job interview scenarios"
+    },
+    keigo: {
+        id: "709d3490-2dbd-414b-9855-84060073fce9",
+        name: "Keigo",
+        description: "Practice Keigo"
     }
 };
 
