@@ -23,9 +23,14 @@ const ASSISTANTS = {
         description: "Practice job interview scenarios"
     },
     keigo: {
-        id: "709d3490-2dbd-414b-9855-84060073fce9",
+        id: "e1a9b76f-c493-4a09-ad6b-5e123184bad2",
         name: "Keigo",
         description: "Practice Keigo"
+    },
+    angryCustomer: {
+        id: "136fcc43-0ba0-4092-999a-d13b871747db",
+        name: "Angry Customer",
+        description: "Practice handling difficult customer situations"
     }
 };
 
