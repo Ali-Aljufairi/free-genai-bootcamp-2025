@@ -25,6 +25,7 @@ const studyImages = {
   drawing: "/Study-session/drawing.png",
   agent: "/Study-session/agent.png",
   speech: "/Study-session/mic.png",
+  companion: "/Study-session/agent.png"
 } as const;
 
 const studyOptions = [
@@ -74,7 +75,7 @@ const studyOptions = [
     title: "Companion",
     description: "Talk with an AI agent by voice (call mode)",
     icon: <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-pink-500" />,
-    image: studyImages.agent,
+    image: studyImages.companion,
     type: "companion-study"
   }
 ] as const;
