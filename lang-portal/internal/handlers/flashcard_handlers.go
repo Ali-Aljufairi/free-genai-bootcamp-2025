@@ -28,11 +28,28 @@ func (h *FlashcardHandler) GetQuizWords(c *fiber.Ctx) error {
 		}
 	}
 
+	// Parse page parameter
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
 	// Parse level parameter
 	level, err := strconv.Atoi(c.Query("level", "5"))
 	if err != nil || level < 1 || level > 5 {
 		level = 5
 	}
+
+	// Get total count of words for this level
+	var totalWords int64
+	if err := h.db.GetDB().Model(&models.Word{}).Where("level = ?", level).Count(&totalWords).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to count words",
+		})
+	}
+
+	// Calculate offset for pagination
+	offset := (page - 1) * limit
 
 	// Get words for this level, ordered by least practiced first
 	var targetWords []models.Word
@@ -41,7 +58,7 @@ func (h *FlashcardHandler) GetQuizWords(c *fiber.Ctx) error {
 		Order("correct_count ASC, RANDOM()")
 
 	if limit > 0 {
-		query = query.Limit(limit)
+		query = query.Limit(limit).Offset(offset)
 	}
 
 	result := query.Find(&targetWords)
@@ -179,6 +196,7 @@ func (h *FlashcardHandler) GetQuizWords(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"flashcards": flashcards,
 		"count":      len(flashcards),
+		"totalWords": totalWords,
 	})
 }
 

@@ -31,6 +31,7 @@ interface Flashcard {
 interface FlashcardResponse {
     count: number
     flashcards: Flashcard[]
+    totalWords: number
 }
 
 interface Answer {
@@ -44,19 +45,27 @@ export function FlashcardStudy() {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [selectedOption, setSelectedOption] = useState<number | null>(null)
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
-    const [cardLimit, setCardLimit] = useState<number>(-1) // -1 represents "All Words"
+    const [cardLimit, setCardLimit] = useState<number>(-1)
     const [level, setLevel] = useState<number>(5)
     const [showRomaji, setShowRomaji] = useState(true)
     const [showIncorrectRomaji, setShowIncorrectRomaji] = useState(false)
     const [showConfig, setShowConfig] = useState(true)
     const [score, setScore] = useState(0)
     const [answers, setAnswers] = useState<Answer[]>([])
+    const [totalWords, setTotalWords] = useState<number>(0)
+    const [isLoading, setIsLoading] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const CARDS_PER_PAGE = 10
 
     const fetchFlashcards = async () => {
         try {
-            const response = await fetch(`/api/langportal/flashcards/quiz?limit=${cardLimit}&level=${level}`)
+            setIsLoading(true)
+            const limit = cardLimit === -1 ? CARDS_PER_PAGE : cardLimit
+            const response = await fetch(`/api/langportal/flashcards/quiz?limit=${limit}&level=${level}&page=${currentPage}`)
             const data: FlashcardResponse = await response.json()
+
             setFlashcards(data.flashcards)
+            setTotalWords(data.totalWords)
             setCurrentIndex(0)
             setSelectedOption(null)
             setIsCorrect(null)
@@ -65,6 +74,28 @@ export function FlashcardStudy() {
             setShowConfig(false)
         } catch (error) {
             console.error("Failed to fetch flashcards:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const loadMoreCards = async () => {
+        if (cardLimit === -1 && currentIndex === flashcards.length - 1) {
+            try {
+                setIsLoading(true)
+                const nextPage = currentPage + 1
+                const response = await fetch(`/api/langportal/flashcards/quiz?limit=${CARDS_PER_PAGE}&level=${level}&page=${nextPage}`)
+                const data: FlashcardResponse = await response.json()
+
+                if (data.flashcards.length > 0) {
+                    setFlashcards(prev => [...prev, ...data.flashcards])
+                    setCurrentPage(nextPage)
+                }
+            } catch (error) {
+                console.error("Failed to load more flashcards:", error)
+            } finally {
+                setIsLoading(false)
+            }
         }
     }
 
@@ -109,7 +140,11 @@ export function FlashcardStudy() {
                     setIsCorrect(null)
                     setShowIncorrectRomaji(false)
                 } else {
-                    submitQuizAnswers()
+                    if (cardLimit === -1) {
+                        loadMoreCards()
+                    } else {
+                        submitQuizAnswers()
+                    }
                 }
             }, 300)
         }
@@ -122,7 +157,11 @@ export function FlashcardStudy() {
             setIsCorrect(null)
             setShowIncorrectRomaji(false)
         } else {
-            submitQuizAnswers()
+            if (cardLimit === -1) {
+                loadMoreCards()
+            } else {
+                submitQuizAnswers()
+            }
         }
     }
 
@@ -206,8 +245,9 @@ export function FlashcardStudy() {
                                 <Button
                                     onClick={fetchFlashcards}
                                     className={`w-full bg-blue-600 hover:bg-blue-700 ${isMobile ? "text-lg h-12" : "text-xl h-14"}`}
+                                    disabled={isLoading}
                                 >
-                                    Start Quiz
+                                    {isLoading ? "Loading..." : "Start Quiz"}
                                 </Button>
                             </div>
                         </div>
@@ -217,12 +257,19 @@ export function FlashcardStudy() {
         )
     }
 
+    if (isLoading) {
+        return <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">Loading...</div>
+    }
+
     if (flashcards.length === 0) {
         fetchFlashcards()
-        return <div>Loading...</div>
+        return <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">Loading...</div>
     }
 
     const currentFlashcard = flashcards[currentIndex]
+    const progressText = cardLimit === -1
+        ? `Question ${currentIndex + 1} of ${totalWords}`
+        : `Question ${currentIndex + 1} of ${flashcards.length}`
 
     // Mobile layout
     if (isMobile) {
@@ -232,7 +279,7 @@ export function FlashcardStudy() {
                     <CardHeader className="border-b py-3 px-4">
                         <div className="flex justify-between items-center">
                             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
-                                Question {currentIndex + 1} of {flashcards.length}
+                                {progressText}
                             </p>
                             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
                                 Score: {score}
@@ -311,7 +358,7 @@ export function FlashcardStudy() {
                 <CardHeader className="border-b py-4 px-8">
                     <div className="flex justify-between items-center">
                         <p className="text-lg" style={{ color: "var(--muted-foreground)" }}>
-                            Question {currentIndex + 1} of {flashcards.length}
+                            {progressText}
                         </p>
                         <p className="text-lg" style={{ color: "var(--muted-foreground)" }}>
                             Score: {score}
