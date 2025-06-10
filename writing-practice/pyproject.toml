@@ -8,7 +8,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "fastapi>=0.115.12",
     "groq>=0.18.0",
-    "manga-ocr>=0.1.14",
+    "google-cloud-vision>=2.0.0",
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
@@ -17,4 +17,5 @@ dependencies = [
     "torch>=2.6.0",
     "torchvision==0.21.0",
     "uvicorn>=0.34.0",
+    "Levenshtein>=0.23.0",
 ]

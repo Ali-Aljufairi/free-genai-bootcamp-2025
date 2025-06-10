@@ -1,6 +1,60 @@
-# Japanese Writing Practice Application
+# Japanese Writing Practice App
 
-An interactive web application for practicing Japanese writing, featuring word and sentence exercises with real-time feedback using OCR and AI grading.
+A web application for practicing Japanese writing with real-time feedback using Google Cloud Vision API for OCR and Groq for AI-powered feedback.
+
+## Features
+
+- Practice writing individual Japanese words
+- Practice writing complete sentences
+- Real-time feedback on writing accuracy
+- Stroke order visualization
+- AI-powered feedback and suggestions
+
+## Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pip install -e .
+   ```
+
+3. Set up environment variables:
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   GROQ_API_KEY=your_groq_api_key
+   GOOGLE_API_KEY=your_google_cloud_vision_api_key
+   ```
+
+4. Set up Google Cloud Vision API:
+   - Go to the [Google Cloud Console](https://console.cloud.google.com)
+   - Create a new project or select an existing one
+   - Enable the Cloud Vision API for your project
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "API Key"
+   - Copy the generated API key and add it to your `.env` file
+
+5. Run the application:
+   ```bash
+   uvicorn api:api --reload
+   ```
+
+## API Endpoints
+
+- `GET /api/writing/random-sentence`: Get a random Japanese sentence to practice
+- `POST /api/writing/feedback-word`: Submit a word for feedback
+- `POST /api/writing/feedback-sentence`: Submit a sentence for feedback
+
+## Development
+
+The application uses:
+- FastAPI for the backend API
+- Google Cloud Vision API for OCR
+- Groq for AI-powered feedback
+- React for the frontend
+
+## License
+
+MIT
 
 ## Project Structure
 
@@ -13,18 +67,6 @@ An interactive web application for practicing Japanese writing, featuring word a
 └── .env              # Environment variables configuration
 ```
 
-## Features
-
-- **Word Practice Mode**
-  - Random word generation from vocabulary
-  - Handwriting input and OCR recognition
-  - Real-time grading and feedback
-
-- **Sentence Practice Mode**
-  - AI-generated practice sentences
-  - Handwriting recognition and translation
-  - Detailed feedback on writing accuracy
-
 ## Dependencies
 
 This project uses UV for package management. Key dependencies include:
@@ -34,30 +76,6 @@ This project uses UV for package management. Key dependencies include:
 - Gradio for UI components
 - Streamlit for web interface
 - Python 3.10 or higher
-
-## Setup
-
-1. Clone the repository
-
-2. Create a Python virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. Install UV package manager:
-   ```bash
-   pip install uv
-   ```
-
-4. Install dependencies:
-   ```bash
-   uv pip install -r requirements.txt
-   ```
-
-5. Configure environment variables:
-   - Copy `.env.example` to `.env`
-   - Add your Groq API key and other required variables
 
 ## Running the Application
 

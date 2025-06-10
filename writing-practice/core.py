@@ -3,10 +3,10 @@ from groq import Groq
 import os
 from dotenv import load_dotenv
 import requests
-from manga_ocr import MangaOcr
+from google.cloud import vision
+import io
 from PIL import Image
 import numpy as np
-import warnings
 import json
 from messages import (
     SENTENCE_SYSTEM_MESSAGE,
@@ -43,15 +43,157 @@ class JapaneseApp:
         self.llm_max_tokens = int(os.environ.get("LLM_MAX_TOKENS", "100"))
         self.current_word = None
         self.current_sentence = None
-        self.mocr = None
+
+        # Initialize Google Cloud Vision client with API key
         try:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                self.mocr = MangaOcr()
-                logger.info("MangaOCR initialized successfully")
+            api_key = os.environ.get("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError("GOOGLE_API_KEY environment variable is not set")
+
+            self.vision_client = vision.ImageAnnotatorClient(
+                client_options={"api_key": api_key}
+            )
+            logger.info(
+                "Google Cloud Vision client initialized successfully with API key"
+            )
         except Exception as e:
-            logger.error(f"Failed to initialize MangaOCR: {str(e)}")
-            self.mocr = None
+            logger.error(f"Failed to initialize Google Cloud Vision client: {str(e)}")
+            raise RuntimeError(
+                "Failed to initialize Google Cloud Vision client. Please check your API key."
+            )
+
+    def ocr_image(self, image: Image.Image) -> str:
+        """Use Google Cloud Vision API to perform OCR on a PIL image."""
+        try:
+            # Convert PIL Image to bytes
+            buffered = io.BytesIO()
+            image.save(buffered, format="PNG")
+            content = buffered.getvalue()
+
+            # Create Vision API image object
+            vision_image = vision.Image(content=content)
+
+            # Perform text detection
+            response = self.vision_client.text_detection(image=vision_image)
+
+            if response.error.message:
+                logger.error(f"Vision API error: {response.error.message}")
+                return ""
+
+            # Get the full text annotation
+            if response.text_annotations:
+                return response.text_annotations[0].description.strip()
+
+            return ""
+        except Exception as e:
+            logger.error(f"Error in OCR processing: {str(e)}")
+            return ""
+
+    def grade_submission(self, transcription: str, target: str) -> tuple[str, str]:
+        """Grade the submission based on transcription and target text."""
+        try:
+            # Clean and normalize both texts
+            transcription = transcription.strip()
+            target = target.strip()
+
+            # Exact match
+            if transcription == target:
+                return "S", "Perfect! Your writing matches exactly."
+
+            # Check for partial matches
+            if target in transcription:
+                return "A", "Good job! The target text was found within your writing."
+
+            # Use Levenshtein distance for similarity
+            from Levenshtein import distance
+
+            dist = distance(transcription, target)
+            max_len = max(len(transcription), len(target))
+            similarity = 1 - (dist / max_len)
+
+            if similarity >= 0.8:
+                return (
+                    "A",
+                    f"Very close! Your writing is {similarity:.0%} similar to the target.",
+                )
+            elif similarity >= 0.6:
+                return (
+                    "B",
+                    f"Good attempt! Your writing is {similarity:.0%} similar to the target.",
+                )
+            else:
+                return (
+                    "C",
+                    f"Keep practicing! Your writing is {similarity:.0%} similar to the target.",
+                )
+
+        except Exception as e:
+            logger.error(f"Error in grading: {str(e)}")
+            return "C", "Error in grading. Please try again."
+
+    def process_word_image(
+        self, image: Image.Image, target_word=None
+    ) -> tuple[str, str, str, str]:
+        """Process a word submission image and return feedback."""
+        try:
+            # Use target word if provided, otherwise use current word
+            target = target_word or (
+                self.current_word.get("japanese") if self.current_word else ""
+            )
+            if not target:
+                raise ValueError("No target word provided")
+
+            # Perform OCR
+            transcription = self.ocr_image(image)
+            if not transcription:
+                return (
+                    "",
+                    target,
+                    "C",
+                    "Could not recognize any text. Please try writing more clearly.",
+                )
+
+            # Grade the submission
+            grade, feedback = self.grade_submission(transcription, target)
+
+            return transcription, target, grade, feedback
+
+        except Exception as e:
+            logger.error(f"Error processing word image: {str(e)}")
+            return "", target, "C", f"Error processing submission: {str(e)}"
+
+    def process_sentence_image(
+        self, image: Image.Image, target_sentence=None
+    ) -> tuple[str, str, str, str]:
+        """Process a sentence submission image and return feedback."""
+        try:
+            # Use target sentence if provided, otherwise use current sentence
+            target = target_sentence or (
+                self.current_sentence_data.sentence
+                if hasattr(self, "current_sentence_data")
+                else ""
+            )
+            if not target:
+                raise ValueError("No target sentence provided")
+
+            # Perform OCR
+            transcription = self.ocr_image(image)
+            if not transcription:
+                return (
+                    "",
+                    target,
+                    "C",
+                    "Could not recognize any text. Please try writing more clearly.",
+                )
+
+            # Grade the submission
+            grade, feedback = self.grade_submission(transcription, target)
+
+            return transcription, target, grade, feedback
+
+        except Exception as e:
+            logger.error(f"Error processing sentence image: {str(e)}")
+            return "", target, "C", f"Error processing submission: {str(e)}"
 
     def get_random_word(self):
         """Get a random word from API"""
@@ -223,18 +365,12 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def grade_word_submission(self, image):
         """Process word submission and grade it using MangaOCR"""
         try:
-            if self.mocr is None:
-                logger.info("Reinitializing MangaOCR")
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    self.mocr = MangaOcr()
-
             logger.info(f"Processing image type: {type(image)}")
             logger.info(
                 f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}"
             )
-
-            transcription = self.mocr(image)
+            logger.info("Performing OCR with Google Vision API")
+            transcription = self.ocr_image(image)
             logger.info(f"OCR Transcription result: {transcription}")
             logger.info(f"Current word data: {self.current_word}")
 
@@ -285,13 +421,8 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def grade_sentence_submission(self, image):
         """Process sentence submission and grade it using MangaOCR and Groq"""
         try:
-            if self.mocr is None:
-                logger.info("Initializing MangaOCR")
-                self.mocr = MangaOcr()
-
-            # Transcribe the image
-            logger.info("Transcribing image with MangaOCR")
-            transcription = self.mocr(image)
+            logger.info("Performing OCR with Google Vision API")
+            transcription = self.ocr_image(image)
             logger.debug(f"Transcription result: {transcription}")
 
             # Get literal translation
@@ -355,29 +486,6 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
                 f"An error occurred: {str(e)}",
             )
 
-    def process_word_image(self, image: Image.Image, target_word=None):
-        """Process the provided image (PIL Image) and perform OCR and grading for word submission"""
-        try:
-            logger.info("Processing word image")
-            # Enhance contrast for better OCR while preserving color
-            threshold = 200
-            processed_image = image.point(lambda p: p < threshold and 255)
-            logger.info(f"Image processed with threshold {threshold}")
-
-            return self.grade_word_submission_with_target(processed_image, target_word)
-        except Exception as e:
-            logger.error(f"Error in process_word_image: {str(e)}", exc_info=True)
-            raise
-
-    def process_sentence_image(self, image: Image.Image, target_sentence=None):
-        """Process the provided image (PIL Image) and perform OCR and grading for sentence submission"""
-        # Enhance contrast for better OCR while preserving color
-        # Convert red strokes to black for OCR while keeping original color for display
-        threshold = 200  # Adjust this value if needed
-        image = image.point(lambda p: p < threshold and 255)
-
-        return self.grade_sentence_submission_with_target(image, target_sentence)
-
     def grade_word_canvas_submission(self, canvas_image: any):
         """Process the canvas drawing (numpy array) for word practice"""
         try:
@@ -415,18 +523,12 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def grade_word_submission_with_target(self, image, target_word=None):
         """Process word submission and grade it using MangaOCR with a specific target word"""
         try:
-            if self.mocr is None:
-                logger.info("Reinitializing MangaOCR")
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    self.mocr = MangaOcr()
-
             logger.info(f"Processing image type: {type(image)}")
             logger.info(
                 f"Image size: {image.size if hasattr(image, 'size') else 'unknown'}"
             )
-
-            transcription = self.mocr(image)
+            logger.info("Performing OCR with Google Vision API")
+            transcription = self.ocr_image(image)
             logger.info(f"OCR Transcription result: {transcription}")
 
             # Use provided target_word if available, otherwise fall back to current_word
@@ -490,13 +592,8 @@ Make sure all fields are filled with appropriate values. If there are no kanji c
     def grade_sentence_submission_with_target(self, image, target_sentence=None):
         """Process sentence submission and grade it using MangaOCR and Groq with a specific target sentence"""
         try:
-            if self.mocr is None:
-                logger.info("Initializing MangaOCR")
-                self.mocr = MangaOcr()
-
-            # Transcribe the image
-            logger.info("Transcribing image with MangaOCR")
-            transcription = self.mocr(image)
+            logger.info("Performing OCR with Google Vision API")
+            transcription = self.ocr_image(image)
             logger.debug(f"Transcription result: {transcription}")
 
             # Use provided target_sentence if available, otherwise fall back to current_sentence
