@@ -9,6 +9,8 @@ import { toast } from "sonner"
 import Image from "next/image"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useMemo, useCallback, useEffect } from 'react'
+import { motion, AnimatePresence } from "framer-motion"
+import { useSidebar } from "@/hooks/use-sidebar"
 
 // Image dimensions constants
 const CARD_IMAGE_DIMENSIONS = {
@@ -85,6 +87,7 @@ export function StudySessionHub() {
   const { createSession, isLoading } = useCreateStudySession()
   const { data: groups } = useGroups()
   const isMobile = useIsMobile()
+  const { isExpanded, setIsExpanded } = useSidebar()
 
   // Move prefetching to useEffect to ensure it only runs on client
   useEffect(() => {
@@ -106,12 +109,16 @@ export function StudySessionHub() {
   // Memoize the startSession callback
   const startSession = useCallback(async (type: string) => {
     try {
+      // Always minimize sidebar when clicking a card
+      setIsExpanded(false)
+
       const session = await createSession({
         type,
         groupId: groups?.[0]?.id,
         name: `${type} Session`,
         description: `New ${type} study session`,
       })
+
       // Special route for companion-study
       if (type === "companion-study") {
         router.push(`/study/companion-study/${session.id}`)
@@ -121,7 +128,7 @@ export function StudySessionHub() {
     } catch (error) {
       console.error('Failed to create session:', error)
     }
-  }, [createSession, groups, router])
+  }, [createSession, groups, router, setIsExpanded])
 
   // Memoize StudyCard component
   const StudyCard = useMemo(() => ({
@@ -137,59 +144,103 @@ export function StudySessionHub() {
     image: string;
     type: string;
   }) => (
-    <Card
-      className="glass-card relative overflow-hidden flex flex-col h-full transition-transform hover:scale-[1.02] cursor-pointer"
-      onClick={() => startSession(type)}
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 17
+      }}
     >
-      <CardHeader className="z-10 pb-0">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          {icon}
-          {title}
-        </CardTitle>
-        <CardDescription className="text-xs sm:text-sm line-clamp-2">{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow flex justify-center items-center py-2 sm:py-4 z-10">
-        <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32">
-          <Image
-            src={image}
-            alt={`${title} background`}
-            width={CARD_IMAGE_DIMENSIONS.large.width}
-            height={CARD_IMAGE_DIMENSIONS.large.height}
-            className="object-contain"
-            sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
-            priority={true}
-            loading="eager"
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E"
-          />
-        </div>
-      </CardContent>
-      <CardFooter className="z-10 pt-0 pb-4">
-        <Button
-          className="w-full text-sm sm:text-base"
-          disabled={isLoading}
-        >
-          {isMobile ? `Start ${title.split(' ')[0]}` : `Start ${title}`}
-        </Button>
-      </CardFooter>
-    </Card>
+      <Card
+        className="glass-card relative overflow-hidden flex flex-col h-full cursor-pointer"
+        onClick={() => startSession(type)}
+      >
+        <CardHeader className="z-10 pb-0">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            {icon}
+            {title}
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm line-clamp-2">{description}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow flex justify-center items-center py-2 sm:py-4 z-10">
+          <motion.div
+            className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32"
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95, rotate: -5 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 17
+            }}
+          >
+            <Image
+              src={image}
+              alt={`${title} background`}
+              width={CARD_IMAGE_DIMENSIONS.large.width}
+              height={CARD_IMAGE_DIMENSIONS.large.height}
+              className="object-contain"
+              sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
+              priority={true}
+              loading="eager"
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E"
+            />
+          </motion.div>
+        </CardContent>
+        <CardFooter className="z-10 pt-0 pb-4">
+          <motion.div
+            className="w-full"
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Button
+              className="w-full text-sm sm:text-base"
+              disabled={isLoading}
+            >
+              {isMobile ? `Start ${title.split(' ')[0]}` : `Start ${title}`}
+            </Button>
+          </motion.div>
+        </CardFooter>
+      </Card>
+    </motion.div>
   ), [isLoading, isMobile, startSession]);
 
   return (
-    <div className="space-y-4 sm:space-y-8 px-2 sm:px-0">
+    <motion.div
+      className="space-y-4 sm:space-y-8 px-2 sm:px-0"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {studyOptions.map((option, index) => (
-          <StudyCard
-            key={index}
-            title={option.title}
-            description={option.description}
-            icon={option.icon}
-            image={option.image}
-            type={option.type}
-          />
-        ))}
+        <AnimatePresence>
+          {studyOptions.map((option, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 100
+              }}
+            >
+              <StudyCard
+                title={option.title}
+                description={option.description}
+                icon={option.icon}
+                image={option.image}
+                type={option.type}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
