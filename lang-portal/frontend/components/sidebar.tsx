@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/hooks/use-sidebar"
 
 export default function Sidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const { isExpanded, setIsExpanded } = useSidebar()
 
   const routes = [
     {
@@ -38,7 +39,7 @@ export default function Sidebar() {
   ]
 
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed)
+    setIsExpanded(!isExpanded)
   }
 
   return (
@@ -94,17 +95,17 @@ export default function Sidebar() {
 
       <div className={cn(
         "hidden md:flex flex-col h-screen border-r bg-white/90 dark:bg-slate-900/90 paper-texture backdrop-blur-sm transition-all duration-300",
-        isCollapsed ? "w-20" : "w-64"
+        !isExpanded ? "w-20" : "w-64"
       )}>
         <div className="flex items-center gap-2 p-4 border-b">
           <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          {!isCollapsed && (
+          {isExpanded && (
             <>
               <span className="font-bold text-lg">Sorami</span>
               <span className="text-xs text-muted-foreground">空見</span>
             </>
           )}
-          {!isCollapsed && (
+          {isExpanded && (
             <Button
               variant="ghost"
               size="sm"
@@ -114,7 +115,7 @@ export default function Sidebar() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
           )}
-          {isCollapsed && (
+          {!isExpanded && (
             <Button
               variant="ghost"
               size="sm"
@@ -136,12 +137,12 @@ export default function Sidebar() {
                     pathname === route.path
                       ? "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-50"
                       : "hover:bg-blue-50 dark:hover:bg-blue-900/20",
-                    isCollapsed && "justify-center px-2"
+                    !isExpanded && "justify-center px-2"
                   )}
-                  title={isCollapsed ? route.name : undefined}
+                  title={!isExpanded ? route.name : undefined}
                 >
                   {route.icon}
-                  {!isCollapsed && route.name}
+                  {isExpanded && route.name}
                 </Link>
               </li>
             ))}
@@ -149,9 +150,9 @@ export default function Sidebar() {
         </div>
         <div className={cn(
           "p-4 border-t flex items-center",
-          isCollapsed ? "justify-center" : "justify-between"
+          !isExpanded ? "justify-center" : "justify-between"
         )}>
-          {!isCollapsed && (
+          {isExpanded && (
             <Link href="/" className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400">
               Back to Home
             </Link>

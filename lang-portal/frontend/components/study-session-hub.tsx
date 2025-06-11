@@ -147,11 +147,7 @@ export function StudySessionHub() {
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.95 }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 17
-      }}
+      transition={{ duration: 0.2 }}
     >
       <Card
         className="glass-card relative overflow-hidden flex flex-col h-full cursor-pointer"
@@ -167,13 +163,9 @@ export function StudySessionHub() {
         <CardContent className="flex-grow flex justify-center items-center py-2 sm:py-4 z-10">
           <motion.div
             className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32"
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            whileTap={{ scale: 0.95, rotate: -5 }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 17
-            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ duration: 0.2 }}
           >
             <Image
               src={image}
@@ -193,7 +185,7 @@ export function StudySessionHub() {
           <motion.div
             className="w-full"
             whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            transition={{ duration: 0.2 }}
           >
             <Button
               className="w-full text-sm sm:text-base"
@@ -212,7 +204,7 @@ export function StudySessionHub() {
       className="space-y-4 sm:space-y-8 px-2 sm:px-0"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <AnimatePresence>
@@ -223,10 +215,8 @@ export function StudySessionHub() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{
-                duration: 0.5,
-                delay: index * 0.1,
-                type: "spring",
-                stiffness: 100
+                duration: 0.3,
+                delay: index * 0.05
               }}
             >
               <StudyCard
