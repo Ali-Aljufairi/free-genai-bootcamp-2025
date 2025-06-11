@@ -1,7 +1,6 @@
 "use client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Brain, Edit, ScrollText, BookOpen, Search, MessageSquare, Mic, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCreateStudySession } from "@/hooks/api/useStudySession"
 import { useGroups } from "@/hooks/api/useGroup"
@@ -171,4 +170,5 @@ export function StudySessionHub() {
     </motion.div>
   )
 }
+
 

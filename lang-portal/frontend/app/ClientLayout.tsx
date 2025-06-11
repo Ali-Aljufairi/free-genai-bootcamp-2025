@@ -8,6 +8,9 @@ import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useEffect } from "react"
+// Import the PostHog instrumentation client
+import "../instrumentation-client"
 
 const queryClient = new QueryClient({
   defaultOptions: {
