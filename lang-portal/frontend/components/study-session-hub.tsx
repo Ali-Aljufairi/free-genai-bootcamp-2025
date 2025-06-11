@@ -112,9 +112,9 @@ export function StudySessionHub() {
     try {
       // Always minimize sidebar when clicking a card
       setIsExpanded(false)
-      
+
       // Track session start event with PostHog
-      posthog.capture("session_started", { 
+      posthog.capture("session_started", {
         session_type: type,
         source: "study_card"
       });

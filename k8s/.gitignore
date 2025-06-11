@@ -1,2 +1,4 @@
 deploy.yaml
 service.yaml
+issuer.yaml
+*.yaml
