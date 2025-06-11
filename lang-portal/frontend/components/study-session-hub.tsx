@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from "framer-motion"
 import { useSidebar } from "@/hooks/use-sidebar"
+import posthog from "posthog-js"
 
 // Image dimensions constants
 const CARD_IMAGE_DIMENSIONS = {
@@ -111,6 +112,12 @@ export function StudySessionHub() {
     try {
       // Always minimize sidebar when clicking a card
       setIsExpanded(false)
+      
+      // Track session start event with PostHog
+      posthog.capture("session_started", { 
+        session_type: type,
+        source: "study_card"
+      });
 
       const session = await createSession({
         type,
