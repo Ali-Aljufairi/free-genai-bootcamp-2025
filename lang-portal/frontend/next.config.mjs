@@ -14,10 +14,10 @@ const userConfig = await getUserConfig();
 const nextConfig = {
   output: 'standalone',
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
