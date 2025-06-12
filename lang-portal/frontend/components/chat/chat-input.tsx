@@ -29,10 +29,12 @@ export function ChatInput({
     const [showPromptPicker, setShowPromptPicker] = useState(false);
 
     const promptLabels: Record<SystemPromptID, string> = {
-        "sentence-construction": "sentence constructor",
+        "Grammar-Explainer": "Grammar Explainer",
+        "sentence-construction": "Sentence Constructor",
         "japanese-only": "Japanese Only",
         "grammar-focus": "Grammar Focus",
         "conversation-partner": "Conversation Partner",
+        "speech-analysis-japanese": "Speech Analysis (Japanese)",
         "vocabulary-builder": "Vocabulary Builder",
     };
 
