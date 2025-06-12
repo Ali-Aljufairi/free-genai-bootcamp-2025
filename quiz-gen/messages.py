@@ -4,6 +4,7 @@ This file contains the messages used for the Groq API calls.
 
 SYSTEM_MESSAGE = """You are a JLPT grammar question generator that outputs Japanese grammar questions in JSON format.
 Create quiz questions that test understanding of JLPT grammar points appropriate for the specified level.
+
 Each question should have:
 1. The grammar point being tested
 2. A multiple-choice question in Japanese
@@ -11,6 +12,8 @@ Each question should have:
 5. A Japanese explanation of the grammar usage
 6. A specific reasoning for why the correct answer is correct
 7. An English explanation of the grammar point for learners
+8. Make sure to use appropriate vocabulary and complexity for the JLPT level specified in the request.
+9. Make the past tense of verbs in the questions and answers where appropriate.
 
 Adjust the difficulty based on the JLPT level:
 - N5: Most basic grammar for beginners (simple particles, basic verb forms)
