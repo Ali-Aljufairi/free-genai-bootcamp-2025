@@ -1,65 +1,52 @@
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import Optional
 import json
 import os
 import dotenv
-from pydantic import BaseModel, Field
 from groq import Groq
 from messages import SYSTEM_MESSAGE, USER_MESSAGE_TEMPLATE
+from models import (
+    Choice, 
+    GrammarQuestion, 
+    GrammarQuiz, 
+    QuizRequest
+)
+from constants import (
+    JSON_FILES_DIR,
+    MAX_QUESTIONS_PER_REQUEST,
+    API_HOST,
+    API_PORT,
+    API_TITLE,
+    CORS_ORIGINS,
+    CORS_CREDENTIALS,
+    CORS_METHODS,
+    CORS_HEADERS,
+    API_MODEL_DEFAULT,
+    API_TEMPERATURE,
+    API_TOP_P,
+    API_STREAM,
+    API_RESPONSE_FORMAT
+)
 
 # Load environment variables and initialize Groq client
 dotenv.load_dotenv()
 groq = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-# Define the JSON files directoryff
-JSON_FILES_DIR = "json_files"
-
 # Ensure the directory exists
 os.makedirs(JSON_FILES_DIR, exist_ok=True)
 
 # Create FastAPI application instance
-api = FastAPI(title="JLPT Grammar Quiz Generator API")
+api = FastAPI(title=API_TITLE)
 
 # Add CORS middleware
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=CORS_CREDENTIALS,
+    allow_methods=CORS_METHODS,
+    allow_headers=CORS_HEADERS
 )
-
-# Maximum questions per request to the LLM
-MAX_QUESTIONS_PER_REQUEST = 5
-
-
-class Choice(BaseModel):
-    text: str
-    is_correct: bool
-
-
-class GrammarQuestion(BaseModel):
-    grammar_point: str
-    question: str
-    choices: List[Choice]
-    explanation: str  # Japanese explanation
-    answer_reasoning: str  # Reasoning for why the answer is correct
-    grammar_explanation_english: str  # English explanation of the grammar point
-
-
-class GrammarQuiz(BaseModel):
-    level: str
-    questions: List[GrammarQuestion]
-
-
-class QuizRequest(BaseModel):
-    level: int = Field(
-        ..., ge=1, le=5, description="JLPT level (1-5 where 5 is easiest, 1 is hardest)"
-    )
-    num_questions: int = Field(
-        ..., ge=1, le=20, description="Number of questions to generate (1-20)"
-    )
 
 
 def get_grammar_questions(level: int, num_questions: int) -> GrammarQuiz:
@@ -88,11 +75,11 @@ def get_grammar_questions(level: int, num_questions: int) -> GrammarQuiz:
                     ),
                 },
             ],
-            model="qwen-qwq-32b",
-            temperature=0.7,
-            top_p=0.9,
-            stream=False,
-            response_format={"type": "json_object"},
+            model=API_MODEL_DEFAULT,
+            temperature=API_TEMPERATURE,
+            top_p=API_TOP_P,
+            stream=API_STREAM,
+            response_format=API_RESPONSE_FORMAT,
         )
 
         return GrammarQuiz.model_validate_json(
@@ -158,7 +145,7 @@ def run_fastapi():
     """Function to run the FastAPI app with uvicorn"""
     import uvicorn
 
-    uvicorn.run(api, host="0.0.0.0", port=8004)
+    uvicorn.run(api, host=API_HOST, port=API_PORT)
 
 
 if __name__ == "__main__":
