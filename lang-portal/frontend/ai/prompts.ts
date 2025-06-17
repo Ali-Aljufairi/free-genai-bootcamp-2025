@@ -34,25 +34,26 @@ Clearly list typical uses, such as:
 
 2. Practice Block
 
-Step 1: Student Output with Cues
+Step 1: Sentence Transformation Practice
 	•	Provide a list of contextual cue pairs (some abstract, some concrete).
-	•	Ask the student to make their own full sentence using the grammar point.
-	•	Encourage proper structure and logical sentence flow.
+	•	Give students a nearly complete example sentence in the correct structure, leaving only 1–2 words (verbs or adjectives) blank for transformation.
+	•	Students should transform or supply the missing words using the grammar point.
 	•	Format:
 
 (cue 1) + (cue 2)  
-→ ＿＿＿し、＿＿＿し、＿＿＿。
+→ 忙(いそが)しいし、＿＿＿し、＿＿＿し。
 
 Example Cues (Moderate Complexity):
-	 you can add verbs  and adjectives in the cues and use them in the sentences 
-	 you should only make Verb and Adjective noun cues other the cues should be 
-	 what will change depending on the grammar point but the rest of the should be written in the 
-	 example  
-	•	(忙しい) + (約束がある)
-	•	(面白い) + (主人公がかっこいい)
-	•	(彼は優しい) + (責任感がある)
-	•	(眠い) + (電車の中)
-	•	(料理が上手だ) + (丁寧に作る)
+	•	(忙しい) + (約束がある)  
+	  → 忙(いそが)しいし、約束(やくそく)も＿＿＿し。  
+	•	(面白い) + (主人公がかっこいい)  
+	  → このアニメは面白(おもしろ)いし、主人公(しゅじんこう)がかっこいいし、＿＿＿。  
+	•	(彼は優しい) + (責任感がある)  
+	  → 彼(かれ)は優(やさ)しいし、責任感(せきにんかん)も＿＿＿し。  
+	•	(眠い) + (電車の中)  
+	  → 眠(ねむ)いし、電車(でんしゃ)の中(なか)だし、＿＿＿。  
+	•	(料理が上手だ) + (丁寧に作る)  
+	  → 彼女(かのじょ)は料理(りょうり)が上手(じょうず)だし、丁寧(ていねい)に＿＿＿し。
 
 ⸻
 
@@ -64,15 +65,15 @@ Step 2: Self-Check Examples (with Hiragana)
 
 Example Answers:
 
-忙(いそが)しいし、約束(やくそく)もあるし、今日は早(はや)く帰(かえ)ります。
+	• 忙(いそが)しいし、約束(やくそく)もあるし、今日は早(はや)く帰(かえ)ります。
 
-このアニメは面白(おもしろ)いし、主人公(しゅじんこう)がかっこいいし、毎週(まいしゅう)見(み)ています。
+	• このアニメは面白(おもしろ)いし、主人公(しゅじんこう)がかっこいいし、毎週(まいしゅう)見(み)ています。
 
-彼(かれ)は優(やさ)しいし、責任感(せきにんかん)もあるし、信頼(しんらい)できます。
+	• 彼(かれ)は優(やさ)しいし、責任感(せきにんかん)もあるし、信頼(しんらい)できます。
 
-眠(ねむ)いし、電車(でんしゃ)の中(なか)だし、ちょっと寝(ね)ようと思(おも)います。
+	• 眠(ねむ)いし、電車(でんしゃ)の中(なか)だし、ちょっと寝(ね)ようと思(おも)います。
 
-彼女(かのじょ)は料理(りょうり)が上手(じょうず)だし、丁寧(ていねい)に作(つく)るし、お弁当(べんとう)が楽し(たの)しみです。
+	• 彼女(かのじょ)は料理(りょうり)が上手(じょうず)だし、丁寧(ていねい)に作(つく)るし、お弁当(べんとう)が楽(たの)しみです。
 
 
 How to Adapt for Other Grammar Points
