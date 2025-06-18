@@ -85,7 +85,9 @@ When applying this structure to other grammar points:
 	•	Always include furigana in model answers.
 
 	• Make sure the self check examples are varied and natural, not just direct translations of the cues. 	
+	
 
+	• Ensure that you provie the thing that whole sentence so that the student can see how the grammar fits into a complete thought.
 
 `,
 
