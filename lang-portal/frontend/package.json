@@ -7,7 +7,7 @@
     "build": "next build && bun run sentry:sourcemaps",
     "start": "next start",
     "lint": "next lint",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org sorami --project lang-portal-frontend ./out && sentry-cli sourcemaps upload --org sorami --project lang-portal-frontend ./out"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org sorami --project lang-portal-frontend ./.next && sentry-cli sourcemaps upload --org sorami --project lang-portal-frontend ./.next"
   },
   "dependencies": {
     "@ai-sdk/groq": "^1.2.1",
