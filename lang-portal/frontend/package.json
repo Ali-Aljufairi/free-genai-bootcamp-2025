@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && bun run sentry:sourcemaps",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org sorami --project lang-portal-frontend ./out && sentry-cli sourcemaps upload --org sorami --project lang-portal-frontend ./out"
   },
   "dependencies": {
     "@ai-sdk/groq": "^1.2.1",
@@ -42,6 +43,9 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@sentry/cli": "^2.46.0",
+    "@sentry/nextjs": "^9.32.0",
+    "@sentry/node": "^9.32.0",
     "@tanstack/react-query": "^5.69.0",
     "@types/recordrtc": "^5.6.14",
     "@vapi-ai/web": "^2.2.7",

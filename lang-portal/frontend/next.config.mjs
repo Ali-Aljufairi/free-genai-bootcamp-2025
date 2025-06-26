@@ -1,4 +1,5 @@
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+import { withSentryConfig } from '@sentry/nextjs';
 
 async function getUserConfig() {
   try {
@@ -84,4 +85,20 @@ function mergeConfig(nextConfig, userConfig) {
   return mergedConfig;
 }
 
-export default mergeConfig(nextConfig, userConfig);
+const finalConfig = mergeConfig(nextConfig, userConfig);
+
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // For all available options, see:
+  // https://github.com/getsentry/sentry-webpack-plugin#options
+  
+  // Upload source maps during build step
+  silent: true,
+  org: 'sorami',
+  project: 'lang-portal-frontend',
+  
+  // Only upload source maps in production
+  dryRun: process.env.NODE_ENV !== 'production',
+};
+
+export default withSentryConfig(finalConfig, sentryWebpackPluginOptions);

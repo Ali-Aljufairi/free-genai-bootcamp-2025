@@ -29,3 +29,5 @@ next-env.d.ts
 /.clerk/
 
 .env.local
+# Sentry Config File
+.sentryclirc
