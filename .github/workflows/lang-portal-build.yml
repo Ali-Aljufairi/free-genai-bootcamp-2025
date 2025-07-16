@@ -16,6 +16,7 @@ env:
   PORT: 8080
   APP_ENV: production
   BLUEPRINT_DB_URL: ./words.db
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT: production
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
@@ -40,33 +41,55 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '23'
+          cache: 'npm'
+          cache-dependency-path: 'lang-portal/frontend/package-lock.json'
 
-      - name: Install frontend dependencies and generate source maps
+      - name: Install dependencies and build frontend
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: sorami
+          SENTRY_PROJECT: lang-portal-frontend
         run: |
           cd lang-portal/frontend
-          npm install
-          # Create .env with Sentry token for source map generation
+          
+          # Install dependencies with proper versioning
+          npm install --legacy-peer-deps
+          
+          # Create production .env file
           cp .env.example .env
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
+          
+          # Build the application
           npm run build
-          # Remove the .env file to ensure it doesn't get into the Docker build
+          
+          # Clean up sensitive data
           rm .env
 
-      - name: Build and push lang-portal services
+      - name: Build and push Docker images
+        env:
+          DOCKER_BUILDKIT: 1
         run: |
           cd lang-portal
-          # Handle backend .env
+          
+          # Setup backend environment
           if [ -f .env.example ]; then
             cp .env.example .env
           fi
-          # Handle frontend .env (without Sentry token)
+          
+          # Setup frontend environment (without sensitive tokens)
           if [ -f frontend/.env.example ]; then
             cp frontend/.env.example frontend/.env
+            # Ensure no auth tokens are included
+            sed -i '/SENTRY_AUTH_TOKEN/d' frontend/.env
           fi
-          # Build without needing Sentry token
-          docker compose build --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL}
+          
+          # Build and push images
+          docker compose build \
+            --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL} \
+            --build-arg NODE_ENV=production
           docker compose push
+          
+          # Cleanup
           docker system prune -af
