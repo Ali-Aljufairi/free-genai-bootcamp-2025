@@ -39,6 +39,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies and generate source maps
+        run: |
+          cd lang-portal/frontend
+          npm install
+          # Create .env with Sentry token for source map generation
+          cp .env.example .env
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
+          npm run build
+          # Remove the .env file to ensure it doesn't get into the Docker build
+          rm .env
+
       - name: Build and push lang-portal services
         run: |
           cd lang-portal
@@ -46,10 +62,11 @@ jobs:
           if [ -f .env.example ]; then
             cp .env.example .env
           fi
-          # Handle frontend .env
+          # Handle frontend .env (without Sentry token)
           if [ -f frontend/.env.example ]; then
             cp frontend/.env.example frontend/.env
           fi
+          # Build without needing Sentry token
           docker compose build --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL}
           docker compose push
           docker system prune -af
