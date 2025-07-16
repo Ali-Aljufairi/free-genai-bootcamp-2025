@@ -16,8 +16,6 @@ env:
   PORT: 8080
   APP_ENV: production
   BLUEPRINT_DB_URL: ./words.db
-  NEXT_PUBLIC_SENTRY_ENVIRONMENT: production
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
   build-and-push:
@@ -40,56 +38,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '23'
-          cache: 'npm'
-          cache-dependency-path: 'lang-portal/frontend/package-lock.json'
-
-      - name: Install dependencies and build frontend
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: sorami
-          SENTRY_PROJECT: lang-portal-frontend
-        run: |
-          cd lang-portal/frontend
-          
-          # Install dependencies with proper versioning
-          npm install --legacy-peer-deps
-          
-          # Create production .env file
-          cp .env.example .env
-          
-          # Build the application
-          npm run build
-          
-          # Clean up sensitive data
-          rm .env
-
-      - name: Build and push Docker images
-        env:
-          DOCKER_BUILDKIT: 1
+      - name: Build and push lang-portal services
         run: |
           cd lang-portal
-          
-          # Setup backend environment
+          # Handle backend .env
           if [ -f .env.example ]; then
             cp .env.example .env
           fi
-          
-          # Setup frontend environment (without sensitive tokens)
+          # Handle frontend .env
           if [ -f frontend/.env.example ]; then
             cp frontend/.env.example frontend/.env
-            # Ensure no auth tokens are included
-            sed -i '/SENTRY_AUTH_TOKEN/d' frontend/.env
           fi
-          
-          # Build and push images
-          docker compose build \
-            --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL} \
-            --build-arg NODE_ENV=production
+          docker compose build --build-arg BLUEPRINT_DB_URL=${BLUEPRINT_DB_URL}
           docker compose push
-          
-          # Cleanup
           docker system prune -af
