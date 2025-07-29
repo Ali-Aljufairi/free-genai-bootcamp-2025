@@ -34,13 +34,14 @@ if (typeof window !== "undefined") {
     } else if (!(posthog as any)._initialized) { // prevent double-init on HMR
       console.log("Initializing PostHog analytics with host:", host)
       posthog.init(key, {
-        api_host: "/ingest", // This should match your proxy setup in next.config.mjs
+        api_host: window.location.origin + "/ingest",
         ui_host: host,
         capture_pageview: true,
         capture_pageleave: true,
         capture_exceptions: true,
         autocapture: true,
         debug: process.env.NODE_ENV === "development",
+        enable_recording_console_log: true,
         loaded: (ph) => {
           if (process.env.NODE_ENV === "development") {
             console.log("PostHog loaded successfully", ph)

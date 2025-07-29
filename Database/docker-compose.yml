@@ -1,0 +1,73 @@
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: sorami-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sorami}
+      POSTGRES_USER: ${POSTGRES_USER:-sorami_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD in .env file}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./pg.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sorami_user} -d ${POSTGRES_DB:-sorami}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Data import service - runs once to import JSON data
+  data-importer:
+    image: postgres:16-alpine
+    container_name: sorami-data-importer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-sorami}
+      DB_USER: ${DB_USER:-sorami_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
+      PGPASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env file}
+    volumes:
+      - ./:/app
+      - ./cleaned_json:/app/Database/cleaned_json:ro
+    working_dir: /app
+    command: >
+      sh -c "
+        apk add --no-cache jq bash &&
+        chmod +x Database/run_import.sh Database/import_jlpt.sh &&
+        ./Database/run_import.sh
+      "
+    profiles:
+      - import
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sorami-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@sorami.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Please set PGADMIN_DEFAULT_PASSWORD in .env file}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  default:
+    name: sorami-network
