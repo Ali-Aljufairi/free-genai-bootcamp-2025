@@ -13,26 +13,26 @@
     - Test with sample data to ensure proper field mapping
     - _Requirements: 2.1, 2.2, 4.1, 6.1, 7.1_
 
-  - [-] 2.2 Create JLPT questions import system
+  - [ -] 2.2 Create JLPT questions import system
     - Write efficient import script for JLPT questions using jq and PostgreSQL COPY
     - Handle variable question structures (audio URLs, timing, HTML content)
     - Process all question types: grammar, listening, reading, word
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 4.3_
 
-  - [ ] 2.3 Create book set and unit import
+  - [ - ] 2.3 Create book set and unit import
     - Import book sets as courses with proper metadata
     - Create hierarchical unit structure using ltree
     - Map word-unit relationships from book_set_unit_detail.json
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 3. Create Docker Infrastructure
+- [ -] 3. Create Docker Infrastructure
   - [ ] 3.1 Create PostgreSQL Docker setup
     - Write Dockerfile with required extensions (pgcrypto, pg_trgm, ltree, vector)
     - Create docker-compose.yml with PostgreSQL and pgAdmin
     - Add health checks and proper volume management
     - _Requirements: 10.1, 10.3_
 
-  - [ ] 3.2 Create automated import container
+  - [ - ] 3.2 Create automated import container
     - Create container that runs import scripts automatically
     - Include jq and all required tools for JSON processing
     - Add progress reporting and error handling
