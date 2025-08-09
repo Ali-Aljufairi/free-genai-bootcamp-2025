@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import json
@@ -6,12 +6,8 @@ import os
 import dotenv
 from groq import Groq
 from messages import SYSTEM_MESSAGE, USER_MESSAGE_TEMPLATE
-from models import (
-    Choice, 
-    GrammarQuestion, 
-    GrammarQuiz, 
-    QuizRequest
-)
+from auth import verify_bearer
+from models import Choice, GrammarQuestion, GrammarQuiz, QuizRequest
 from constants import (
     JSON_FILES_DIR,
     MAX_QUESTIONS_PER_REQUEST,
@@ -26,7 +22,7 @@ from constants import (
     API_TEMPERATURE,
     API_TOP_P,
     API_STREAM,
-    API_RESPONSE_FORMAT
+    API_RESPONSE_FORMAT,
 )
 
 # Load environment variables and initialize Groq client
@@ -45,7 +41,7 @@ api.add_middleware(
     allow_origins=CORS_ORIGINS,
     allow_credentials=CORS_CREDENTIALS,
     allow_methods=CORS_METHODS,
-    allow_headers=CORS_HEADERS
+    allow_headers=CORS_HEADERS,
 )
 
 
@@ -126,7 +122,9 @@ async def health_check():
 
 
 @api.post("/api/quiz-gen/quiz/generate")
-async def generate_grammar_quiz(request: QuizRequest = Body(...)):
+async def generate_grammar_quiz(
+    request: QuizRequest = Body(...), claims=Depends(verify_bearer)
+):
     """
     Generate JLPT grammar questions for a specified level and quantity.
     Will make multiple requests to the LLM if num_questions > MAX_QUESTIONS_PER_REQUEST.

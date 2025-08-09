@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import json
 import os
 import dotenv
 from pydantic import BaseModel
+from auth import verify_bearer
 from groq import Groq
 from messages import SYSTEM_MESSAGE, USER_MESSAGE_TEMPLATE
 
@@ -124,7 +125,9 @@ async def health_check():
 
 
 @api.post("/api/vocab-importer/vocabulary")
-async def get_vocabulary(request: TopicRequest = Body(...)):
+async def get_vocabulary(
+    request: TopicRequest = Body(...), claims=Depends(verify_bearer)
+):
     """
     Generate Japanese vocabulary for a given topic
     """

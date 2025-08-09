@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import base64
@@ -8,6 +8,7 @@ import logging
 from core import JapaneseApp
 from models import WordFeedback, SentenceFeedback
 import uvicorn
+from auth import verify_bearer
 
 # Setup logging
 logger = logging.getLogger("fastapi_app")
@@ -60,7 +61,7 @@ async def root():
 
 
 @api.get("/api/writing/random-sentence", response_model=RandomSentenceResponse)
-async def get_random_sentence():
+async def get_random_sentence(claims=Depends(verify_bearer)):
     """Generate a random sentence using a random Japanese word"""
     try:
         # First get a random word
@@ -105,7 +106,7 @@ async def get_random_sentence():
 
 
 @api.get("/api/writing/random-word-sentence", response_model=RandomSentenceResponse)
-async def get_random_word_sentence():
+async def get_random_word_sentence(claims=Depends(verify_bearer)):
     """Get a random word and generate a sentence using that word"""
     try:
         # First get a random word
@@ -150,7 +151,7 @@ async def get_random_word_sentence():
 
 
 @api.post("/api/writing/feedback-word", response_model=FeedbackResponse)
-async def get_word_feedback(submission: ImageSubmission):
+async def get_word_feedback(submission: ImageSubmission, claims=Depends(verify_bearer)):
     """Get feedback on a word writing submission"""
     try:
         # Decode base64 image
@@ -173,7 +174,9 @@ async def get_word_feedback(submission: ImageSubmission):
 
 
 @api.post("/api/writing/feedback-sentence", response_model=FeedbackResponse)
-async def get_sentence_feedback(submission: ImageSubmission):
+async def get_sentence_feedback(
+    submission: ImageSubmission, claims=Depends(verify_bearer)
+):
     """Get feedback on a sentence writing submission"""
     try:
         # Decode base64 image
