@@ -4,12 +4,13 @@ ShopGenie - AI-powered shopping assistant
 FastAPI implementation
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from graph import run_shopgenie, run_shopgenie_api
 from config import GROQ_API_KEY, TAVILY_API_KEY, YOUTUBE_API_KEY
+from auth import verify_bearer
 
 # Initialize FastAPI app
 api = FastAPI(
@@ -91,7 +92,11 @@ async def root():
 
 
 @api.post("/api/agent/search", response_model=SearchResponse)
-async def search(request: SearchRequest, background_tasks: BackgroundTasks):
+async def search(
+    request: SearchRequest,
+    background_tasks: BackgroundTasks,
+    claims=Depends(verify_bearer),
+):
     """
     Endpoint to search for products and send results via email.
     The response will be minimal while processing happens in the background.
@@ -126,7 +131,7 @@ async def search(request: SearchRequest, background_tasks: BackgroundTasks):
 
 
 @api.post("/api/agent/search/direct", response_model=DirectSearchResponse)
-async def search_direct(request: SearchRequest):
+async def search_direct(request: SearchRequest, claims=Depends(verify_bearer)):
     """
     Endpoint to search for products and return complete results directly in the API response.
     This endpoint doesn't send emails but provides all the data including search results,
